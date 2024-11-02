@@ -1,0 +1,23 @@
+{
+    "Lua.diagnostics.globals": [
+        "love",
+        "chip"
+    ],
+    "Lua.runtime.version": "LuaJIT",
+    "Lua.runtime.special": {
+        "love.filesystem.load": "loadfile"
+    },
+    "Lua.workspace.library": [
+        "${3rd}/love2d/library",
+        "chip"
+    ],
+    "Lua.diagnostics.disable": [
+        "lowercase-global",
+        "duplicate-set-field",
+        "need-check-nil",
+        "undefined-field",
+        "undefined-doc-param",
+        "param-type-mismatch"
+    ],
+    "Lua.runtime.unicodeName": true
+}
