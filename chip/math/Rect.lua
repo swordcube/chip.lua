@@ -29,7 +29,7 @@ end
 ---
 --- Copies the components of the given rectangle to this rectangle.
 --- 
---- @param  vec  flora.math.Rect  The rectangle to copy.
+--- @param  vec  chip.math.Rect  The rectangle to copy.
 ---
 function Rect:copyFrom(vec)
     self.x = vec.x

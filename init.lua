@@ -30,6 +30,9 @@ qrequire("chip.libs.autobatch")
 Class = qrequire("chip.libs.Classic") --- @type chip.libs.Class
 Native = qrequire("chip.native") --- @type chip.Native
 
+Json = qrequire("chip.libs.Json") --- @type chip.libs.Json
+Xml = qrequire("chip.libs.Xml") --- @type chip.libs.Xml
+
 Object = qrequire("chip.backend.Object") --- @type chip.backend.Object
 RefCounted = qrequire("chip.backend.RefCounted") --- @type chip.backend.RefCounted
 
@@ -50,6 +53,8 @@ Scene = qrequire("chip.core.Scene") --- @type chip.core.Scene
 
 Texture = qrequire("chip.graphics.Texture") --- @type chip.graphics.Texture
 Sprite = qrequire("chip.graphics.Sprite") --- @type chip.graphics.Sprite
+Camera = qrequire("chip.graphics.Camera") --- @type chip.graphics.Camera
+CanvasLayer = qrequire("chip.graphics.CanvasLayer") --- @type chip.graphics.CanvasLayer
 
 BaseScaleMode = qrequire("chip.graphics.scalemodes.BaseScaleMode") --- @type chip.graphics.scalemodes.BaseScaleMode
 RatioScaleMode = qrequire("chip.graphics.scalemodes.RatioScaleMode") --- @type chip.graphics.scalemodes.RatioScaleMode
@@ -60,7 +65,13 @@ AudioPlayer = qrequire("chip.audio.AudioPlayer") --- @type chip.audio.AudioPlaye
 
 --- [ UTILITY IMPORTS ] ---
 
+File = qrequire("chip.utils.File") --- @type chip.utils.File
 Assets = qrequire("chip.utils.Assets") --- @type chip.utils.Assets
+
+Bit = qrequire("chip.utils.Bit") --- @type chip.utils.Bit
+Color = qrequire("chip.utils.Color") --- @type chip.utils.Color
+
+Signal = qrequire("chip.utils.Signal") --- @type chip.utils.Signal
 
 --- [ GAME IMPORTS ] ---
 
@@ -187,7 +198,29 @@ function Chip.init(settings)
             busySleep(capDt - dt)
         end
     end
+    love.load = function()
+        Native.setDarkMode(true)
+        Native.forceWindowRedraw()
+
+        if settings.initialScene == nil then
+            settings.initialScene = Scene:new()
+        end
+        Engine.gameWidth = settings.gameWidth
+        Engine.gameHeight = settings.gameHeight
+
+        Engine.targetFPS = settings.targetFPS
+
+        Engine.scaleMode = RatioScaleMode:new()
+        Engine.scaleMode:onMeasure(settings.gameWidth, settings.gameHeight)
+
+        Engine.currentScene = settings.initialScene
+        Engine.currentScene:init()
+    end
     love.update = function(dt)
+        for i = 1, #Engine.plugins do
+            local plugin = Engine.plugins[i] --- @type chip.core.Actor
+            plugin:update(dt)
+        end
         Engine.currentScene:update(dt)
     end
     love.draw = function()
@@ -200,7 +233,19 @@ function Chip.init(settings)
         love.graphics.translate(Engine.scaleMode.offset.x, Engine.scaleMode.offset.y)
         love.graphics.scale(Engine.scaleMode.scale.x, Engine.scaleMode.scale.y)
 
+        if not Engine.drawPluginsInFront then
+            for i = 1, #Engine.plugins do
+                local plugin = Engine.plugins[i] --- @type chip.core.Actor
+                plugin:draw()
+            end
+        end
         Engine.currentScene:draw()
+        if Engine.drawPluginsInFront then
+            for i = 1, #Engine.plugins do
+                local plugin = Engine.plugins[i] --- @type chip.core.Actor
+                plugin:draw()
+            end
+        end
         
         love.graphics.setScissor()
         love.graphics.pop()
@@ -208,22 +253,6 @@ function Chip.init(settings)
     love.resize = function(width, height)
         Engine.scaleMode:onMeasure(width, height)
     end
-    Native.setDarkMode(true)
-    Native.forceWindowRedraw()
-
-    if settings.initialScene == nil then
-        settings.initialScene = Scene:new()
-    end
-    Engine.gameWidth = settings.gameWidth
-    Engine.gameHeight = settings.gameHeight
-
-    Engine.targetFPS = settings.targetFPS
-
-    Engine.scaleMode = RatioScaleMode:new()
-    Engine.scaleMode:onMeasure(settings.gameWidth, settings.gameHeight)
-
-    Engine.currentScene = settings.initialScene
-    Engine.currentScene:init()
 end
 
 return Chip

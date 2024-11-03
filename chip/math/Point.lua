@@ -27,7 +27,7 @@ end
 ---
 --- Copies the components of the given point to this point.
 --- 
---- @param  vec  flora.math.Point  The point to copy.
+--- @param  vec  chip.math.Point  The point to copy.
 ---
 function Point:copyFrom(vec)
     self.x = vec.x

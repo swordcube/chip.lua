@@ -24,6 +24,24 @@ function RefCounted:constructor()
     self._references = 0
 end
 
+---
+--- Adds a reference to this object.
+--- 
+--- Only use this if you know what you're doing!
+---
+function RefCounted:reference()
+    self.references = self.references + 1
+end
+
+---
+--- Removes a reference from this object.
+--- 
+--- Only use this if you know what you're doing!
+---
+function RefCounted:unreference()
+    self.references = self.references - 1
+end
+
 --- [ PRIVATE API ] ---
 
 function RefCounted:get_references()

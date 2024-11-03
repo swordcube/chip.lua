@@ -13,6 +13,7 @@ Assets._textureCache = {}
 --- Returns a file path from a given asset ID.
 ---
 --- @param  id  string
+--- @return string
 ---
 function Assets.getPath(id)
     -- TODO: the shit.
@@ -23,8 +24,12 @@ end
 --- Loads a texture from a given asset ID.
 ---
 --- @param  id  string
+--- @return chip.graphics.Texture
 ---
 function Assets.getTexture(id)
+    if type(id) ~= "string" then
+        return id
+    end
     if Assets._textureCache[id] == nil then
         local newTexture = Texture:new() --- @type chip.graphics.Texture
         newTexture.image = love.graphics.newImage(Assets.getPath(id))

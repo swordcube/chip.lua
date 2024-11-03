@@ -1,4 +1,5 @@
 ---
+--- @diagnostic disable: invisible
 --- @class chip.graphics.Texture : chip.backend.RefCounted
 --- 
 --- A class representing a texture/image.
@@ -27,10 +28,24 @@ function Texture:constructor()
     self.height = 0 --- @type integer
 
     ---
-    --- @private
+    --- @protected
     --- @type love.Image
     ---
     self._image = nil
+end
+
+function Texture:free()
+    self._image:release()
+    self._image = nil
+
+    self.width = 0
+    self.height = 0
+
+    for key, value in pairs(Assets._textureCache) do
+        if value == self then
+            Assets._textureCache[key] = nil
+        end
+    end
 end
 
 --- [ PRIVATE API ] ---
