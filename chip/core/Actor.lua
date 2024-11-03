@@ -41,7 +41,7 @@ function Actor:update(delta)
 end
 
 ---
---- Draws this actor.
+--- Draws this actor to the screen.
 ---
 function Actor:draw()
 end

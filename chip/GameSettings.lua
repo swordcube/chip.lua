@@ -5,12 +5,12 @@ local GameSettings = {
     ---
     --- The width of the game area, in pixels.
     ---
-    width = 640, --- @type integer
+    gameWidth = 640, --- @type integer
 
     ---
     --- The height of the game area, in pixels.
     ---
-    height = 480, --- @type integer
+    gameHeight = 480, --- @type integer
 
     ---
     --- The target framerate of the game.
@@ -20,6 +20,6 @@ local GameSettings = {
     ---
     --- The initial scene to start your game with.
     ---
-    initialScene = nil --- @type chip.core.Node?
+    initialScene = nil --- @type chip.core.Actor?
 }
 return GameSettings

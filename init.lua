@@ -1,12 +1,21 @@
+--- [ BASIC LUA CONFIG ] ---
+
+io.stdout:setvbuf("no") -- Allows console output to be shown immediately
+
 --- [ BASIC UTIL FUNCS ] ---
 
 local classPath = ...
 
 ---
+--- @param   modname  string
+---
 --- @return  any
 --- @return  any  loaderdata
 ---
-local function qrequire(modname) -- qrequire = quick require
+function qrequire(modname) -- qrequire = quick require
+    if modname == nil or #modname == 0 then
+        return require(classPath)
+    end
     return require(classPath .. "." .. modname)
 end
 
@@ -16,10 +25,13 @@ qrequire("chip.utils.lua.MathUtil")
 qrequire("chip.utils.lua.StringUtil")
 qrequire("chip.utils.lua.TableUtil")
 
+qrequire("chip.libs.autobatch")
+
 Class = qrequire("chip.libs.Classic") --- @type chip.libs.Class
 Native = qrequire("chip.native") --- @type chip.Native
 
-Object = qrequire("chip.backend.Object") --- @type chip.libs.Class
+Object = qrequire("chip.backend.Object") --- @type chip.backend.Object
+RefCounted = qrequire("chip.backend.RefCounted") --- @type chip.backend.RefCounted
 
 --- [ MATH IMPORTS ] ---
 
@@ -36,7 +48,19 @@ Scene = qrequire("chip.core.Scene") --- @type chip.core.Scene
 
 --- [ GRAPHICS IMPORTS ] ---
 
+Texture = qrequire("chip.graphics.Texture") --- @type chip.graphics.Texture
 Sprite = qrequire("chip.graphics.Sprite") --- @type chip.graphics.Sprite
+
+BaseScaleMode = qrequire("chip.graphics.scalemodes.BaseScaleMode") --- @type chip.graphics.scalemodes.BaseScaleMode
+RatioScaleMode = qrequire("chip.graphics.scalemodes.RatioScaleMode") --- @type chip.graphics.scalemodes.RatioScaleMode
+
+--- [ AUDIO IMPORTS ] ---
+
+AudioPlayer = qrequire("chip.audio.AudioPlayer") --- @type chip.audio.AudioPlayer
+
+--- [ UTILITY IMPORTS ] ---
+
+Assets = qrequire("chip.utils.Assets") --- @type chip.utils.Assets
 
 --- [ GAME IMPORTS ] ---
 
@@ -49,7 +73,7 @@ local function busySleep(time) -- uses more cpu BUT results in more accurate fps
         return
     end
     local duration = os.clock() + time
-    love.timer.sleep(time * 0.9875)
+    love.timer.sleep(time)
     while os.clock() < duration do end
 end
 if (love.filesystem.isFused() or not love.filesystem.getInfo("assets")) and love.filesystem.mountFullPath then
@@ -57,7 +81,7 @@ if (love.filesystem.isFused() or not love.filesystem.getInfo("assets")) and love
 end
 
 ---
---- @class chip.Core
+--- @class chip.Chip
 --- 
 --- The class responsible for initializing
 --- and handling the core of Chip.
@@ -66,7 +90,13 @@ end
 --- everything you need should be in Engine
 --- or other classes throughout Chip.
 ---
-local Core = Class:extend("Core", ...)
+local Chip = Class:extend("Chip", ...)
+
+---
+--- @protected
+--- @type love.Canvas
+---
+Chip._canvas = nil
 
 ---
 --- Initializes chip with some given settings,
@@ -74,7 +104,7 @@ local Core = Class:extend("Core", ...)
 ---
 --- @param  settings  chip.GameSettings
 ---
-function Core.init(settings)
+function Chip.init(settings)
     local luaPrint = print
     print = function(...)
         local str = ""
@@ -138,7 +168,14 @@ function Core.init(settings)
                     love.draw()
                 end
 
-                love.graphics.print("FPS: " .. love.timer.getFPS(), 10, 3)
+                local fpsText = "FPS: " .. ((Engine.targetFPS > 0) and math.min(love.timer.getFPS(), Engine.targetFPS) or love.timer.getFPS())
+                for i = 1, 4 do
+                    love.graphics.setColor(0, 0, 0, 1)
+                    love.graphics.print(fpsText, 10 + (i * 0.5), 3 + (i * 0.5))
+                end
+                love.graphics.setColor(1, 1, 1, 1)
+                love.graphics.print(fpsText, 10, 3)
+
                 love.graphics.present()
             end
 
@@ -147,26 +184,46 @@ function Core.init(settings)
             else
                 collectgarbage("collect")
             end
-            busySleep(capDt)
+            busySleep(capDt - dt)
         end
     end
     love.update = function(dt)
         Engine.currentScene:update(dt)
     end
     love.draw = function()
-        Engine.currentScene:draw()
-    end
+        -- Draw current scene to the game area
+        love.graphics.push()
+        love.graphics.setScissor(
+            Engine.scaleMode.offset.x, Engine.scaleMode.offset.y,
+            Engine.scaleMode.gameSize.x, Engine.scaleMode.gameSize.y
+        )
+        love.graphics.translate(Engine.scaleMode.offset.x, Engine.scaleMode.offset.y)
+        love.graphics.scale(Engine.scaleMode.scale.x, Engine.scaleMode.scale.y)
 
+        Engine.currentScene:draw()
+        
+        love.graphics.setScissor()
+        love.graphics.pop()
+    end
+    love.resize = function(width, height)
+        Engine.scaleMode:onMeasure(width, height)
+    end
     Native.setDarkMode(true)
     Native.forceWindowRedraw()
 
     if settings.initialScene == nil then
         settings.initialScene = Scene:new()
     end
+    Engine.gameWidth = settings.gameWidth
+    Engine.gameHeight = settings.gameHeight
+
     Engine.targetFPS = settings.targetFPS
+
+    Engine.scaleMode = RatioScaleMode:new()
+    Engine.scaleMode:onMeasure(settings.gameWidth, settings.gameHeight)
 
     Engine.currentScene = settings.initialScene
     Engine.currentScene:init()
 end
 
-return Core
+return Chip

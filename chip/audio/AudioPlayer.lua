@@ -1,0 +1,3 @@
+---
+--- @class chip.audio.AudioPlayer : chip.backend.Object
+---
