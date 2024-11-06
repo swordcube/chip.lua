@@ -32,7 +32,7 @@ function TileFrames.fromTexture(texture, tileSize)
                 "frame",
                 (i - 1) * tileSize.x, (j - 1) * tileSize.y,
                 0, 0, tileSize.x, tileSize.y,
-                atlas.texture
+                atlas:getTexture()
             ))
         end
     end

@@ -13,48 +13,6 @@ local Sprite = Actor2D:extend("Sprite", ...)
 function Sprite:constructor(x, y)
     Sprite.super.constructor(self, x, y)
 
-    self.frameWidth = nil
-    self.frameHeight = nil
-
-    ---
-    --- The width of this actor. (in pixels)
-    ---
-    self.width = nil --- @type number
-
-    ---
-    --- The height of this actor. (in pixels)
-    ---
-    self.height = nil --- @type number
-
-    ---
-    --- The frame collection to used to render this sprite.
-    ---
-    --- @type chip.animation.frames.FrameCollection?
-    ---
-    self.frames = nil
-
-    ---
-    --- The texture attached to this sprite's frame collection.
-    ---
-    --- @type chip.graphics.Texture?
-    ---
-    self.texture = nil
-
-    ---
-    --- The total number of frames in the parent
-    --- sprite's texture.
-    --- 
-    --- @type integer
-    ---
-    self.numFrames = nil
-
-    ---
-    --- The current frame to used to render this sprite.
-    ---
-    --- @type chip.animation.frames.FrameData?
-    ---
-    self.frame = nil
-
     ---
     --- The X and Y offset of this sprite. (not accounting for rotation)
     ---
@@ -85,16 +43,6 @@ function Sprite:constructor(x, y)
     --- @type chip.math.Point
     ---
     self.scrollFactor = Point:new(1, 1)
-
-    ---
-    --- The rotation of this sprite. (in radians)
-    ---
-    self.rotation = 0.0
-
-    ---
-    --- The rotation of this sprite. (in degrees)
-    ---
-    self.rotationDegrees = nil
 
     ---
     --- Controls whether or not this sprite is
@@ -148,6 +96,18 @@ function Sprite:constructor(x, y)
     --- @type chip.animation.frames.FrameData?
     ---
     self._frame = nil
+
+    ---
+    --- @protected
+    --- @type chip.math.Rect
+    ---
+    self._rect = Rect:new()
+
+    ---
+    --- @protected
+    --- @type chip.math.Point
+    ---
+    self._scaledOrigin = Point:new()
 end
 
 ---
@@ -187,9 +147,9 @@ function Sprite:loadTexture(texture, animated, frameWidth, frameHeight)
     end
 
     if animated then
-        self.frames = TileFrames.fromTexture(texture, Point:new(frameWidth, frameHeight))
+        self:setFrames(TileFrames.fromTexture(texture, Point:new(frameWidth, frameHeight)))
     else
-        self.frames = FrameCollection.fromTexture(texture)
+        self:setFrames(FrameCollection.fromTexture(texture))
     end
     return self
 end
@@ -260,22 +220,71 @@ function Sprite:update(delta)
 end
 
 ---
+--- @param  newRect  chip.math.Rect
+--- @return chip.math.Rect
+---
+function Sprite:getScreenBounds(newRect)
+    if not newRect then
+        newRect = Rect:new()
+    end
+    newRect.x = self.x
+    newRect.y = self.y
+
+    local cam = Camera.currentCamera --- @type chip.graphics.Camera
+    local camx, camy = 0.0, 0.0
+    if cam then
+        camx = cam.x
+        camy = cam.y
+    end
+    self._scaledOrigin:set(self.origin.x * self.scale.x, self.origin.y * self.scale.y)
+
+    newRect.x = newRect.x + (-math.round(camx * self.scrollFactor.x) - self.offset.x + self.origin.x - self._scaledOrigin.x)
+    newRect.y = newRect.y + (-math.round(camy * self.scrollFactor.y) - self.offset.y + self.origin.y - self._scaledOrigin.y)
+
+    newRect.width = self:getFrameWidth() * math.abs(self.scale.x)
+    newRect.height = self:getFrameHeight() * math.abs(self.scale.y)
+    
+    return newRect:getRotatedBounds(self._rotation, self._scaledOrigin, newRect)
+end
+
+function Sprite:isOnScreen()
+    local cam = Camera.currentCamera --- @type chip.graphics.Camera
+    local camzoom = 1.0
+    if cam then
+        camzoom = cam:getZoom()
+    end
+    local width, height = self:getWidth(), self:getHeight()
+    local bounds = self:getScreenBounds(self._rect)
+    -- TODO: why does this return crash consistently
+    return (
+        bounds.x > -(width / camzoom) and bounds.x < (Engine.gameWidth - width) / camzoom and
+        bounds.y > -(height / camzoom) and bounds.y < (Engine.gameHeight - height) / camzoom
+    )
+end
+
+---
 --- Draws this sprite to the screen.
 ---
 function Sprite:draw()
-    if not self.frames or not self.frame or not self.frame.texture then
+    if not self:isOnScreen() then
+        return
+    end
+    local frames, frame = self._frames, self._frame
+    local width, height = self:getWidth(), self:getHeight()
+
+    if not frames or not frame or not frame.texture then
         return
     end
     local curAnim = self.animation.curAnim
     
-    local ox, oy = self.origin.x * self.width, self.origin.y * self.height
+    local ox, oy = self.origin.x * width, self.origin.y * height
     local rx, ry = (self.x - self.offset.x) + ox, (self.y - self.offset.y) + oy
  
     local offx = ((curAnim and curAnim.offset.x or 0.0) - self.frameOffset.x) * (self.scale.x < 0 and -1 or 1)
     local offy = ((curAnim and curAnim.offset.y or 0.0) - self.frameOffset.y) * (self.scale.x < 0 and -1 or 1)
 
-    offx = offx - (self.frame.offset.x * (self.scale.x < 0 and -1 or 1))
-    offy = offy - (self.frame.offset.y * (self.scale.y < 0 and -1 or 1))
+    offx = offx - (frame.offset.x * (self.scale.x < 0 and -1 or 1))
+    offy = offy - (frame.offset.y * (self.scale.y < 0 and -1 or 1))
 
     -- TODO: maybe have some kind of ParallaxLayer instead of this
     local cam = Camera.currentCamera
@@ -290,63 +299,45 @@ function Sprite:draw()
     local sx = self.scale.x * (self.flipX and -1.0 or 1.0)
     local sy = self.scale.y * (self.flipY and -1.0 or 1.0)
     love.graphics.draw(
-        self.frame.texture.image, self.frame.quad, -- What's actually drawn to the screen
+        frame.texture:getImage(), frame.quad, -- What's actually drawn to the screen
         rx, ry, -- X and Y coordinates
-        self.rotation, -- Rotation (in radians)
+        self:getRotation(), -- Rotation (in radians)
         sx, sy, -- X and Y scaling
         ox, oy -- X and Y rotation origin
     )
 end
 
---- [ PRIVATE API ] ---
-
----
---- @protected
----
-function Sprite:get_frameWidth()
+function Sprite:getFrameWidth()
     if self.animation.curAnim then
         local firstFrame = self.animation.curAnim.frames[1]
         return firstFrame.width
     end
-    return self.frame and self.frame.width or 0.0
+    local frame = self:getFrame()
+    return frame and frame.width or 0.0
 end
 
----
---- @protected
----
-function Sprite:get_width()
-    return self.frameWidth * math.abs(self.scale.x)
+function Sprite:getWidth()
+    return self:getFrameWidth() * math.abs(self.scale.x)
 end
 
----
---- @protected
----
-function Sprite:get_frameHeight()
+function Sprite:getFrameHeight()
     if self.animation.curAnim then
         local firstFrame = self.animation.curAnim.frames[1]
         return firstFrame.height
     end
-    return self.frame and self.frame.height or 0.0
+    local frame = self:getFrame()
+    return frame and frame.height or 0.0
 end
 
----
---- @protected
----
-function Sprite:get_height()
-    return self.frameHeight * math.abs(self.scale.y)
+function Sprite:getHeight()
+    return self:getFrameHeight() * math.abs(self.scale.y)
 end
 
----
---- @protected
----
-function Sprite:get_rotation()
+function Sprite:getRotation()
     return self._rotation
 end
 
----
---- @protected
----
-function Sprite:set_rotation(val)
+function Sprite:setRotation(val)
     self._rotation = val
 
     self._cosRotation = math.cos(val)
@@ -355,75 +346,54 @@ function Sprite:set_rotation(val)
     return self._rotation
 end
 
----
---- @protected
----
-function Sprite:get_rotationDegrees()
-    return math.deg(self.rotation)
+function Sprite:getRotationDegrees()
+    return math.deg(self:getRotation())
 end
 
----
---- @protected
----
-function Sprite:set_rotationDegrees(val)
-    self.rotation = math.rad(val)
+function Sprite:setRotationDegrees(val)
+    self:setRotation(math.rad(val))
 end
 
----
---- @protected
----
-function Sprite:get_texture()
-    if not self.frames then
+function Sprite:getTexture()
+    local frames = self:getFrames()
+    if not frames then
         return nil
     end
-    return self.frames.texture
+    return frames.texture
 end
 
----
---- @protected
----
-function Sprite:get_frame()
+function Sprite:getFrame()
     return self._frame
 end
 
----
---- @protected
----
-function Sprite:get_numFrames()
-    if self.frames then
-        return self.frames.numFrames
+function Sprite:setFrame(val)
+    self._frame = val
+end
+
+function Sprite:getNumFrames()
+    local frames = self:getFrames()
+    if frames then
+        return frames.numFrames
     end
     return 0
 end
 
----
---- @protected
----
-function Sprite:set_frame(val)
-    self._frame = val
-end
-
----
---- @protected
----
-function Sprite:get_frames()
+function Sprite:getFrames()
     return self._frames
 end
 
----
---- @protected
----
-function Sprite:set_frames(val)
+function Sprite:setFrames(val)
     if val then
-        if self.texture then -- prevent texture from getting destroyed too early
-            self.texture:reference()
+        local texture = self:getTexture()
+        if texture then -- prevent texture from getting destroyed too early
+            texture:reference()
         end
-        for i = 1, #self.animation.animations do
-            local anim = self.animation.animations[i] --- @type chip.animation.AnimationData
+        for i = 1, #self.animation._animations do
+            local anim = self.animation._animations[i] --- @type chip.animation.AnimationData
             anim:free()
         end
-        if self.texture then
-            self.texture:unreference()
+        if texture then
+            texture:unreference()
         end
         
         if self._frames then
@@ -432,12 +402,13 @@ function Sprite:set_frames(val)
         self._frames = val
         self._frames:reference()
         
-        self.frame = self._frames.frames[1]
+        self:setFrame(self._frames:getFrames()[1])
 
-        self.animation.animations = {}
-        self.animation.curAnim = nil
+        self.animation._animations = {}
+        self.animation._curAnim = nil
     end
-    return self._frames
 end
+
+--- [ PRIVATE API ] ---
 
 return Sprite

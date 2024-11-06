@@ -13,14 +13,16 @@ function FrameCollection:constructor(texture, frames)
     FrameCollection.super.constructor(self)
 
     ---
+    --- @protected
     --- @type chip.graphics.Texture?
     ---
-    self.texture = Assets.getTexture(texture)
+    self._texture = Assets.getTexture(texture)
 
     ---
+    --- @protected
     --- @type table<chip.animation.frames.FrameData>
     ---
-    self.frames = frames and frames or {}
+    self._frames = frames and frames or {}
 
     ---
     --- The amount of frames in this frame collection.
@@ -40,7 +42,7 @@ function FrameCollection.fromTexture(texture)
     --- @type chip.animation.frames.FrameCollection
     ---
     local atlas = FrameCollection:new(tex)
-    table.insert(atlas.frames, FrameData:new(
+    table.insert(atlas._frames, FrameData:new(
         "#_TEXTURE_",
         0, 0, 0, 0,
         tex.width, tex.height,
@@ -50,25 +52,30 @@ function FrameCollection.fromTexture(texture)
 end
 
 function FrameCollection:dispose()
-    for i = 1, #self.frames do
+    for i = 1, #self._frames do
         ---
         --- @type chip.animation.frames.FrameData
         ---
-        local frame = self.frames[i]
+        local frame = self._frames[i]
         frame:dispose()
     end
-    self.frames = nil
+    self._frames = nil
+end
+
+function FrameCollection:getNumFrames()
+    return #self.frames
+end
+
+function FrameCollection:getTexture()
+    return self._texture
+end
+
+function FrameCollection:getFrames()
+    return self._frames
 end
 
 -----------------------
 --- [ Private API ] ---
 -----------------------
-
----
---- @protected
----
-function FrameCollection:get_numFrames()
-    return #self.frames
-end
 
 return FrameCollection

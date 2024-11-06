@@ -30,13 +30,13 @@ function AtlasFrames.fromSparrow(texture, xmlFile)
 	local data = Xml.parse(xmlContent)
 	for _, node in ipairs(data.TextureAtlas.children) do
         if node.name == "SubTexture" then
-			table.insert(atlas.frames, FrameData:new(
+			table.insert(atlas._frames, FrameData:new(
 				node.att.name,
 				tonumber(node.att.x), tonumber(node.att.y),
 				node.att.frameX and tonumber(node.att.frameX) or 0,
 				node.att.frameY and tonumber(node.att.frameY) or 0,
 				tonumber(node.att.width), tonumber(node.att.height),
-				atlas.texture
+				atlas:getTexture()
 			))
         end
     end

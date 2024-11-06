@@ -9,14 +9,28 @@ function Group:constructor()
     Group.super.constructor(self)
 
     ---
-    --- A list of all members in this group.
+    --- @protected
     ---
-    self.members = {} --- @type table<chip.core.Actor>
+    self._members = {} --- @type table<chip.core.Actor>
 
     ---
-    --- The amount of members in this group.
+    --- @protected
     ---
-    self.length = 0 --- @type integer
+    self._length = 0 --- @type integer
+end
+
+---
+--- Returns a list of all members in this group.
+---
+function Group:getMembers()
+    return self._members
+end
+
+---
+--- Returns the amount of members in this group.
+---
+function Group:getLength()
+    return self._length
 end
 
 ---
@@ -25,9 +39,10 @@ end
 --- @param  delta  number  The time since the last frame. (in seconds)
 ---
 function Group:update(delta)
-    for i = 1, self.length do
-        local actor = self.members[i] --- @type chip.core.Actor
-        if actor.exists and actor.active then
+    local members = self._members
+    for i = 1, self._length do
+        local actor = members[i] --- @type chip.core.Actor
+        if actor:isExisting() and actor:isVisible() then
             actor:update(delta)
         end
     end
@@ -41,9 +56,10 @@ function Group:draw()
     if cam then
         cam:attach()
     end
-    for i = 1, self.length do
-        local actor = self.members[i] --- @type chip.core.Actor
-        if actor.exists and actor.visible then
+    local members = self._members
+    for i = 1, self._length do
+        local actor = members[i] --- @type chip.core.Actor
+        if actor:isExisting() and actor:isVisible() then
             if actor:is(CanvasLayer) then
                 cam:detach()
                 actor:draw()
@@ -68,12 +84,13 @@ function Group:add(actor)
         print("Cannot add an invalid actor to this group!")
         return
     end
-    if table.contains(self.members, actor) then
+    if table.contains(self._members, actor) then
         print("This group already contains that actor!")
         return
     end
-    self.length = self.length + 1
-    table.insert(self.members, actor)
+    actor._parent = self
+    self._length = self._length + 1
+    table.insert(self._members, actor)
 end
 
 ---
@@ -87,12 +104,13 @@ function Group:insert(idx, actor)
         print("Cannot add an invalid actor to this group!")
         return
     end
-    if table.contains(self.members, actor) then
+    if table.contains(self._members, actor) then
         print("This group already contains that actor!")
         return
     end
-    self.length = self.length + 1
-    table.insert(self.members, idx, actor)
+    actor._parent = self
+    self._length = self._length + 1
+    table.insert(self._members, idx, actor)
 end
 
 ---
@@ -105,12 +123,13 @@ function Group:remove(actor)
         print("Cannot remove an invalid actor from this group!")
         return
     end
-    if not table.contains(self.members, actor) then
+    if not table.contains(self._members, actor) then
         print("This group does not contain that actor!")
         return
     end
-    self.length = self.length - 1
-    table.removeItem(self.members, actor)
+    actor._parent = nil
+    self._length = self._length - 1
+    table.removeItem(self._members, actor)
 end
 
 ---
@@ -124,20 +143,21 @@ function Group:move(actor, idx)
         print("Cannot move an invalid actor in this group!")
         return
     end
-    if not table.contains(self.members, actor) then
+    if not table.contains(self._members, actor) then
         print("This group does not contain that actor!")
         return
     end
-    table.removeItem(self.members, actor)
-    table.insert(self.members, idx, actor)
+    table.removeItem(self._members, actor)
+    table.insert(self._members, idx, actor)
 end
 
 ---
 --- Frees all of this group's members.
 ---
 function Group:free()
-    for i = 1, self.length do
-        local actor = self.members[i] --- @type chip.core.Actor
+    for i = 1, self._length do
+        local actor = self._members[i] --- @type chip.core.Actor
+        actor._parent = nil
         actor:free()
     end
 end

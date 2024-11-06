@@ -1,7 +1,7 @@
 ---
 --- @class chip.Engine
 ---
-local Engine = Class:extend("Engine", ...)
+local Engine = {}
 
 ---
 --- The width of the game area. (in pixels)

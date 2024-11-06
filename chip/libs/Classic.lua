@@ -16,41 +16,9 @@
 --- @class chip.libs.Class
 ---
 local Class = {__class = "Class"}
+Class.__index = Class
 
 function Class:constructor(...) end
-
-function Class:__index(k)
-	local cls = getmetatable(self)
-	local getterName = "get_" .. k
-	local selfGetter = rawget(self, getterName)
-	local clsGetter = cls[getterName]
-	if selfGetter then
-		return selfGetter()
-	
-	elseif clsGetter then
-		return clsGetter(self)
-	end
-	return cls[k]
-end
-
-function Class:__newindex(k, v)
-	if self.__initializing then
-		rawset(self, k, v)
-		return
-	end
-	local cls = getmetatable(self)
-	local setterName = "set_" .. k
-	local selfSetter = rawget(self, setterName)
-	local clsSetter = cls[setterName]
-	if selfSetter then
-		return selfSetter(v)
-	
-	elseif clsSetter then
-		clsSetter(self, v)
-		return self
-	end
-	return rawset(self, k, v)
-end
 
 function Class:extend(type, path)
 	local cls = {}
@@ -61,6 +29,7 @@ function Class:extend(type, path)
 
 	cls.__class = type or ("Unknown(" .. self.__class .. ")")
 	cls.__path = path
+	cls.__index = cls
 	cls.super = self
 	setmetatable(cls, self)
 
@@ -96,9 +65,7 @@ function Class:__tostring() return self.__class end
 
 function Class:new(...)
 	local obj = setmetatable({}, self)
-	obj.__initializing = true
 	obj:constructor(...)
-	obj.__initializing = false
 	return obj
 end
 

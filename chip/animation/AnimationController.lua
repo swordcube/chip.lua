@@ -7,43 +7,24 @@ local AnimationController = Class:extend("AnimationController", ...)
 
 function AnimationController:constructor(parent)
     ---
-    --- The attached sprite that utilizes this
-    --- animation player.
-    --- 
+    --- @protected
     --- @type chip.graphics.Sprite
     ---
-    self.parent = parent
+    self._parent = parent
+    
+    self._animations = {}
     
     ---
-    --- The list of added animations.
-    ---
-    self.animations = {}
-
-    ---
-    --- The total number of frames in the parent
-    --- sprite's texture.
-    --- 
-    --- @type integer
-    ---
-    self.numFrames = nil
-    
-    ---
-    --- The name of the currently playing animation.
-    ---
-    --- ⚠️ **WARNING**: This can be `nil`!
-    --- 
+    --- @protected
     --- @type string?
     ---
-    self.name = nil
-    
-    ---
-    --- The data of the currently playing animation.
-    ---
-    --- ⚠️ **WARNING**: This can be `nil`!
+    self._name = nil
+
     --- 
-    --- @type chip.animation.AnimationData
+    --- @protected
+    --- @type chip.animation.AnimationData?
     ---
-    self.curAnim = nil
+    self._curAnim = nil
     
     ---
     --- The function that gets ran when
@@ -51,19 +32,19 @@ function AnimationController:constructor(parent)
     --- 
     --- @type function?
     ---
-    self.onComplete = nil
+    self._onComplete = nil
     
     ---
     --- Whether or not the currently playing
     --- animation is reversed.
     ---
-    self.reversed = false
+    self._reversed = false
     
     ---
     --- Whether or not the currently playing
     --- animation is finished.
     ---
-    self.finished = false
+    self._finished = false
 
     ---
     --- @protected
@@ -73,16 +54,84 @@ function AnimationController:constructor(parent)
 end
 
 ---
+--- Returns a map of all added animations.
+--- 
+--- @return table<string, chip.animation.AnimationData?>
+---
+function AnimationController:getAnimationList()
+    return self._animations
+end
+
+---
+--- The data of the currently playing animation.
+---
+--- ⚠️ **WARNING**: This can be `nil`!
+--- 
+--- @return chip.animation.AnimationData?
+---
+function AnimationController:getCurrentAnimation()
+    return self._curAnim
+end
+
+---
+--- Returns the name of the currently playing animation.
+---
+--- ⚠️ **WARNING**: This can be `nil`!
+--- 
+--- @return string?
+---
+function AnimationController:getCurrentAnimationName()
+    if self._curAnim ~= nil then
+        return self._curAnim.name
+    end
+    return nil
+end
+
+---
+--- Returns the animation with the given name.
+--- 
+--- @param  name  string  The name of the animation to return.
+--- 
+--- @return chip.animation.AnimationData?
+---
+function AnimationController:getAnimationByName(name)
+    return self._animations[name]
+end
+
+---
+--- Sets the function that gets ran when
+--- the current animation has finished playing.
+--- 
+--- @param  func  function  The function to run on completion.
+---
+function AnimationController:setCompletionCallback(func)
+    self._onComplete = func
+end
+
+---
+--- Returns whether or not the current animation is reversed.
+---
+function AnimationController:isReversed()
+    return self._reversed
+end
+
+---
+--- Returns whether or not the current animation is finished.
+---
+function AnimationController:isFinished()
+    return self._finished
+end
+
+---
 --- Resets this animation player and
 --- destroys & removes all previously added animations.
 ---
 function AnimationController:reset()
-    self.animations = {}
-    self.curAnim = nil
-    self.onComplete = nil
-    self.reversed = false
-    self.finished = false
-    self.name = nil
+    self._animations = {}
+    self._curAnim = nil
+    self._onComplete = nil
+    self._reversed = false
+    self._finished = false
 end
 
 ---
@@ -94,30 +143,30 @@ end
 --- @param delta number  The time between the last and current frame.
 ---
 function AnimationController:update(delta)
-    if self.finished or self.curAnim == nil then
+    if self._finished or self._curAnim == nil then
         return
     end
 
     self._elapsedTime = self._elapsedTime + delta
 
-    if self._elapsedTime < (1 / self.curAnim.fps) then
+    if self._elapsedTime < (1 / self._curAnim.fps) then
         return
     end
     self._elapsedTime = 0
 
-    if self.curAnim.curFrame < self.curAnim.frameCount then
-        self.curAnim.curFrame = self.curAnim.curFrame + 1
-        self.parent.frame = self.curAnim.frames[self.curAnim.curFrame]
+    if self._curAnim.curFrame < self._curAnim.frameCount then
+        self._curAnim.curFrame = self._curAnim.curFrame + 1
+        self._parent:setFrame(self._curAnim.frames[self._curAnim.curFrame])
         return
     end
 
-    if self.curAnim.loop then
-        self.curAnim.curFrame = 1
-        self.parent.frame = self.curAnim.frames[self.curAnim.curFrame]
+    if self._curAnim.loop then
+        self._curAnim.curFrame = 1
+        self._parent:setFrame(self._curAnim.frames[self._curAnim.curFrame])
     else
-        self.finished = true
-        if self.onComplete then
-            self.onComplete(self.name)
+        self._finished = true
+        if self._onComplete then
+            self._onComplete(self.name)
         end
     end
 end
@@ -131,7 +180,7 @@ end
 --- @param loop   boolean?  Whether or not the animation is looped or just plays once.
 ---
 function AnimationController:add(name, frames, fps, loop)
-    local atlas = self.parent.frames
+    local atlas = self._parent:getFrames()
     if atlas == nil then
         return
     end
@@ -140,7 +189,7 @@ function AnimationController:add(name, frames, fps, loop)
         table.insert(datas, atlas.frames[num])
     end
     local anim = AnimationData:new(name, datas, fps, loop and loop or true)
-    self.animations[name] = anim
+    self._animations[name] = anim
 end
 
 ---
@@ -152,12 +201,12 @@ end
 --- @param loop   boolean?  Whether or not the animation is looped or just plays once.
 ---
 function AnimationController:addByPrefix(name, prefix, fps, loop)
-    local atlas = self.parent.frames
+    local atlas = self._parent:getFrames()
     if atlas == nil then
         return
     end
     local __frames = {}
-    for _, data in ipairs(atlas.frames) do
+    for _, data in ipairs(atlas:getFrames()) do
         if string.startsWith(data.name, prefix) then
             table.insert(__frames, data)
         end
@@ -167,7 +216,7 @@ function AnimationController:addByPrefix(name, prefix, fps, loop)
         return
     end
     local anim = AnimationData:new(name, __frames, fps, loop and loop or true)
-    self.animations[name] = anim
+    self._animations[name] = anim
 end
 
 ---
@@ -180,7 +229,7 @@ end
 --- @param loop    boolean  Whether or not the animation is looped or just plays once.
 ---
 function AnimationController:addByIndices(name, prefix, indices, fps, loop)
-    local atlas = self.parent.frames
+    local atlas = self._parent:getFrames()
     if atlas == nil then
         return
     end
@@ -199,7 +248,7 @@ function AnimationController:addByIndices(name, prefix, indices, fps, loop)
         table.insert(datas, __frames[num])
     end
     local anim = AnimationData:new(name, datas, fps, loop and loop or true)
-    self.animations[name] = anim
+    self._animations[name] = anim
 end
 
 ---
@@ -208,7 +257,7 @@ end
 --- @param name string  The name of the animation to check.
 ---
 function AnimationController:exists(name)
-    return self.animations[name] ~= nil
+    return self._animations[name] ~= nil
 end
 
 ---
@@ -217,7 +266,7 @@ end
 --- @param name string  The name of the animation to get the data of.
 ---
 function AnimationController:getByName(name)
-    return self.animations[name]
+    return self._animations[name]
 end
 
 ---
@@ -226,11 +275,11 @@ end
 --- @param name string  The name of the animation to remove.
 ---
 function AnimationController:remove(name)
-    local anim = self.animations[name]
+    local anim = self._animations[name]
     if anim == nil then
         return
     end
-    table.remove(self.animations, table.indexOf(anim))
+    table.remove(self._animations, table.indexOf(anim))
     anim:destroy()
 end
 
@@ -252,22 +301,20 @@ function AnimationController:play(name, force, reversed, frame)
         print("Animation called "..name.." doesn't exist!")
         return false
     end
-    if self.name == name and not self.finished and not (force and force or false) then
+    if self:getCurrentAnimationName() == name and not self._finished and not (force and force or false) then
         return true
     end
-
-    self.name = name
-    self.reversed = reversed and reversed or false
-    self.finished = false
+    self._reversed = reversed and reversed or false
+    self._finished = false
     self._elapsedTime = 0
 
-    self.curAnim = self.animations[name]
-    self.curAnim.curFrame = frame and frame or 1
+    self._curAnim = self._animations[name]
+    self._curAnim.curFrame = frame and frame or 1
     
-    if self.parent == nil or self.curAnim == nil or self.curAnim.frames == nil or self.curAnim.frames[1] == nil then
+    if self._parent == nil or self._curAnim == nil or self._curAnim.frames == nil or self._curAnim.frames[1] == nil then
         return false
     end
-    self.parent.frame = self.curAnim.frames[self.curAnim.curFrame]
+    self._parent:setFrame(self._curAnim.frames[self._curAnim.curFrame])
     return true
 end
 
@@ -282,25 +329,28 @@ end
 --- @param y    number  The Y offset to set on the animation.
 ---
 function AnimationController:setOffset(name, x, y)
-    local anim = self.animations[name]
+    local anim = self._animations[name]
     if anim == nil then
         return
     end
     anim.offset:set(x, y)
 end
 
------------------------
---- [ Private API ] ---
------------------------
-
 ---
---- @protected
+--- The total number of frames in the parent
+--- sprite's texture.
+--- 
+--- @return integer
 ---
-function AnimationController:get_numFrames()
-    if self.parent then
-        return self.parent.numFrames
+function AnimationController:getNumFrames()
+    if self._parent then
+        return self._parent:getNumFrames()
     end
     return 0.0
 end
+
+-----------------------
+--- [ Private API ] ---
+-----------------------
 
 return AnimationController

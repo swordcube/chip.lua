@@ -32,7 +32,7 @@ function Assets.getTexture(id)
     end
     if Assets._textureCache[id] == nil then
         local newTexture = Texture:new() --- @type chip.graphics.Texture
-        newTexture.image = love.graphics.newImage(Assets.getPath(id))
+        newTexture:setImage(love.graphics.newImage(Assets.getPath(id)))
         Assets._textureCache[id] = newTexture
     end
     return Assets._textureCache[id]

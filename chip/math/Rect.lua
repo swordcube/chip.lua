@@ -39,6 +39,47 @@ function Rect:copyFrom(vec)
     return self
 end
 
+function Rect:getRotatedBounds(radians, origin, newRect)
+    if not origin then
+        origin = Point:new(0.0, 0.0)
+    end
+    if not newRect then
+        newRect = Rect:new()
+    end
+    local degrees = math.deg(radians) % 360
+    if degrees == 0 then
+        return newRect:set(self.x, self.y, self.width, self.height)
+    end
+    if degrees < 0 then
+        degrees = degrees + 360
+    end
+    local cos = math.cos(radians)
+    local sin = math.sin(radians)
+
+    local left = -origin.x
+    local top = -origin.y
+    local right = -origin.x + self.width
+    local bottom = -origin.y + self.height
+
+    if degrees < 90 then
+        newRect.x = self.x + origin.x + cos * left - sin * bottom
+        newRect.y = self.y + origin.y + sin * left + cos * top
+    elseif degrees < 180 then
+        newRect.x = self.x + origin.x + cos * right - sin * bottom
+        newRect.y = self.y + origin.y + sin * left  + cos * bottom
+    elseif degrees < 270 then
+        newRect.x = self.x + origin.x + cos * right - sin * top
+        newRect.y = self.y + origin.y + sin * right + cos * bottom
+    else
+        newRect.x = self.x + origin.x + cos * left - sin * top
+        newRect.y = self.y + origin.y + sin * right + cos * top
+    end
+    local newHeight = math.abs(cos * self.height) + math.abs(sin * self.width)
+    newRect.width = math.abs(cos * self.width) + math.abs(sin * self.height)
+    newRect.height = newHeight
+    return newRect
+end
+
 ---
 --- Sets the components of this rectangle to given values.
 --- 

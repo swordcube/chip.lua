@@ -13,11 +13,6 @@ function Texture:constructor()
     Texture.super.constructor(self)
 
     ---
-    --- The image that this texture represents.
-    ---
-    self.image = nil --- @type love.Image
-
-    ---
     --- The width of this texture. (in pixels)
     ---
     self.width = 0 --- @type integer
@@ -48,23 +43,19 @@ function Texture:free()
     end
 end
 
---- [ PRIVATE API ] ---
-
----
---- @protected
----
-function Texture:get_image()
+function Texture:getImage()
     return self._image
 end
 
 ---
---- @protected
 --- @param  val  love.Image
 ---
-function Texture:set_image(val)
+function Texture:setImage(val)
     self._image = val
     self.width = val:getWidth()
     self.height = val:getHeight()
 end
+
+--- [ PRIVATE API ] ---
 
 return Texture

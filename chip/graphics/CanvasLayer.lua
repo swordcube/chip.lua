@@ -40,11 +40,6 @@ function CanvasLayer:constructor()
     --- The rotation of this canvas layer. (in radians)
     ---
     self.rotation = 0.0
-
-    ---
-    --- The rotation of this canvas layer. (in degrees)
-    ---
-    self.rotationDegrees = nil
 end
 
 ---
@@ -67,36 +62,25 @@ function CanvasLayer:draw()
     love.graphics.pop()
 end
 
---- [ PRIVATE API ] ---
-
----
---- @protected
----
-function CanvasLayer:get_rotationDegrees()
+function CanvasLayer:getRotationDegrees()
     return math.deg(self.rotation)
 end
 
----
---- @protected
----
-function CanvasLayer:set_rotationDegrees(val)
+function CanvasLayer:setRotationDegrees(val)
     self.rotation = math.rad(val)
 end
 
----
---- @protected
----
-function CanvasLayer:get_zoom()
+function CanvasLayer:getZoom()
     return (self.scale.x + self.scale.y) * 0.5
 end
 
----
---- @protected
----
-function CanvasLayer:set_zoom(val)
+function CanvasLayer:setZoom(val)
     self.x = -((Engine.gameWidth * 0.5) * (val - 1))
     self.y = -((Engine.gameHeight * 0.5) * (val - 1))
     self.scale:set(val, val)
 end
+
+--- [ PRIVATE API ] ---
+
 
 return CanvasLayer

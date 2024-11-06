@@ -39,7 +39,7 @@ local function switchActiveImage(img)
     if not b then
       b = {}
       b.count = 0
-      b.capacity = 16
+      b.capacity = 5
       b.sb = love_graphics.newSpriteBatch(img, b.capacity, "stream")
       autobatch.batches[img] = b
     end

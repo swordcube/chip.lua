@@ -101,7 +101,7 @@ end
 --- everything you need should be in Engine
 --- or other classes throughout Chip.
 ---
-local Chip = Class:extend("Chip", ...)
+local Chip = {}
 
 ---
 --- @protected

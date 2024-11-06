@@ -17,8 +17,8 @@ function SpriteUtil.makeRectangle(width, height, color)
                 )
             end
         end
-        local newTexture = Texture:new()
-        newTexture.image = love.graphics.newImage(result)
+        local newTexture = Texture:new() --- @type chip.graphics.Texture
+        newTexture:setImage(love.graphics.newImage(result))
         Assets._textureCache[key] = newTexture
 	end
 	return Assets._textureCache[key]
@@ -43,8 +43,8 @@ function SpriteUtil.makeGradient(horizontal, fromColor, toColor, width, height)
                 )
             end
         end
-        local newTexture = Texture:new()
-        newTexture.image = love.graphics.newImage(result)
+        local newTexture = Texture:new() --- @type chip.graphics.Texture
+        newTexture:setImage(love.graphics.newImage(result))
         Assets._textureCache[key] = newTexture
     end
     return Assets._textureCache[key]

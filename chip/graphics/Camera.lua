@@ -21,19 +21,38 @@ function Camera:constructor()
     self.y = Engine.gameHeight * 0.5
 
     ---
-    --- The zoom factor of this camera.
+    --- @protected
     ---
-    self.zoom = 1 --- @type number
+    self._zoom = 1 --- @type number
 
     ---
-    --- The rotation of this camera. (in radians)
+    --- @protected
     ---
-    self.rotation = 0.0
+    self._rotation = 0.0 --- @type number
+end
 
-    ---
-    --- The rotation of this camera. (in degrees)
-    ---
-    self.rotationDegrees = nil
+function Camera:getZoom()
+    return self._zoom
+end
+
+function Camera:setZoom(val)
+    self._zoom = val
+end
+
+function Camera:getRotation()
+    return self._rotation
+end
+
+function Camera:setRotation(val)
+    self._rotation = val
+end
+
+function Camera:getRotationDegrees()
+    return math.deg(self._rotation)
+end
+
+function Camera:setRotationDegrees(val)
+    self._rotation = math.rad(val)
 end
 
 function Camera:attach()
@@ -57,19 +76,5 @@ function Camera:detach()
 end
 
 --- [ PRIVATE API ] ---
-
----
---- @protected
----
-function Camera:get_rotationDegrees()
-    return math.deg(self.rotation)
-end
-
----
---- @protected
----
-function Camera:set_rotationDegrees(val)
-    self.rotation = math.rad(val)
-end
 
 return Camera
