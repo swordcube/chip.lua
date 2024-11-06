@@ -219,47 +219,9 @@ function Sprite:update(delta)
     self.animation:update(delta)
 end
 
----
---- @param  newRect  chip.math.Rect
---- @return chip.math.Rect
----
-function Sprite:getScreenBounds(newRect)
-    if not newRect then
-        newRect = Rect:new()
-    end
-    newRect.x = self.x
-    newRect.y = self.y
-
-    local cam = Camera.currentCamera --- @type chip.graphics.Camera
-    local camx, camy = 0.0, 0.0
-    if cam then
-        camx = cam.x
-        camy = cam.y
-    end
-    self._scaledOrigin:set(self.origin.x * self.scale.x, self.origin.y * self.scale.y)
-
-    newRect.x = newRect.x + (-math.round(camx * self.scrollFactor.x) - self.offset.x + self.origin.x - self._scaledOrigin.x)
-    newRect.y = newRect.y + (-math.round(camy * self.scrollFactor.y) - self.offset.y + self.origin.y - self._scaledOrigin.y)
-
-    newRect.width = self:getFrameWidth() * math.abs(self.scale.x)
-    newRect.height = self:getFrameHeight() * math.abs(self.scale.y)
-    
-    return newRect:getRotatedBounds(self._rotation, self._scaledOrigin, newRect)
-end
-
 function Sprite:isOnScreen()
-    local cam = Camera.currentCamera --- @type chip.graphics.Camera
-    local camzoom = 1.0
-    if cam then
-        camzoom = cam:getZoom()
-    end
-    local width, height = self:getWidth(), self:getHeight()
-    local bounds = self:getScreenBounds(self._rect)
-    -- TODO: why does this return crash consistently
-    return (
-        bounds.x > -(width / camzoom) and bounds.x < (Engine.gameWidth - width) / camzoom and
-        bounds.y > -(height / camzoom) and bounds.y < (Engine.gameHeight - height) / camzoom
-    )
+    -- TODO: this fuckin function
+    return true
 end
 
 ---

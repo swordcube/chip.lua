@@ -58,16 +58,17 @@ end
 function Camera:attach()
     local w2 = Engine.gameWidth * 0.5
     local h2 = Engine.gameHeight * 0.5
+    local zoom = self:getZoom()
 
     love.graphics.push()
 	love.graphics.translate(
-        -(self.x - w2) - (w2 * (self.zoom - 1)),
-        -(self.y - h2) - (h2 * (self.zoom - 1))
+        -(self.x - w2) - (w2 * (zoom - 1)),
+        -(self.y - h2) - (h2 * (zoom - 1))
     )
-	love.graphics.scale(self.zoom)
+	love.graphics.scale(zoom)
 
     love.graphics.translate(w2, h2)
-	love.graphics.rotate(self.rotation)
+	love.graphics.rotate(self:getRotation())
     love.graphics.translate(-w2, -h2)
 end
 
