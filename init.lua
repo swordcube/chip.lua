@@ -104,10 +104,9 @@ end
 local Chip = {}
 
 ---
---- @protected
---- @type love.Canvas
+--- @type string
 ---
-Chip._canvas = nil
+Chip.classPath = classPath
 
 ---
 --- Initializes chip with some given settings,

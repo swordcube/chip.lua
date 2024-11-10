@@ -39,6 +39,18 @@ function Rect:copyFrom(vec)
     return self
 end
 
+function Rect:setPosition(x, y)
+    self.x = x
+    self.y = y
+    return self
+end
+
+function Rect:setSize(width, height)
+    self.width = width
+    self.height = height
+    return self
+end
+
 function Rect:getRotatedBounds(radians, origin, newRect)
     if not origin then
         origin = Point:new(0.0, 0.0)
@@ -53,6 +65,8 @@ function Rect:getRotatedBounds(radians, origin, newRect)
     if degrees < 0 then
         degrees = degrees + 360
     end
+    radians = math.rad(degrees)
+    
     local cos = math.cos(radians)
     local sin = math.sin(radians)
 

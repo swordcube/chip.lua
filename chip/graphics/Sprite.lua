@@ -219,9 +219,52 @@ function Sprite:update(delta)
     self.animation:update(delta)
 end
 
+---
+--- @param  newRect  chip.math.Rect
+---
+function Sprite:getScreenBounds(newRect)
+    if not newRect then
+        newRect = Rect:new()
+    end
+    local camX, camY = 0, 0
+    local parentX, parentY = 0, 0
+    if self._parent:is(CanvasLayer) then
+        parentX = self._parent.x
+        parentY = self._parent.y
+    else
+        local cam = Camera.currentCamera
+        if cam then
+            camX = cam.x - (Engine.gameWidth * 0.5)
+            camY = cam.y - (Engine.gameHeight * 0.5)
+        end
+    end
+    newRect:setPosition(self.x + parentX, self.y + parentY)
+    self._scaledOrigin:set(self:getWidth() * self.origin.x, self:getHeight() * self.origin.y)
+
+    newRect.x = newRect.x + (-((camX + parentX) * self.scrollFactor.x) - self.offset.x + (self:getFrameWidth() * self.origin.x) - self._scaledOrigin.x)
+    newRect.y = newRect.y + (-((camY + parentY) * self.scrollFactor.y) - self.offset.y + (self:getFrameHeight() * self.origin.y) - self._scaledOrigin.y)
+
+    newRect:setSize(self:getFrameWidth() * self.scale.x, self:getFrameHeight() * self.scale.y)
+    return newRect:getRotatedBounds(self._rotation, self._scaledOrigin, newRect)
+end
+
 function Sprite:isOnScreen()
-    -- TODO: this fuckin function
-    return true
+    local parentScale = Point:new(1, 1) --- @type chip.math.Point
+    local cam, camZoomX, camZoomY = Camera.currentCamera, 1, 1
+    if cam then
+        camZoomX, camZoomY = cam:getZoom(), cam:getZoom()
+    end
+    if self._parent:is(CanvasLayer) then
+        parentScale:set(self._parent.scale.x, self._parent.scale.y)
+    end
+    local bounds = self:getScreenBounds(self._rect)
+    local camWidth = Engine.gameWidth * (1 - camZoomX)
+    local camHeight = Engine.gameHeight * (1 - camZoomY)
+    return 
+        (bounds.x + bounds.width) > -(Engine.gameWidth + camWidth) and 
+        bounds.x < ((Engine.gameWidth / camZoomX) + camWidth) and
+        (bounds.y + bounds.height) > -(Engine.gameHeight + camHeight) and
+        bounds.y < ((Engine.gameHeight / camZoomY) + camHeight)
 end
 
 ---
@@ -233,7 +276,7 @@ function Sprite:draw()
     end
     local frames, frame = self._frames, self._frame
     local width, height = self:getWidth(), self:getHeight()
-
+    
     if not frames or not frame or not frame.texture then
         return
     end
