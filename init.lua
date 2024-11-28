@@ -2,6 +2,13 @@
 
 io.stdout:setvbuf("no") -- Allows console output to be shown immediately
 
+--- [ SHORTCUTS TO LOVE2D FUNCS ] ---
+
+local ev = love.event
+local gfx = love.graphics
+local tmr = love.timer
+local window = love.window
+
 --- [ BASIC UTIL FUNCS ] ---
 
 local classPath = ...
@@ -52,7 +59,11 @@ Scene = qrequire("chip.core.Scene") --- @type chip.core.Scene
 --- [ GRAPHICS IMPORTS ] ---
 
 Texture = qrequire("chip.graphics.Texture") --- @type chip.graphics.Texture
+Font = qrequire("chip.graphics.Font") --- @type chip.graphics.Font
+
 Sprite = qrequire("chip.graphics.Sprite") --- @type chip.graphics.Sprite
+Text = qrequire("chip.graphics.Text") --- @type chip.graphics.Text
+
 Camera = qrequire("chip.graphics.Camera") --- @type chip.graphics.Camera
 CanvasLayer = qrequire("chip.graphics.CanvasLayer") --- @type chip.graphics.CanvasLayer
 
@@ -84,7 +95,7 @@ local function busySleep(time) -- uses more cpu BUT results in more accurate fps
         return
     end
     local duration = os.clock() + time
-    love.timer.sleep(time)
+    tmr.sleep(time)
     while os.clock() < duration do end
 end
 if (love.filesystem.isFused() or not love.filesystem.getInfo("assets")) and love.filesystem.mountFullPath then
@@ -108,6 +119,93 @@ local Chip = {}
 ---
 Chip.classPath = classPath
 
+local plugins = Engine.plugins
+local function update(dt)
+    for i = 1, #plugins do
+        local plugin = plugins[i] --- @type chip.core.Actor
+        plugin:update(dt)
+    end
+    Engine.currentScene:update(dt)
+end
+local function draw()
+    -- Draw current scene to the game area
+    gfx.push()
+    gfx.setScissor(
+        Engine.scaleMode.offset.x, Engine.scaleMode.offset.y,
+        Engine.scaleMode.gameSize.x, Engine.scaleMode.gameSize.y
+    )
+    gfx.translate(Engine.scaleMode.offset.x, Engine.scaleMode.offset.y)
+    gfx.scale(Engine.scaleMode.scale.x, Engine.scaleMode.scale.y)
+
+    if not Engine.drawPluginsInFront then
+        for i = 1, #Engine.plugins do
+            local plugin = Engine.plugins[i] --- @type chip.core.Actor
+            plugin:draw()
+        end
+    end
+    Engine.currentScene:draw()
+    if Engine.drawPluginsInFront then
+        for i = 1, #Engine.plugins do
+            local plugin = Engine.plugins[i] --- @type chip.core.Actor
+            plugin:draw()
+        end
+    end
+    
+    gfx.setScissor()
+    gfx.pop()
+end
+
+local dt = 0
+local function loop()
+    if ev then
+        ev.pump()
+        for name, a, b, c, d, e, f in ev.poll() do
+            if name == "quit" then
+                if not love.quit or not love.quit() then
+                    return a or 0
+                end
+            end
+            love.handlers[name](a,b,c,d,e,f)
+        end
+    end
+    
+    local focused = window.hasFocus()
+    
+    local cap = (focused and Engine.targetFPS or 10)
+    local capDt = (cap > 0) and 1 / cap or 0
+
+    if tmr then
+        dt = math.min(tmr.step(), math.max(capDt, 0.0416))
+        Engine.deltaTime = dt
+    end
+
+    update(dt)
+
+    if gfx and gfx.isActive() then
+        gfx.origin()
+        gfx.clear(gfx.getBackgroundColor())
+        
+        draw()
+
+        local fpsText = "FPS: " .. ((Engine.targetFPS > 0) and math.min(tmr.getFPS(), Engine.targetFPS) or tmr.getFPS())
+        for i = 1, 4 do
+            gfx.setColor(0, 0, 0, 1)
+            gfx.print(fpsText, 10 + (i * 0.5), 3 + (i * 0.5))
+        end
+        gfx.setColor(1, 1, 1, 1)
+        gfx.print(fpsText, 10, 3)
+
+        gfx.present()
+    end
+
+    if focused then
+        collectgarbage("step")
+    else
+        collectgarbage("collect")
+    end
+    busySleep(capDt - dt)
+end
+
 ---
 --- Initializes chip with some given settings,
 --- specific to your game!
@@ -130,73 +228,6 @@ function Chip.init(settings)
         luaPrint(curFile .. ":" .. curLine .. ": " .. str)
     end
 
-    love.run = function()
-        if love.math then
-            love.math.setRandomSeed(os.time())
-        end
-        if love.load then
-            love.load(love.arg.parseGameArguments(arg), arg)
-        end
-        if love.timer then
-            love.timer.step()
-        end
-    
-        local dt = 0.0
-
-        return function()
-            if love.event then
-                love.event.pump()
-                for name, a, b, c, d, e, f in love.event.poll() do
-                    if name == "quit" then
-                        if not love.quit or not love.quit() then
-                            return a or 0
-                        end
-                    end
-                    love.handlers[name](a,b,c,d,e,f)
-                end
-            end
-            
-            local focused = love.window.hasFocus()
-            
-            local cap = (focused and Engine.targetFPS or 10)
-            local capDt = (cap > 0) and 1 / cap or 0
-
-            if love.timer then
-                dt = math.min(love.timer.step(), math.max(capDt, 0.0416))
-                Engine.deltaTime = dt
-            end
-
-            if love.update then
-                love.update(dt)
-            end
-
-            if love.graphics and love.graphics.isActive() then
-                love.graphics.origin()
-                love.graphics.clear(love.graphics.getBackgroundColor())
-                
-                if love.draw then
-                    love.draw()
-                end
-
-                local fpsText = "FPS: " .. ((Engine.targetFPS > 0) and math.min(love.timer.getFPS(), Engine.targetFPS) or love.timer.getFPS())
-                for i = 1, 4 do
-                    love.graphics.setColor(0, 0, 0, 1)
-                    love.graphics.print(fpsText, 10 + (i * 0.5), 3 + (i * 0.5))
-                end
-                love.graphics.setColor(1, 1, 1, 1)
-                love.graphics.print(fpsText, 10, 3)
-
-                love.graphics.present()
-            end
-
-            if focused then
-                collectgarbage("step")
-            else
-                collectgarbage("collect")
-            end
-            busySleep(capDt - dt)
-        end
-    end
     love.load = function()
         Native.setDarkMode(true)
         Native.forceWindowRedraw()
@@ -215,42 +246,20 @@ function Chip.init(settings)
         Engine.currentScene = settings.initialScene
         Engine.currentScene:init()
     end
-    love.update = function(dt)
-        for i = 1, #Engine.plugins do
-            local plugin = Engine.plugins[i] --- @type chip.core.Actor
-            plugin:update(dt)
-        end
-        Engine.currentScene:update(dt)
-    end
-    love.draw = function()
-        -- Draw current scene to the game area
-        love.graphics.push()
-        love.graphics.setScissor(
-            Engine.scaleMode.offset.x, Engine.scaleMode.offset.y,
-            Engine.scaleMode.gameSize.x, Engine.scaleMode.gameSize.y
-        )
-        love.graphics.translate(Engine.scaleMode.offset.x, Engine.scaleMode.offset.y)
-        love.graphics.scale(Engine.scaleMode.scale.x, Engine.scaleMode.scale.y)
-
-        if not Engine.drawPluginsInFront then
-            for i = 1, #Engine.plugins do
-                local plugin = Engine.plugins[i] --- @type chip.core.Actor
-                plugin:draw()
-            end
-        end
-        Engine.currentScene:draw()
-        if Engine.drawPluginsInFront then
-            for i = 1, #Engine.plugins do
-                local plugin = Engine.plugins[i] --- @type chip.core.Actor
-                plugin:draw()
-            end
-        end
-        
-        love.graphics.setScissor()
-        love.graphics.pop()
-    end
     love.resize = function(width, height)
         Engine.scaleMode:onMeasure(width, height)
+    end
+    love.run = function()
+        if love.math then
+            love.math.setRandomSeed(os.time())
+        end
+        if love.load then
+            love.load(love.arg.parseGameArguments(arg), arg)
+        end
+        if tmr then
+            tmr.step()
+        end
+        return loop
     end
 end
 

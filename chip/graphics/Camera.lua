@@ -1,3 +1,5 @@
+local gfx = love.graphics
+
 ---
 --- @class chip.graphics.Camera : chip.core.Actor2D
 --- 
@@ -60,20 +62,20 @@ function Camera:attach()
     local h2 = Engine.gameHeight * 0.5
     local zoom = self:getZoom()
 
-    love.graphics.push()
-	love.graphics.translate(
+    gfx.push()
+	gfx.translate(
         -(self.x - w2) - (w2 * (zoom - 1)),
         -(self.y - h2) - (h2 * (zoom - 1))
     )
-	love.graphics.scale(zoom)
+	gfx.scale(zoom)
 
-    love.graphics.translate(w2, h2)
-	love.graphics.rotate(self:getRotation())
-    love.graphics.translate(-w2, -h2)
+    gfx.translate(w2, h2)
+	gfx.rotate(self:getRotation())
+    gfx.translate(-w2, -h2)
 end
 
 function Camera:detach()
-    love.graphics.pop()
+    gfx.pop()
 end
 
 --- [ PRIVATE API ] ---

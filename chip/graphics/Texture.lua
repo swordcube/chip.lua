@@ -7,7 +7,7 @@
 --- You should load these from the `Assets` class
 --- under the `chip.utils` package.
 ---
-local Texture = RefCounted:extend("RefCounted", ...)
+local Texture = RefCounted:extend("Texture", ...)
 
 function Texture:constructor()
     Texture.super.constructor(self)

@@ -1,3 +1,5 @@
+local gfx = love.graphics
+
 local SpriteUtil = qrequire("chip.utils.SpriteUtil") --- @type chip.utils.SpriteUtil
 
 local FrameCollection = qrequire("chip.animation.frames.FrameCollection") --- @type chip.animation.frames.FrameCollection
@@ -303,7 +305,7 @@ function Sprite:draw()
 
     local sx = self.scale.x * (self.flipX and -1.0 or 1.0)
     local sy = self.scale.y * (self.flipY and -1.0 or 1.0)
-    love.graphics.draw(
+    gfx.draw(
         frame.texture:getImage(), frame.quad, -- What's actually drawn to the screen
         rx, ry, -- X and Y coordinates
         self:getRotation(), -- Rotation (in radians)

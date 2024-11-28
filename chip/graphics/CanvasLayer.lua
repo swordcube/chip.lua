@@ -1,3 +1,5 @@
+local gfx = love.graphics
+
 ---
 --- @class chip.graphics.CanvasLayer : chip.core.Group
 --- 
@@ -46,20 +48,20 @@ end
 --- Draws all of this canvas layer's members to the screen.
 ---
 function CanvasLayer:draw()
-    love.graphics.push()
-	love.graphics.translate(self.x, self.y)
+    gfx.push()
+	gfx.translate(self.x, self.y)
 
     local w2 = Engine.gameWidth * self.origin.x
     local h2 = Engine.gameHeight * self.origin.y
-	love.graphics.scale(self.scale.x, self.scale.y)
+	gfx.scale(self.scale.x, self.scale.y)
     
-    love.graphics.translate(w2, h2)
-	love.graphics.rotate(self.rotation)
-    love.graphics.translate(-w2, -h2)
+    gfx.translate(w2, h2)
+	gfx.rotate(self.rotation)
+    gfx.translate(-w2, -h2)
     
     CanvasLayer.super.draw(self)
 
-    love.graphics.pop()
+    gfx.pop()
 end
 
 function CanvasLayer:getRotationDegrees()
