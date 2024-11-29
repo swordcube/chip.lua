@@ -1,3 +1,5 @@
+local tmr = love.timer
+
 ---
 --- @class chip.Engine
 ---
@@ -49,6 +51,40 @@ Engine.plugins = {}
 Engine.drawPluginsInFront = true --- @type boolean
 
 ---
+--- A signal that is fired before the game updates.
+---
+Engine.preUpdate = Signal:new() --- @type chip.utils.Signal
+
+---
+--- A signal that is fired after the game updates
+---
+Engine.postUpdate = Signal:new() --- @type chip.utils.Signal
+
+---
+--- A signal that is fired before the game
+--- is drawn to the screen.
+---
+Engine.preDraw = Signal:new() --- @type chip.utils.Signal
+
+---
+--- A signal that is fired after the game
+--- is drawn to the screen.
+---
+Engine.postDraw = Signal:new() --- @type chip.utils.Signal
+
+---
+--- A signal that is fired before the game
+--- switches scenes.
+---
+Engine.preSceneSwitch = Signal:new() --- @type chip.utils.Signal
+
+---
+--- A signal that is fired after the game
+--- switches scenes.
+---
+Engine.postSceneSwitch = Signal:new() --- @type chip.utils.Signal
+
+---
 --- Adds a plugin to the engine.
 ---
 --- @param  plugin  chip.core.Actor  The plugin to add.
@@ -68,5 +104,53 @@ end
 function Engine.removePlugin(plugin)
     table.removeItem(Engine.plugins, plugin)
 end
+
+---
+--- Returns the amount of frames drawn
+--- to the screen in the last second.
+---
+--- @return integer
+---
+function Engine.getCurrentFPS()
+    return Engine._currentFPS
+end
+
+---
+--- Returns the amount of ticks/update calls
+--- ran in the last second.
+---
+--- @return integer
+---
+function Engine.getCurrentTPS()
+    -- This only works because we're not limiting FPS
+    -- via sleeping, since that's too inaccurate.
+
+    -- Instead we are using a simple timer and an if
+    -- statement to do the job, so this effectively
+    -- returns into a ticks per second counter.
+    
+    return tmr.getFPS()
+end
+
+---
+--- @param  newScene  chip.core.Scene
+---
+function Engine.switchScene(newScene)
+    Engine._requestedScene = newScene
+end
+
+--- [ PRIVATE API ] ---
+
+---
+--- @protected
+--- @type chip.core.Scene?
+---
+Engine._requestedScene = nil
+
+---
+--- @protected
+--- @type integer
+---
+Engine._currentFPS = nil
 
 return Engine

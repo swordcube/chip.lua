@@ -1,3 +1,6 @@
+local gfx = love.graphics
+local _gcCount_ = "count"
+
 ---
 --- @class chip.Native
 ---
@@ -42,6 +45,9 @@ function Native.forceWindowRedraw()
     love.window.setMode(w, h, f)
 end
 function Native.setConsoleColors(fg_color, bg_color) end
+function Native.getProcessMemory()
+	return collectgarbage(_gcCount_) + gfx.getStats().texturememory
+end
 
 -----------------------------------------
 -- Don't worry about the stuff below!! --

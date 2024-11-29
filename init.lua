@@ -1,3 +1,5 @@
+---@diagnostic disable: invisible
+
 --- [ BASIC LUA CONFIG ] ---
 
 io.stdout:setvbuf("no") -- Allows console output to be shown immediately
@@ -8,6 +10,12 @@ local ev = love.event
 local gfx = love.graphics
 local tmr = love.timer
 local window = love.window
+
+--- [ STATIC STRINGS ] ---
+
+local _gcStep_ = "step"
+local _gcCount_ = "count"
+local _gcCollect_ = "collect"
 
 --- [ BASIC UTIL FUNCS ] ---
 
@@ -121,11 +129,22 @@ Chip.classPath = classPath
 
 local plugins = Engine.plugins
 local function update(dt)
+    Engine.preUpdate:emit()
+    if Engine._requestedScene then
+        Engine.preSceneSwitch:emit()
+        
+        Engine.currentScene = Engine._requestedScene
+        Engine.currentScene:init()
+        
+        Engine._requestedScene = nil
+        Engine.postSceneSwitch:emit(Engine.currentScene)
+    end
     for i = 1, #plugins do
         local plugin = plugins[i] --- @type chip.core.Actor
         plugin:update(dt)
     end
     Engine.currentScene:update(dt)
+    Engine.postUpdate:emit()
 end
 local function draw()
     -- Draw current scene to the game area
@@ -156,6 +175,30 @@ local function draw()
 end
 
 local dt = 0
+local drawTmr = 999999
+
+local lastDraw = 0.0
+local fpsTimer = 0.0
+
+local drawsPassed = 0
+local currentFPS = 0
+
+local peakMemUsage = 0.0
+
+local fpsFonts = {
+    big = gfx.newFont("assets/fonts/montserrat/semibold.ttf", 16, "light"),
+    small = gfx.newFont("assets/fonts/montserrat/semibold.ttf", 12, "light")
+}
+
+local function drawFPSText(x, y, text, font, color, alpha)
+    for i = 1, 4 do
+        gfx.setColor(0, 0, 0, color.a * alpha)
+        gfx.print(text, font, x + (i * 0.5), y + (i * 0.5))
+    end
+    gfx.setColor(color.r, color.g, color.b, color.a * alpha)
+    gfx.print(text, font, x, y)
+end
+
 local function loop()
     if ev then
         ev.pump()
@@ -178,32 +221,67 @@ local function loop()
         dt = math.min(tmr.step(), math.max(capDt, 0.0416))
         Engine.deltaTime = dt
     end
-
-    update(dt)
-
-    if gfx and gfx.isActive() then
-        gfx.origin()
-        gfx.clear(gfx.getBackgroundColor())
-        
-        draw()
-
-        local fpsText = "FPS: " .. ((Engine.targetFPS > 0) and math.min(tmr.getFPS(), Engine.targetFPS) or tmr.getFPS())
-        for i = 1, 4 do
-            gfx.setColor(0, 0, 0, 1)
-            gfx.print(fpsText, 10 + (i * 0.5), 3 + (i * 0.5))
-        end
-        gfx.setColor(1, 1, 1, 1)
-        gfx.print(fpsText, 10, 3)
-
-        gfx.present()
-    end
-
     if focused then
-        collectgarbage("step")
+        update(dt)
     else
-        collectgarbage("collect")
+        love.timer.sleep(capDt)
     end
-    busySleep(capDt - dt)
+    drawTmr = drawTmr + dt
+    
+    if cap <= 0 or drawTmr >= capDt then
+        if gfx and gfx.isActive() then
+            gfx.origin()
+            gfx.clear(gfx.getBackgroundColor())
+            
+            draw()
+            
+            local memUsage = Native.getProcessMemory()
+            if memUsage > peakMemUsage then
+                peakMemUsage = memUsage
+            end
+            local fpsColor = Color.WHITE
+            if cap > 0 and currentFPS < math.floor(cap * 0.5) then
+                fpsColor = Color.RED
+            end
+            local fpsText = tostring(currentFPS)
+            local smallFPSText = "FPS"
+            drawFPSText(10, 3, fpsText, fpsFonts.big, fpsColor, 1)
+
+            local smallFPSTextX = 10 + fpsFonts.big:getWidth(fpsText) + 5
+            drawFPSText(smallFPSTextX, 7, smallFPSText, fpsFonts.small, fpsColor, 1)
+
+            local smallTPSText = " / " .. tmr.getFPS() .. " TPS"
+            drawFPSText(smallFPSTextX + fpsFonts.small:getWidth(smallFPSText), 7, smallTPSText, fpsFonts.small, fpsColor, 0.5)
+
+            local memText = math.humanizeBytes(memUsage)
+            local memPeakText = " / " .. math.humanizeBytes(peakMemUsage)
+
+            drawFPSText(10, 22, memText, fpsFonts.small, fpsColor, 1)
+            drawFPSText(10 + fpsFonts.small:getWidth(memText), 22, memPeakText, fpsFonts.small, fpsColor, 0.5)
+    
+            gfx.present()
+
+            local drawDt = os.clock() - lastDraw
+            drawsPassed = drawsPassed + 1
+            
+            fpsTimer = fpsTimer + drawDt
+            if fpsTimer >= 1.0 then
+                currentFPS = drawsPassed
+                Engine._currentFPS = currentFPS
+
+                drawsPassed = 0
+                fpsTimer = fpsTimer % 1.0
+            end
+            lastDraw = os.clock()
+        end
+        drawTmr = drawTmr % capDt
+        love.timer.sleep(dt < 0.001 and 0.001 or 0)
+    end
+    if focused then
+        collectgarbage(_gcStep_)
+    else
+        collectgarbage(_gcCollect_)
+    end
 end
 
 ---

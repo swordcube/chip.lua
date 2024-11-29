@@ -5,7 +5,6 @@ local ffi = require("ffi")
 
 local comdlg32 = ffi.load("comdlg32")
 local dwmapi = ffi.load("dwmapi")
-
 local kernel32 = ffi.load("kernel32")
 
 ffi.cdef [[\
@@ -62,6 +61,8 @@ ffi.cdef [[\
 	typedef void* HANDLE;
     typedef HANDLE HCURSOR;
 
+	typedef size_t SIZE_T;
+
 	typedef struct tagRECT {
 		union{
 			struct{
@@ -83,6 +84,21 @@ ffi.cdef [[\
 		};
 	} RECT, *PRECT,  *NPRECT,  *LPRECT;
 
+	typedef struct _PROCESS_MEMORY_COUNTERS {
+		DWORD  cb;
+		DWORD  PageFaultCount;
+		SIZE_T PeakWorkingSetSize;
+		SIZE_T WorkingSetSize;
+		SIZE_T QuotaPeakPagedPoolUsage;
+		SIZE_T QuotaPagedPoolUsage;
+		SIZE_T QuotaPeakNonPagedPoolUsage;
+		SIZE_T QuotaNonPagedPoolUsage;
+		SIZE_T PagefileUsage;
+		SIZE_T PeakPagefileUsage;
+	} PROCESS_MEMORY_COUNTERS;
+
+	typedef const PROCESS_MEMORY_COUNTERS* PPROCESS_MEMORY_COUNTERS;
+
 	HWND FindWindowA(LPCSTR lpClassName, LPCSTR lpWindowName);
 	HWND FindWindowExA(HWND hwndParent, HWND hwndChildAfter, LPCSTR lpszClass, LPCSTR lpszWindow);
 	HWND GetActiveWindow(void);
@@ -99,6 +115,9 @@ ffi.cdef [[\
 
 	HANDLE GetStdHandle(DWORD nStdHandle);
 	BOOL SetConsoleTextAttribute(HANDLE hConsoleOutput, WORD wAttributes);
+
+	HANDLE GetCurrentProcess();
+	BOOL K32GetProcessMemoryInfo(HANDLE hProcess, PPROCESS_MEMORY_COUNTERS ppsmemCounters, DWORD cb);
 ]]
 
 --local Rect = ffi.metatype("RECT", {})
@@ -212,6 +231,14 @@ function Native.setConsoleColors(fg_color, bg_color)
 	end
 	local console = ffi.C.GetStdHandle(Native.STD_OUTPUT_HANDLE)
 	ffi.C.SetConsoleTextAttribute(console, (bg_color * 16) + fg_color)
+end
+
+local pmc_size = ffi.sizeof('PROCESS_MEMORY_COUNTERS')
+
+function Native.getProcessMemory()
+	local ppsmemCounters = ffi.new('PROCESS_MEMORY_COUNTERS[1]')
+	ffi.C.K32GetProcessMemoryInfo(ffi.C.GetCurrentProcess(), ppsmemCounters, pmc_size)
+	return tonumber(ppsmemCounters[0].WorkingSetSize) / 1.5
 end
 
 return Native
