@@ -48,6 +48,9 @@ function Native.setConsoleColors(fg_color, bg_color) end
 function Native.getProcessMemory()
 	return collectgarbage(_gcCount_) + gfx.getStats().texturememory
 end
+function Native.getMonitorRefreshRate()
+	return 60 --- placeholder
+end
 
 -----------------------------------------
 -- Don't worry about the stuff below!! --

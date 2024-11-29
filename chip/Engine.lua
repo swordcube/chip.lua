@@ -37,6 +37,13 @@ Engine.deltaTime = 0.0 --- @type number
 Engine.targetFPS = 60 --- @type integer
 
 ---
+--- Whether or not the framerate of the game
+--- should match the monitor that the window
+--- is currently within.
+---
+Engine.vsync = true
+
+---
 --- A list of every added plugin.
 --- 
 --- Plugins are responsible for running some of
@@ -65,6 +72,18 @@ Engine.postUpdate = Signal:new() --- @type chip.utils.Signal
 --- is drawn to the screen.
 ---
 Engine.preDraw = Signal:new() --- @type chip.utils.Signal
+
+---
+--- A signal that is fired before the current
+--- scene or any plugin is drawn to the screen.
+---
+Engine.preSceneDraw = Signal:new() --- @type chip.utils.Signal
+
+---
+--- A signal that is fired after the current
+--- scene or any plugin drawn to the screen.
+---
+Engine.postSceneDraw = Signal:new() --- @type chip.utils.Signal
 
 ---
 --- A signal that is fired after the game
@@ -151,6 +170,6 @@ Engine._requestedScene = nil
 --- @protected
 --- @type integer
 ---
-Engine._currentFPS = nil
+Engine._currentFPS = 0
 
 return Engine
