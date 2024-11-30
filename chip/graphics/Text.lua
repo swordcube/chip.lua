@@ -1,3 +1,21 @@
+--[[
+	chip.lua: a simple 2D game framework built off of Love2D
+    Copyright (C) 2024  swordcube
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+]]
+
 local gfx = love.graphics
 
 ---
@@ -96,6 +114,10 @@ function Text:constructor(x, y, fieldWidth, contents)
     --- @type love.Canvas?
     ---
     self._canvas = nil
+
+    tex = Texture:new()
+    tex:setImage(gfx.newImage(love.image.newImageData(1, 1)))
+    self:loadTexture(tex)
 end
 
 ---
@@ -348,14 +370,9 @@ function Text:_regenTexture()
     gfx.setCanvas(prevCanvas)
 
     ---
-    --- @type chip.graphics.Texture
+    --- @type chip.graphics.Texture?
     ---
     local tex = self:getTexture()
-    if not tex then
-        tex = Texture:new()
-        tex:setImage(gfx.newImage(love.image.newImageData(1, 1)))
-        self:loadTexture(tex)
-    end
     local img = gfx.newImage(gfx.readbackTexture(self._canvas))
     tex:setImage(img)
 
@@ -373,7 +390,7 @@ function Text:_regenTexture()
     quad:setViewport(0, 0, tex.width, tex.height, tex.width, tex.height)
 end
 
-function Text:dispose()
+function Text:free()
     if self._canvas then
         self._canvas:release()
         self._canvas = nil
@@ -382,7 +399,7 @@ function Text:dispose()
         self._textObj:release()
         self._textObj = nil
     end
-    Text.super.dispose(self)
+    Text.super.free(self)
 end
 
 return Text

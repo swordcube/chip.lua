@@ -1,4 +1,4 @@
-# <img src="./art/logo.png" alt="chip.lua logo" width="24" /> chip.lua
+# <img src="./assets/logo.png" alt="chip.lua logo" width="24" /> chip.lua
 
 > [!NOTE]  
 > This only works for LÖVE 12.0 and above, you can download it from the main [LÖVE GitHub Repository](https://github.com/love2d/love) [Actions](https://github.com/love2d/love/actions).

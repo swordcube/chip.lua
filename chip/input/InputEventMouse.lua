@@ -17,11 +17,29 @@
 ]]
 
 ---
---- @class chip.audio.AudioPlayer : chip.backend.Object
+--- @class chip.input.InputEventMouse : chip.backend.Object
+--- 
+--- A class which represents a mouse input event.
 ---
-local AudioPlayer = Object:extend("AudioPlayer", ...)
+local InputEventMouse = Object:extend("InputEventMouse", ...)
 
-function AudioPlayer:constructor()
+---
+--- @param  x  number
+--- @param  y  number
+---
+function InputEventMouse:constructor(x, y)
+    InputEventMouse.super.constructor(self)
+
+    self._x = x
+    self._y = y
 end
 
-return AudioPlayer
+function InputEventMouse:getX()
+    return self._x
+end
+
+function InputEventMouse:getY()
+    return self._y
+end
+
+return InputEventMouse

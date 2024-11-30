@@ -1,3 +1,21 @@
+--[[
+	chip.lua: a simple 2D game framework built off of Love2D
+    Copyright (C) 2024  swordcube
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+]]
+
 ---
 --- @class chip.core.Group : chip.core.Actor
 --- 
@@ -149,6 +167,19 @@ function Group:move(actor, idx)
     end
     table.removeItem(self._members, actor)
     table.insert(self._members, idx, actor)
+end
+
+---
+--- The function that gets called when
+--- this group receives an input event.
+--- 
+--- @param  event  chip.input.InputEvent
+---
+function Group:input(event)
+    for i = 1, self._length do
+        local actor = self._members[i] --- @type chip.core.Actor
+        actor:input(event)
+    end
 end
 
 ---

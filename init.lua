@@ -1,3 +1,21 @@
+--[[
+	chip.lua: a simple 2D game framework built off of Love2D
+    Copyright (C) 2024  swordcube
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+]]
+
 ---@diagnostic disable: invisible
 
 --- [ BASIC LUA CONFIG ] ---
@@ -91,6 +109,16 @@ Bit = qrequire("chip.utils.Bit") --- @type chip.utils.Bit
 Color = qrequire("chip.utils.Color") --- @type chip.utils.Color
 
 Signal = qrequire("chip.utils.Signal") --- @type chip.utils.Signal
+Save = qrequire("chip.utils.Save") --- @type chip.utils.Save
+
+--- [ INPUT IMPORTS ] ---
+
+InputEvent = qrequire("chip.input.InputEvent") --- @type chip.input.InputEvent
+InputEventKey = qrequire("chip.input.InputEventKey") --- @type chip.input.InputEventKey
+
+InputEventMouse = qrequire("chip.input.InputEventMouse") --- @type chip.input.InputEventMouse
+InputEventMouseButton = qrequire("chip.input.InputEventMouseButton") --- @type chip.input.InputEventMouseButton
+InputEventMouseMotion = qrequire("chip.input.InputEventMouseMotion") --- @type chip.input.InputEventMouseMotion
 
 --- [ GAME IMPORTS ] ---
 
@@ -251,6 +279,46 @@ local function loop()
         collectgarbage(_gcCollect_)
     end
 end
+local function run()
+    if love.math then
+        love.math.setRandomSeed(os.time())
+    end
+    if love.load then
+        love.load(love.arg.parseGameArguments(arg), arg)
+    end
+    if tmr then
+        tmr.step()
+    end
+    return loop
+end
+local function keypressed(key, scancode, repeating)
+    local event = InputEventKey:new(key, scancode, true, repeating)
+    Engine.currentScene:input(event)
+    event:free()
+end
+local function keyreleased(key, scancode)
+    local event = InputEventKey:new(key, scancode, false, false)
+    Engine.currentScene:input(event)
+    event:free()
+end
+local function mousemoved(x, y, dx, dy, _)
+    local event = InputEventMouseMotion:new(x, y, dx, dy)
+    Engine.currentScene:input(event)
+    event:free()
+end
+local function mousepressed(x, y, button, _, _)
+    local event = InputEventMouseButton:new(x, y, true, button)
+    Engine.currentScene:input(event)
+    event:free()
+end
+local function mousereleased(x, y, button, _, _)
+    local event = InputEventMouseButton:new(x, y, false, button)
+    Engine.currentScene:input(event)
+    event:free()
+end
+local function resize(width, height)
+    Engine.scaleMode:onMeasure(width, height)
+end
 
 ---
 --- Initializes chip with some given settings,
@@ -273,7 +341,6 @@ function Chip.init(settings)
         local curLine = debug.getinfo(2, "l").currentline
         luaPrint(curFile .. ":" .. curLine .. ": " .. str)
     end
-
     love.load = function()
         Native.setDarkMode(true)
         Native.forceWindowRedraw()
@@ -292,21 +359,15 @@ function Chip.init(settings)
         Engine.currentScene = settings.initialScene
         Engine.currentScene:init()
     end
-    love.resize = function(width, height)
-        Engine.scaleMode:onMeasure(width, height)
-    end
-    love.run = function()
-        if love.math then
-            love.math.setRandomSeed(os.time())
-        end
-        if love.load then
-            love.load(love.arg.parseGameArguments(arg), arg)
-        end
-        if tmr then
-            tmr.step()
-        end
-        return loop
-    end
+    love.run = run
+    love.resize = resize
+    
+    love.keypressed = keypressed
+    love.keyreleased = keyreleased
+
+    love.mousemoved = mousemoved
+    love.mousepressed = mousepressed
+    love.mousereleased = mousereleased
 end
 
 return Chip

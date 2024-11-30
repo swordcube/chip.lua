@@ -17,11 +17,10 @@
 ]]
 
 ---
---- @class chip.audio.AudioPlayer : chip.backend.Object
+--- @class chip.input.InputEvent : chip.backend.Object
+--- 
+--- A class which represents an input event.
 ---
-local AudioPlayer = Object:extend("AudioPlayer", ...)
+local InputEvent = Object:extend("InputEvent", ...)
 
-function AudioPlayer:constructor()
-end
-
-return AudioPlayer
+return InputEvent

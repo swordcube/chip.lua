@@ -17,32 +17,40 @@
 ]]
 
 ---
---- @class chip.core.Actor2D : chip.core.Actor
----
---- A base class for all of your 2D game objects.
+--- @class chip.input.InputEventKey : chip.backend.Object
 --- 
---- Includes built-in X and Y coordinate properties.
+--- A class which represents a keyboard input event.
 ---
-local Actor2D = Actor:extend("Actor2D", ...)
+local InputEventKey = Object:extend("InputEventKey", ...)
 
-function Actor2D:constructor(x, y)
-    Actor2D.super.constructor(self)
+---
+--- @param  key        string
+--- @param  pressed    boolean
+--- @param  repeating  boolean
+---
+function InputEventKey:constructor(key, scancode, pressed, repeating)
+    InputEventKey.super.constructor(self)
 
-    ---
-    --- The X coordinate of this actor on-screen. (in pixels)
-    ---
-    self.x = x or 0.0 --- @type number
-
-    ---
-    --- The Y coordinate of this actor on-screen. (in pixels)
-    ---
-    self.y = y or 0.0 --- @type number
+    self._key = key
+    self._scancode = scancode
+    self._pressed = pressed
+    self._repeating = repeating
 end
 
-function Actor2D:setPosition(x, y)
-    self.x = x or 0.0
-    self.y = y or 0.0
-    return self
+function InputEventKey:getKey()
+    return self._key
 end
 
-return Actor2D
+function InputEventKey:getScanCode()
+    return self._scancode
+end
+
+function InputEventKey:isPressed()
+    return self._pressed
+end
+
+function InputEventKey:isRepeating()
+    return self._repeating
+end
+
+return InputEventKey
