@@ -1,5 +1,5 @@
 --[[
-	chip.lua: a simple 2D game framework built off of Love2D
+    chip.lua: a simple 2D game framework built off of Love2D
     Copyright (C) 2024  swordcube
 
     This program is free software: you can redistribute it and/or modify
