@@ -22,13 +22,6 @@
 
 io.stdout:setvbuf("no") -- Allows console output to be shown immediately
 
---- [ SHORTCUTS TO LOVE2D FUNCS ] ---
-
-local ev = love.event
-local gfx = love.graphics
-local tmr = love.timer
-local window = love.window
-
 --- [ STATIC STRINGS ] ---
 
 local _gcStep_ = "step"
@@ -45,98 +38,122 @@ local classPath = ...
 --- @return  any
 --- @return  any  loaderdata
 ---
-function qrequire(modname) -- qrequire = quick require
+function crequire(modname) -- crequire = quick require
     if modname == nil or #modname == 0 then
         return require(classPath)
     end
-    return require(classPath .. "." .. modname)
+    return require(classPath .. ".src." .. modname)
 end
 
 --- [ BACKEND IMPORTS ] ---
 
-qrequire("chip.utils.lua.MathUtil")
-qrequire("chip.utils.lua.StringUtil")
-qrequire("chip.utils.lua.TableUtil")
+crequire("utils.lua.MathUtil")
+crequire("utils.lua.StringUtil")
+crequire("utils.lua.TableUtil")
 
-qrequire("chip.libs.autobatch")
+crequire("libs.autobatch")
 
-Class = qrequire("chip.libs.Classic") --- @type chip.libs.Class
-Native = qrequire("chip.native") --- @type chip.Native
+Class = crequire("libs.Classic") --- @type chip.libs.Class
+Native = crequire("native") --- @type chip.Native
 
-Json = qrequire("chip.libs.Json") --- @type chip.libs.Json
-Xml = qrequire("chip.libs.Xml") --- @type chip.libs.Xml
+Json = crequire("libs.Json") --- @type chip.libs.Json
+Xml = crequire("libs.Xml") --- @type chip.libs.Xml
 
-Object = qrequire("chip.backend.Object") --- @type chip.backend.Object
-RefCounted = qrequire("chip.backend.RefCounted") --- @type chip.backend.RefCounted
+Object = crequire("backend.Object") --- @type chip.backend.Object
+RefCounted = crequire("backend.RefCounted") --- @type chip.backend.RefCounted
 
 --- [ MATH IMPORTS ] ---
 
-Point = qrequire("chip.math.Point") --- @type chip.math.Point
-Rect = qrequire("chip.math.Rect") --- @type chip.math.Rect
+Point = crequire("math.Point") --- @type chip.math.Point
+Rect = crequire("math.Rect") --- @type chip.math.Rect
 
 --- [ CORE IMPORTS ] ---
 
-Actor = qrequire("chip.core.Actor") --- @type chip.core.Actor
-Actor2D = qrequire("chip.core.Actor2D") --- @type chip.core.Actor
+Actor = crequire("core.Actor") --- @type chip.core.Actor
+Actor2D = crequire("core.Actor2D") --- @type chip.core.Actor
 
-Group = qrequire("chip.core.Group") --- @type chip.core.Group
-Scene = qrequire("chip.core.Scene") --- @type chip.core.Scene
+Group = crequire("core.Group") --- @type chip.core.Group
+Scene = crequire("core.Scene") --- @type chip.core.Scene
 
 --- [ GRAPHICS IMPORTS ] ---
 
-Texture = qrequire("chip.graphics.Texture") --- @type chip.graphics.Texture
-Font = qrequire("chip.graphics.Font") --- @type chip.graphics.Font
+Texture = crequire("graphics.Texture") --- @type chip.graphics.Texture
+Font = crequire("graphics.Font") --- @type chip.graphics.Font
 
-Sprite = qrequire("chip.graphics.Sprite") --- @type chip.graphics.Sprite
-Text = qrequire("chip.graphics.Text") --- @type chip.graphics.Text
+Sprite = crequire("graphics.Sprite") --- @type chip.graphics.Sprite
+Text = crequire("graphics.Text") --- @type chip.graphics.Text
 
-Camera = qrequire("chip.graphics.Camera") --- @type chip.graphics.Camera
-CanvasLayer = qrequire("chip.graphics.CanvasLayer") --- @type chip.graphics.CanvasLayer
+Backdrop = crequire("graphics.Backdrop") --- @type chip.graphics.Backdrop
 
-BaseScaleMode = qrequire("chip.graphics.scalemodes.BaseScaleMode") --- @type chip.graphics.scalemodes.BaseScaleMode
-RatioScaleMode = qrequire("chip.graphics.scalemodes.RatioScaleMode") --- @type chip.graphics.scalemodes.RatioScaleMode
+Camera = crequire("graphics.Camera") --- @type chip.graphics.Camera
+CanvasLayer = crequire("graphics.CanvasLayer") --- @type chip.graphics.CanvasLayer
+
+BaseScaleMode = crequire("graphics.scalemodes.BaseScaleMode") --- @type chip.graphics.scalemodes.BaseScaleMode
+RatioScaleMode = crequire("graphics.scalemodes.RatioScaleMode") --- @type chip.graphics.scalemodes.RatioScaleMode
 
 --- [ AUDIO IMPORTS ] ---
 
-AudioPlayer = qrequire("chip.audio.AudioPlayer") --- @type chip.audio.AudioPlayer
+AudioBus = crequire("audio.AudioBus") --- @type chip.audio.AudioBus
+
+AudioStream = crequire("audio.AudioStream") --- @type chip.audio.AudioStream
+AudioPlayer = crequire("audio.AudioPlayer") --- @type chip.audio.AudioPlayer
+
+BGM = crequire("audio.BGM") --- @type chip.audio.BGM
+
+--- [ PLUGIN IMPORTS ] ---
+
+TimerManager = crequire("plugins.TimerManager") --- @type chip.plugins.TimerManager
+TweenManager = crequire("plugins.TweenManager") --- @type chip.plugins.TweenManager
+
+--- [ TWEEN IMPORTS ] ---
+
+Ease = crequire("tweens.Ease") --- @type chip.tweens.Ease
+Tween = crequire("tweens.Tween") --- @type chip.tweens.Tween
 
 --- [ UTILITY IMPORTS ] ---
 
-File = qrequire("chip.utils.File") --- @type chip.utils.File
-Assets = qrequire("chip.utils.Assets") --- @type chip.utils.Assets
+File = crequire("utils.File") --- @type chip.utils.File
+Assets = crequire("utils.Assets") --- @type chip.utils.Assets
 
-Bit = qrequire("chip.utils.Bit") --- @type chip.utils.Bit
-Color = qrequire("chip.utils.Color") --- @type chip.utils.Color
+Bit = crequire("utils.Bit") --- @type chip.utils.Bit
+Color = crequire("utils.Color") --- @type chip.utils.Color
 
-Signal = qrequire("chip.utils.Signal") --- @type chip.utils.Signal
-Save = qrequire("chip.utils.Save") --- @type chip.utils.Save
+Signal = crequire("utils.Signal") --- @type chip.utils.Signal
+Save = crequire("utils.Save") --- @type chip.utils.Save
+
+Timer = crequire("utils.Timer") --- @type chip.utils.Timer
+KeyCode = crequire("utils.KeyCode") --- @type chip.utils.KeyCode
 
 --- [ INPUT IMPORTS ] ---
 
-InputEvent = qrequire("chip.input.InputEvent") --- @type chip.input.InputEvent
-InputEventKey = qrequire("chip.input.InputEventKey") --- @type chip.input.InputEventKey
+InputEvent = crequire("input.InputEvent") --- @type chip.input.InputEvent
+InputEventKey = crequire("input.InputEventKey") --- @type chip.input.InputEventKey
 
-InputEventMouse = qrequire("chip.input.InputEventMouse") --- @type chip.input.InputEventMouse
-InputEventMouseButton = qrequire("chip.input.InputEventMouseButton") --- @type chip.input.InputEventMouseButton
-InputEventMouseMotion = qrequire("chip.input.InputEventMouseMotion") --- @type chip.input.InputEventMouseMotion
+InputEventMouse = crequire("input.InputEventMouse") --- @type chip.input.InputEventMouse
+InputEventMouseButton = crequire("input.InputEventMouseButton") --- @type chip.input.InputEventMouseButton
+InputEventMouseMotion = crequire("input.InputEventMouseMotion") --- @type chip.input.InputEventMouseMotion
 
 --- [ GAME IMPORTS ] ---
 
-Engine = qrequire("chip.Engine") --- @type chip.Engine
+Engine = crequire("Engine") --- @type chip.Engine
 
 --- [ CORE ] ---
 
-local function busySleep(time) -- uses more cpu BUT results in more accurate fps
-    if time <= 0 then
-        return
-    end
-    local duration = os.clock() + time
-    tmr.sleep(time)
-    while os.clock() < duration do end
-end
 if (love.filesystem.isFused() or not love.filesystem.getInfo("assets")) and love.filesystem.mountFullPath then
     love.filesystem.mountFullPath(love.filesystem.getSourceBaseDirectory(), "")
 end
+
+function love.window.resize(width, height)
+    local _, _, flags = love.window.getMode()
+    love.window.setMode(width, height, flags)
+end
+
+--- [ SHORTCUTS TO LOVE2D FUNCS ] ---
+
+local ev = love.event
+local gfx = love.graphics
+local tmr = love.timer
+local window = love.window
 
 ---
 --- @class chip.Chip
@@ -159,18 +176,11 @@ local plugins = Engine.plugins
 local function update(dt)
     Engine.preUpdate:emit()
     if Engine._requestedScene then
-        Engine.preSceneSwitch:emit()
-        
-        Engine.currentScene = Engine._requestedScene
-        Engine.currentScene:init()
-        
-        Engine._requestedScene = nil
-        Engine.postSceneSwitch:emit(Engine.currentScene)
+        Engine._switchScene()
     end
-    for i = 1, #plugins do
-        local plugin = plugins[i] --- @type chip.core.Actor
-        plugin:update(dt)
-    end
+    BGM.update(dt)
+    plugins:update(dt)
+
     Engine.currentScene:update(dt)
     Engine.postUpdate:emit()
 end
@@ -186,21 +196,21 @@ local function draw()
     gfx.translate(Engine.scaleMode.offset.x, Engine.scaleMode.offset.y)
     gfx.scale(Engine.scaleMode.scale.x, Engine.scaleMode.scale.y)
 
+    local color = Engine.clearColor
+    gfx.setColor(color.r, color.g, color.b, color.a)
+
+    gfx.rectangle("fill", 0, 0, Engine.gameWidth, Engine.gameHeight)
+    gfx.setColor(1, 1, 1, 1)
+
     Engine.preSceneDraw:emit()
 
     if not Engine.drawPluginsInFront then
-        for i = 1, #Engine.plugins do
-            local plugin = Engine.plugins[i] --- @type chip.core.Actor
-            plugin:draw()
-        end
+        plugins:draw()
     end
     Engine.currentScene:draw()
-
+    
     if Engine.drawPluginsInFront then
-        for i = 1, #Engine.plugins do
-            local plugin = Engine.plugins[i] --- @type chip.core.Actor
-            plugin:draw()
-        end
+        plugins:draw()
     end
     Engine.postSceneDraw:emit()
     
@@ -219,6 +229,8 @@ local fpsTimer = 0.0
 local drawsPassed = 0
 local currentFPS = 0
 
+local wasFocused = true
+
 local function loop()
     if ev then
         ev.pump()
@@ -233,7 +245,14 @@ local function loop()
     end
     
     local focused = window.hasFocus()
-    
+    if wasFocused ~= focused then
+        if focused then
+            Engine.onFocusGained:emit()
+        else
+            Engine.onFocusLost:emit()
+        end
+        wasFocused = focused
+    end
     local cap = (focused and (Engine.vsync and Native.getMonitorRefreshRate() or Engine.targetFPS) or 10)
     local capDt = (cap > 0) and 1 / cap or 0
 
@@ -291,33 +310,42 @@ local function run()
     end
     return loop
 end
+local function processInputEvent(event)
+    Engine.currentScene:input(event)
+    Engine.onInputReceived:emit(event)
+end
 local function keypressed(key, scancode, repeating)
     local event = InputEventKey:new(key, scancode, true, repeating)
-    Engine.currentScene:input(event)
+    processInputEvent(event)
     event:free()
 end
 local function keyreleased(key, scancode)
     local event = InputEventKey:new(key, scancode, false, false)
-    Engine.currentScene:input(event)
+    processInputEvent(event)
     event:free()
 end
 local function mousemoved(x, y, dx, dy, _)
     local event = InputEventMouseMotion:new(x, y, dx, dy)
-    Engine.currentScene:input(event)
+    processInputEvent(event)
     event:free()
 end
 local function mousepressed(x, y, button, _, _)
     local event = InputEventMouseButton:new(x, y, true, button)
-    Engine.currentScene:input(event)
+    processInputEvent(event)
     event:free()
 end
 local function mousereleased(x, y, button, _, _)
     local event = InputEventMouseButton:new(x, y, false, button)
-    Engine.currentScene:input(event)
+    processInputEvent(event)
     event:free()
 end
 local function resize(width, height)
     Engine.scaleMode:onMeasure(width, height)
+    Engine.onWindowResize:emit(width, height)
+end
+local function quit()
+    Engine.onQuit:emit()
+    return Engine.onQuit._cancelled
 end
 
 ---
@@ -345,18 +373,45 @@ function Chip.init(settings)
         Native.setDarkMode(true)
         Native.forceWindowRedraw()
 
+        local screenWidth = Native.getScreenWidth()
+        local screenHeight = Native.getScreenHeight()
+
+        local scaleFactor = (screenWidth > screenHeight) and ((screenHeight * 0.8) / settings.gameHeight) or ((screenWidth * 0.8) / settings.gameWidth);
+        if scaleFactor < 1 then
+            local windowWidth = math.floor(scaleFactor * settings.gameWidth)
+            local windowHeight = math.floor(scaleFactor * settings.gameHeight)
+    
+            love.window.resize(
+                math.floor(scaleFactor * settings.gameWidth),
+                math.floor(scaleFactor * settings.gameHeight)
+            )
+            love.window.setPosition(
+                math.floor((screenWidth - windowWidth) * 0.5),
+                math.floor((screenHeight - windowHeight) * 0.5)
+            )
+        end
         if settings.initialScene == nil then
             settings.initialScene = Scene:new()
         end
+        TimerManager.global = TimerManager:new()
+        Engine.plugins:add(TimerManager.global)
+
+        TweenManager.global = TweenManager:new()
+        Engine.plugins:add(TweenManager.global)
+
         Engine.gameWidth = settings.gameWidth
         Engine.gameHeight = settings.gameHeight
-
+        
         Engine.targetFPS = settings.targetFPS
 
         Engine.scaleMode = RatioScaleMode:new()
         Engine.scaleMode:onMeasure(settings.gameWidth, settings.gameHeight)
 
-        Engine.currentScene = settings.initialScene
+        if settings.showSplashScreen then
+            Engine.currentScene = crequire("SplashScene"):new(settings.initialScene)
+        else
+            Engine.currentScene = settings.initialScene
+        end
         Engine.currentScene:init()
     end
     love.run = run
@@ -368,6 +423,8 @@ function Chip.init(settings)
     love.mousemoved = mousemoved
     love.mousepressed = mousepressed
     love.mousereleased = mousereleased
+
+    love.quit = quit
 end
 
 return Chip
