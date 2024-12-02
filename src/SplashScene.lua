@@ -223,10 +223,6 @@ function SplashScene:init()
                 blueStrip:free()
             end)
         end)
-
-        local t4 = Timer:new()
-        t4:start(0.85, function(_)
-        end)
     end)
 end
 
