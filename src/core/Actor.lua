@@ -149,6 +149,7 @@ function Actor:free()
     if self._parent then
         self._parent:remove(self)
     end
+    Actor.super.free(self)
 end
 
 return Actor

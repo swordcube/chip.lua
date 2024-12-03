@@ -24,7 +24,6 @@ local ffi = require("ffi")
 local comdlg32 = ffi.load("comdlg32")
 local dwmapi = ffi.load("dwmapi")
 local kernel32 = ffi.load("kernel32")
-local SDL3 = ffi.load("SDL3")
 
 ffi.cdef [[\
 	// windows api

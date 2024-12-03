@@ -209,7 +209,7 @@ function AnimationController:add(name, frames, fps, loop)
     for _, num in pairs(frames) do
         table.insert(datas, atlas.frames[num])
     end
-    local anim = AnimationData:new(name, datas, fps, loop and loop or true)
+    local anim = AnimationData:new(name, datas, fps, loop ~= nil and loop or true)
     self._animations[name] = anim
 end
 
@@ -236,7 +236,7 @@ function AnimationController:addByPrefix(name, prefix, fps, loop)
         print("Failed to add animation called " .. name .. " since no frames were found")
         return
     end
-    local anim = AnimationData:new(name, __frames, fps, loop and loop or true)
+    local anim = AnimationData:new(name, __frames, fps, loop ~= nil and loop or true)
     self._animations[name] = anim
 end
 
@@ -268,7 +268,7 @@ function AnimationController:addByIndices(name, prefix, indices, fps, loop)
     for _, num in ipairs(indices) do
         table.insert(datas, __frames[num])
     end
-    local anim = AnimationData:new(name, datas, fps, loop and loop or true)
+    local anim = AnimationData:new(name, datas, fps, loop ~= nil and loop or true)
     self._animations[name] = anim
 end
 

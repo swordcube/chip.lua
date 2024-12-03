@@ -376,14 +376,16 @@ function Chip.init(settings)
         local screenWidth = Native.getScreenWidth()
         local screenHeight = Native.getScreenHeight()
 
+        local prevWindowWidth, prevWindowHeight, _ = love.window.getMode()
+
         local scaleFactor = (screenWidth > screenHeight) and ((screenHeight * 0.8) / settings.gameHeight) or ((screenWidth * 0.8) / settings.gameWidth);
         if scaleFactor < 1 then
-            local windowWidth = math.floor(scaleFactor * settings.gameWidth)
-            local windowHeight = math.floor(scaleFactor * settings.gameHeight)
+            local windowWidth = math.floor(scaleFactor * prevWindowWidth)
+            local windowHeight = math.floor(scaleFactor * prevWindowHeight)
     
             love.window.resize(
-                math.floor(scaleFactor * settings.gameWidth),
-                math.floor(scaleFactor * settings.gameHeight)
+                math.floor(scaleFactor * prevWindowWidth),
+                math.floor(scaleFactor * prevWindowHeight)
             )
             love.window.setPosition(
                 math.floor((screenWidth - windowWidth) * 0.5),

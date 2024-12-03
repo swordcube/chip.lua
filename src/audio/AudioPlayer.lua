@@ -309,7 +309,7 @@ function AudioPlayer:setVolume(newVolume)
     self._volume = newVolume
     local sources = self._sources
     for i = 1, #sources do
-        local source = sources[i]
+        local source = sources[i] --- @type love.Source
         if source then
             local masterBus = AudioBus.master
             local mult = masterBus:getVolume()
@@ -319,6 +319,7 @@ function AudioPlayer:setVolume(newVolume)
             if masterBus:isMuted() then
                 mult = 0
             end
+            print(self._volume)
             source:setVolume(self._volume * mult)
         end
     end
@@ -333,8 +334,12 @@ end
 ---
 function AudioPlayer:setPitch(newPitch)
     self._pitch = newPitch
-    if self._source then
-        self._source:setPitch(self._pitch)
+    local sources = self._sources
+    for i = 1, #sources do
+        local source = sources[i] --- @type love.Source
+        if source then
+            source:setPitch(self._pitch)
+        end
     end
 end
 
@@ -347,8 +352,12 @@ end
 ---
 function AudioPlayer:setLooping(newLooping)
     self._looping = newLooping
-    if self._source then
-        self._source:setLooping(newLooping)
+    local sources = self._sources
+    for i = 1, #sources do
+        local source = sources[i] --- @type love.Source
+        if source then
+            source:setLooping(self._looping)
+        end
     end
 end
 

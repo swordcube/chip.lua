@@ -45,7 +45,7 @@ function SplashScene:init()
     self.bg:screenCenter("xy")
     self:add(self.bg)
 
-    self.backdrop = Backdrop:new(0, 0, 15, 15) --- @type chip.graphics.Backdrop
+    self.backdrop = Backdrop:new(0, 0, math.floor(Engine.gameWidth / 64), math.floor(Engine.gameHeight / 64)) --- @type chip.graphics.Backdrop
     self.backdrop:loadTexture(getImagePath("love_logo_heart_small.png"))
     self.backdrop.spacing:set(20, 20)
     self.backdrop.velocity:set(-60, -60)

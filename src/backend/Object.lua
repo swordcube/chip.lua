@@ -23,6 +23,13 @@
 ---
 local Object = Class:extend("Object", ...)
 
+function Object:constructor()
+    ---
+    --- @protected
+    ---
+    self._freed = false --- @type boolean
+end
+
 ---
 --- Frees this object from memory immediately.
 --- 
@@ -30,6 +37,7 @@ local Object = Class:extend("Object", ...)
 --- after this is called!
 ---
 function Object:free()
+    self._freed = true
 end
 
 return Object
