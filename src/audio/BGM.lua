@@ -43,6 +43,7 @@ function BGM.play(stream, looping)
     looping = looping or true
 
     player:load(stream)
+    player:setLooping(looping)
     player:play()
 end
 

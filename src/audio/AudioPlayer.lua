@@ -319,7 +319,6 @@ function AudioPlayer:setVolume(newVolume)
             if masterBus:isMuted() then
                 mult = 0
             end
-            print(self._volume)
             source:setVolume(self._volume * mult)
         end
     end
