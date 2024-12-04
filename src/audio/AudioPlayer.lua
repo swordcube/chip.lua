@@ -479,8 +479,9 @@ end
 function AudioPlayer:free()
     local sources = self._sources
     for i = 1, #sources do
-        local source = sources[i]
+        local source = sources[i] --- @type love.Source
         if source then
+            source:stop()
             source:release()
         end
     end

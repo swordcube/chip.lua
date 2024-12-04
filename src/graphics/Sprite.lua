@@ -408,7 +408,7 @@ function Sprite:draw()
     local rx, ry, sx, sy, otx, oty, frame = self:getRenderingInfo()
 
     local pr, pg, pb, pa = love.graphics.getColor()
-    love.graphics.setColor(self._tint.r, self._tint.g, self._tint.b, self._alpha)
+    gfx.setColor(self._tint.r, self._tint.g, self._tint.b, self._alpha)
 
     local img = frame.texture:getImage()
     local prevFilterMin, prevFilterMag, prevFilterAns = img:getFilter()
@@ -424,7 +424,7 @@ function Sprite:draw()
         otx, oty -- X and Y rotation origin
     )
     img:setFilter(prevFilterMin, prevFilterMag, prevFilterAns)
-    love.graphics.setColor(pr, pg, pb, pa)
+    gfx.setColor(pr, pg, pb, pa)
 end
 
 function Sprite:getFrameWidth()

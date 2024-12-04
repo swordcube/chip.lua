@@ -116,7 +116,10 @@ function Text:constructor(x, y, fieldWidth, contents)
     self._canvas = nil
 
     tex = Texture:new()
-    tex:setImage(gfx.newImage(love.image.newImageData(1, 1)))
+    
+    local imgData = love.image.newImageData(1, 1)
+    tex:setImage(gfx.newImage(imgData), imgData)
+
     self:loadTexture(tex)
 end
 
@@ -373,8 +376,10 @@ function Text:_regenTexture()
     --- @type chip.graphics.Texture?
     ---
     local tex = self:getTexture()
-    local img = gfx.newImage(gfx.readbackTexture(self._canvas))
-    tex:setImage(img)
+    local imgData = gfx.readbackTexture(self._canvas)
+
+    local img = gfx.newImage(imgData)
+    tex:setImage(img, imgData)
 
     ---
     --- @type chip.animation.frames.FrameData

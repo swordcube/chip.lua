@@ -40,6 +40,9 @@ function InputEventMouseButton:isPressed()
     return self._pressed
 end
 
+---
+--- @return "left"|"right"|"middle"|"unknown"
+---
 function InputEventMouseButton:getButton()
     if self._button == 1 then
         return "left"

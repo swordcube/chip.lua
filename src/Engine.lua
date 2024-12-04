@@ -216,6 +216,8 @@ function Engine._switchScene()
     if Engine.currentScene then
         Engine.currentScene:free()
     end
+    Camera.currentCamera = nil
+    
     Engine.currentScene = Engine._requestedScene
     Engine._requestedScene = nil
     

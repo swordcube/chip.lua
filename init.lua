@@ -91,6 +91,8 @@ CanvasLayer = crequire("graphics.CanvasLayer") --- @type chip.graphics.CanvasLay
 BaseScaleMode = crequire("graphics.scalemodes.BaseScaleMode") --- @type chip.graphics.scalemodes.BaseScaleMode
 RatioScaleMode = crequire("graphics.scalemodes.RatioScaleMode") --- @type chip.graphics.scalemodes.RatioScaleMode
 
+FlickerEffect = crequire("graphics.effects.FlickerEffect") --- @type chip.graphics.effects.FlickerEffect
+
 --- [ AUDIO IMPORTS ] ---
 
 AudioBus = crequire("audio.AudioBus") --- @type chip.audio.AudioBus
@@ -112,6 +114,8 @@ Tween = crequire("tweens.Tween") --- @type chip.tweens.Tween
 
 --- [ UTILITY IMPORTS ] ---
 
+Pool = crequire("utils.Pool") --- @type chip.utils.Pool
+
 File = crequire("utils.File") --- @type chip.utils.File
 Assets = crequire("utils.Assets") --- @type chip.utils.Assets
 
@@ -126,12 +130,16 @@ KeyCode = crequire("utils.KeyCode") --- @type chip.utils.KeyCode
 
 --- [ INPUT IMPORTS ] ---
 
+Input = crequire("input.Input") --- @type chip.input.Input
+InputState = crequire("input.InputState") --- @type chip.input.InputState
+
 InputEvent = crequire("input.InputEvent") --- @type chip.input.InputEvent
 InputEventKey = crequire("input.InputEventKey") --- @type chip.input.InputEventKey
 
 InputEventMouse = crequire("input.InputEventMouse") --- @type chip.input.InputEventMouse
 InputEventMouseButton = crequire("input.InputEventMouseButton") --- @type chip.input.InputEventMouseButton
 InputEventMouseMotion = crequire("input.InputEventMouseMotion") --- @type chip.input.InputEventMouseMotion
+InputEventMouseScroll = crequire("input.InputEventMouseScroll") --- @type chip.input.InputEventMouseScroll
 
 --- [ GAME IMPORTS ] ---
 
@@ -195,7 +203,7 @@ local function draw()
     )
     gfx.translate(Engine.scaleMode.offset.x, Engine.scaleMode.offset.y)
     gfx.scale(Engine.scaleMode.scale.x, Engine.scaleMode.scale.y)
-
+    
     local color = Engine.clearColor
     gfx.setColor(color.r, color.g, color.b, color.a)
 
@@ -329,6 +337,11 @@ local function mousemoved(x, y, dx, dy, _)
     processInputEvent(event)
     event:free()
 end
+local function wheelmoved(x, y)
+    local event = InputEventMouseScroll:new(x, y)
+    processInputEvent(event)
+    event:free()
+end
 local function mousepressed(x, y, button, _, _)
     local event = InputEventMouseButton:new(x, y, true, button)
     processInputEvent(event)
@@ -415,6 +428,7 @@ function Chip.init(settings)
             Engine.currentScene = settings.initialScene
         end
         Engine.currentScene:init()
+        Input.init()
     end
     love.run = run
     love.resize = resize
@@ -423,6 +437,8 @@ function Chip.init(settings)
     love.keyreleased = keyreleased
 
     love.mousemoved = mousemoved
+    love.wheelmoved = wheelmoved
+    
     love.mousepressed = mousepressed
     love.mousereleased = mousereleased
 

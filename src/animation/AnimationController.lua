@@ -167,7 +167,6 @@ function AnimationController:update(delta)
     if self._finished or self._curAnim == nil then
         return
     end
-
     self._elapsedTime = self._elapsedTime + delta
 
     if self._elapsedTime < (1 / self._curAnim.fps) then
@@ -207,9 +206,13 @@ function AnimationController:add(name, frames, fps, loop)
     end
     local datas = {}
     for _, num in pairs(frames) do
-        table.insert(datas, atlas.frames[num])
+        table.insert(datas, atlas:getFrames()[num])
     end
-    local anim = AnimationData:new(name, datas, fps, loop ~= nil and loop or true)
+    local looping = true
+    if loop ~= nil then
+        looping = loop
+    end
+    local anim = AnimationData:new(name, datas, fps, looping)
     self._animations[name] = anim
 end
 
@@ -236,7 +239,11 @@ function AnimationController:addByPrefix(name, prefix, fps, loop)
         print("Failed to add animation called " .. name .. " since no frames were found")
         return
     end
-    local anim = AnimationData:new(name, __frames, fps, loop ~= nil and loop or true)
+    local looping = true
+    if loop ~= nil then
+        looping = loop
+    end
+    local anim = AnimationData:new(name, __frames, fps, looping)
     self._animations[name] = anim
 end
 
@@ -255,7 +262,7 @@ function AnimationController:addByIndices(name, prefix, indices, fps, loop)
         return
     end
     local __frames = {}
-    for _, data in ipairs(atlas.frames) do
+    for _, data in ipairs(atlas:getFrames()) do
         if string.startsWith(data.name, prefix) then
             table.insert(__frames, data)
         end
@@ -268,7 +275,11 @@ function AnimationController:addByIndices(name, prefix, indices, fps, loop)
     for _, num in ipairs(indices) do
         table.insert(datas, __frames[num])
     end
-    local anim = AnimationData:new(name, datas, fps, loop ~= nil and loop or true)
+    local looping = true
+    if loop ~= nil then
+        looping = loop
+    end
+    local anim = AnimationData:new(name, datas, fps, looping) --- @type chip.animation.AnimationData
     self._animations[name] = anim
 end
 

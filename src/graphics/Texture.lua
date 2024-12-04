@@ -45,9 +45,18 @@ function Texture:constructor()
     --- @type love.Image
     ---
     self._image = nil
+
+    ---
+    --- @protected
+    --- @type love.ImageData
+    ---
+    self._imageData = nil
 end
 
 function Texture:free()
+    self._imageData:release()
+    self._imageData = nil
+
     self._image:release()
     self._image = nil
 
@@ -66,12 +75,15 @@ function Texture:getImage()
 end
 
 ---
---- @param  val  love.Image
+--- @param  image      love.Image
+--- @param  imageData  love.ImageData
 ---
-function Texture:setImage(val)
-    self._image = val
-    self.width = val:getWidth()
-    self.height = val:getHeight()
+function Texture:setImage(image, imageData)
+    self._image = image
+    self._imageData = imageData
+
+    self.width = self._image:getWidth()
+    self.height = self._image:getHeight()
 end
 
 --- [ PRIVATE API ] ---
