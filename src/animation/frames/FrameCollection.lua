@@ -60,7 +60,7 @@ function FrameCollection.fromTexture(texture)
     --- @type chip.animation.frames.FrameCollection
     ---
     local atlas = FrameCollection:new(tex)
-    table.insert(atlas._frames, FrameData:new(
+    table.insert(atlas:getFrames(), FrameData:new(
         "#_TEXTURE_",
         0, 0, 0, 0,
         tex.width, tex.height,

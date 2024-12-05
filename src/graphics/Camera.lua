@@ -37,8 +37,8 @@ Camera.currentCamera = nil --- @type chip.graphics.Camera
 function Camera:constructor()
     Camera.super.constructor(self)
 
-    self.x = Engine.gameWidth * 0.5
-    self.y = Engine.gameHeight * 0.5
+    self._x = Engine.gameWidth * 0.5
+    self._y = Engine.gameHeight * 0.5
 
     ---
     --- @protected
@@ -49,6 +49,56 @@ function Camera:constructor()
     --- @protected
     ---
     self._rotation = 0.0 --- @type number
+
+    ---
+    --- @protected
+    ---
+    self._smoothing = 0.0 --- @type number
+
+    ---
+    --- @protected
+    ---
+    self._smoothedX = 0.0 --- @type number
+
+    ---
+    --- @protected
+    ---
+    self._smoothedY = 0.0 --- @type number
+end
+
+---
+--- Returns the X coordinate of the camera, as if it
+--- had instantly snapped to it's destination.
+---
+function Camera:getTargetX()
+    return self._x
+end
+
+---
+--- Returns the Y coordinate of the camera, as if it
+--- had instantly snapped to it's destination.
+---
+function Camera:getTargetY()
+    return self._y
+end
+
+function Camera:snapToTargetPos()
+    self._smoothedX = self._x
+    self._smoothedY = self._y
+end
+
+function Camera:getX()
+    if self._smoothing > 0.0 then
+        return self._smoothedX
+    end
+    return self._x
+end
+
+function Camera:getY()
+    if self._smoothing > 0.0 then
+        return self._smoothedY
+    end
+    return self._y
 end
 
 function Camera:getZoom()
@@ -75,6 +125,23 @@ function Camera:setRotationDegrees(val)
     self._rotation = math.rad(val)
 end
 
+function Camera:getSmoothing()
+    return self._smoothing
+end
+
+function Camera:setSmoothing(val)
+    self._smoothing = val
+end
+
+function Camera:update(dt)
+    Camera.super.update(self, dt)
+
+    if self._smoothing > 0.0 then
+        self._smoothedX = math.lerp(self._smoothedX, self._x, dt * self._smoothing)
+        self._smoothedY = math.lerp(self._smoothedY, self._y, dt * self._smoothing)
+    end
+end
+
 function Camera:attach()
     local w2 = Engine.gameWidth * 0.5
     local h2 = Engine.gameHeight * 0.5
@@ -82,8 +149,8 @@ function Camera:attach()
 
     gfx.push()
 	gfx.translate(
-        -(self.x - w2) - (w2 * (zoom - 1)),
-        -(self.y - h2) - (h2 * (zoom - 1))
+        -(w2 * (zoom - 1)),
+        -(h2 * (zoom - 1))
     )
 	gfx.scale(zoom)
 
@@ -94,6 +161,31 @@ end
 
 function Camera:detach()
     gfx.pop()
+end
+
+function Camera:makeCurrent()
+    Camera.currentCamera = self
+end
+
+---
+--- @param  rect  chip.math.Rect?  The rectangle to apply the values to. If not specified, a new rectangle will be created instead.
+---
+--- @return chip.math.Rect
+---
+function Camera:getScreenRect(rect)
+    if not rect then
+        rect = Rect:new()
+    end
+    local w = Engine.gameWidth
+    local h = Engine.gameHeight
+    
+    local zoom = self:getZoom()
+    return rect:set(
+        w * (zoom - 1),
+        h * (zoom - 1),
+        math.abs(w / zoom),
+        math.abs(h / zoom)
+    )
 end
 
 --- [ PRIVATE API ] ---

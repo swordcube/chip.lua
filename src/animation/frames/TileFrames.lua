@@ -46,7 +46,7 @@ function TileFrames.fromTexture(texture, tileSize)
 
     for j = 1, numRows do
         for i = 1, numCols do
-            table.insert(atlas.frames, FrameData:new(
+            table.insert(atlas:getFrames(), FrameData:new(
                 "frame",
                 (i - 1) * tileSize.x, (j - 1) * tileSize.y,
                 0, 0, tileSize.x, tileSize.y,

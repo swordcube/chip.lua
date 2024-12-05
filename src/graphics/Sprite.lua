@@ -289,52 +289,31 @@ function Sprite:update(delta)
     self.animation:update(delta)
 end
 
----
---- @param  newRect  chip.math.Rect
----
-function Sprite:getScreenBounds(newRect)
-    if not newRect then
-        newRect = Rect:new()
-    end
-    local camX, camY = 0, 0
-    local parentX, parentY = 0, 0
-    if self._parent and self._parent:is(CanvasLayer) then
-        parentX = self._parent:getX()
-        parentY = self._parent:getY()
-    else
-        local cam = Camera.currentCamera
-        if cam then
-            camX = cam.x - (Engine.gameWidth * 0.5)
-            camY = cam.y - (Engine.gameHeight * 0.5)
-        end
-    end
-    newRect:setPosition(self._x + parentX, self._y + parentY)
-    self._scaledOrigin:set(self:getWidth() * self.origin.x, self:getHeight() * self.origin.y)
-
-    newRect.x = newRect.x + (-((camX + parentX) * self.scrollFactor.x) - self.offset.x + (self:getFrameWidth() * self.origin.x) - self._scaledOrigin.x)
-    newRect.y = newRect.y + (-((camY + parentY) * self.scrollFactor.y) - self.offset.y + (self:getFrameHeight() * self.origin.y) - self._scaledOrigin.y)
-
-    newRect:setSize(self:getFrameWidth() * self.scale.x, self:getFrameHeight() * self.scale.y)
-    return newRect:getRotatedBounds(self._rotation, self._scaledOrigin, newRect)
-end
-
 function Sprite:isOnScreen()
-    local parentScale = Point:new(1, 1) --- @type chip.math.Point
-    local cam, camZoomX, camZoomY = Camera.currentCamera, 1, 1
-    if cam then
-        camZoomX, camZoomY = cam:getZoom(), cam:getZoom()
+    local cam = Camera.currentCamera
+
+    local p = self._parent
+    local isOnCanvasLayer = false
+    
+    while p do
+        if p:is(CanvasLayer) and not p:is(Scene) then
+            isOnCanvasLayer = true
+            break
+        end
+        p = p._parent
     end
-    if self._parent and self._parent:is(CanvasLayer) then
-        parentScale:set(self._parent.scale.x, self._parent.scale.y)
+    local rx, ry, sx, sy, otx, oty, _ = self:getRenderingInfo()
+    rx = rx - (otx * math.abs(sx))
+    ry = ry - (oty * math.abs(sy))
+
+    if cam and not isOnCanvasLayer then
+        local rect = cam:getScreenRect()
+        return (
+            (rx + self:getWidth()) > rect.x and rx < (rect.x + rect.width) and
+            (ry + self:getHeight()) > rect.y and ry < (rect.y + rect.height)
+        )
     end
-    local bounds = self:getScreenBounds(self._rect)
-    local camWidth = Engine.gameWidth * (1 - camZoomX)
-    local camHeight = Engine.gameHeight * (1 - camZoomY)
-    return 
-        (bounds.x + bounds.width) > -(Engine.gameWidth + camWidth) and 
-        bounds.x < ((Engine.gameWidth / camZoomX) + camWidth) and
-        (bounds.y + bounds.height) > -(Engine.gameHeight + camHeight) and
-        bounds.y < ((Engine.gameHeight / camZoomY) + camHeight)
+    return true
 end
 
 ---
@@ -359,9 +338,6 @@ end
 --- @return  chip.animation.frames.FrameData?  frame  The frame that is being rendered onto this sprite.
 ---
 function Sprite:getRenderingInfo()
-    if not self:isOnScreen() then
-        return 0, 0, 0, 0, 0, 0, nil
-    end
     local frames, frame = self._frames, self._frame
     local width, height = self:getWidth(), self:getHeight()
     local frameWidth, frameHeight = self:getFrameWidth(), self:getFrameHeight()
@@ -382,13 +358,24 @@ function Sprite:getRenderingInfo()
     offx = offx - (frame.offset.x * (self.scale.x < 0 and -1 or 1))
     offy = offy - (frame.offset.y * (self.scale.y < 0 and -1 or 1))
 
-    -- TODO: maybe have some kind of ParallaxLayer instead of this
-    local cam = Camera.currentCamera
-    if cam then
-        offx = offx - ((cam.x - (Engine.gameWidth * 0.5)) * self.scrollFactor.x)
-        offy = offy - ((cam.y - (Engine.gameHeight * 0.5)) * self.scrollFactor.y)
-    end
+    local p = self._parent
+    local isOnCanvasLayer = false
 
+    while p do
+        if p:is(CanvasLayer) and not p:is(Scene) then
+            isOnCanvasLayer = true
+            break
+        end
+        p = p._parent
+    end
+    if not isOnCanvasLayer then
+        -- TODO: maybe have some kind of ParallaxLayer instead of this
+        local cam = Camera.currentCamera
+        if cam then
+            offx = offx - ((cam:getX() - (Engine.gameWidth * 0.5)) * self.scrollFactor.x)
+            offy = offy - ((cam:getY() - (Engine.gameHeight * 0.5)) * self.scrollFactor.y)
+        end
+    end
     rx = rx + ((offx * math.abs(self.scale.x)) * self._cosRotation + (offy * math.abs(self.scale.y)) * -self._sinRotation)
     ry = ry + ((offx * math.abs(self.scale.x)) * self._sinRotation + (offy * math.abs(self.scale.y)) * self._cosRotation)
 
@@ -403,6 +390,7 @@ end
 ---
 function Sprite:draw()
     if not self:isOnScreen() then
+        print("balls")
         return
     end
     local rx, ry, sx, sy, otx, oty, frame = self:getRenderingInfo()

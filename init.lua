@@ -128,6 +128,10 @@ Save = crequire("utils.Save") --- @type chip.utils.Save
 Timer = crequire("utils.Timer") --- @type chip.utils.Timer
 KeyCode = crequire("utils.KeyCode") --- @type chip.utils.KeyCode
 
+--- [ DEBUG IMPORTS ] ---
+
+Log = crequire("debug.Log") --- @type chip.debug.Log
+
 --- [ INPUT IMPORTS ] ---
 
 Input = crequire("input.Input") --- @type chip.input.Input
@@ -368,19 +372,11 @@ end
 --- @param  settings  chip.GameSettings
 ---
 function Chip.init(settings)
-    local luaPrint = print
+    Log.luaPrint = print
     print = function(...)
-        local str = ""
-        local argCount = select("#", ...)
-        for i = 1, argCount do
-            str = str .. tostring(select(i, ...))
-            if i < argCount then
-                str = str .. ", "
-            end
-        end
         local curFile = debug.getinfo(2, "S").source:sub(2)
         local curLine = debug.getinfo(2, "l").currentline
-        luaPrint(curFile .. ":" .. curLine .. ": " .. str)
+        Log.info(nil, curFile, curLine, ...)
     end
     love.load = function()
         Native.setDarkMode(true)

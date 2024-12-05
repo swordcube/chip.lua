@@ -216,6 +216,8 @@ function Input._postUpdate()
         end
     end
     Input._mouseJustMoved = false
+    Input._horizontalMouseWheel = 0.0
+    Input._verticalMouseWheel = 0.0
 end
 
 return Input

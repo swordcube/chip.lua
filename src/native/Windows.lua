@@ -191,7 +191,7 @@ Native.cursorType = {
 	PIN = 32671,
 	PERSON = 32672
 }
-Native.consoleColor = {
+Native.ConsoleColor = {
 	BLACK = 0,
 	DARK_BLUE = 1,
 	DARK_GREEN = 2,
@@ -241,15 +241,15 @@ function Native.setDarkMode(enable)
 	end
 end
 
-function Native.setConsoleColors(fg_color, bg_color)
-	if fg_color == nil or fg_color == Native.consoleColor.NONE then
-		fg_color = Native.consoleColor.LIGHT_GRAY
+function Native.setConsoleColors(fgColor, bgColor)
+	if fgColor == nil or fgColor == Native.ConsoleColor.NONE then
+		fgColor = Native.ConsoleColor.LIGHT_GRAY
 	end
-	if bg_color == nil or bg_color == Native.consoleColor.NONE then
-		bg_color = Native.consoleColor.BLACK
+	if bgColor == nil or bgColor == Native.ConsoleColor.NONE then
+		bgColor = Native.ConsoleColor.BLACK
 	end
 	local console = ffi.C.GetStdHandle(Native.STD_OUTPUT_HANDLE)
-	ffi.C.SetConsoleTextAttribute(console, (bg_color * 16) + fg_color)
+	ffi.C.SetConsoleTextAttribute(console, (bgColor * 16) + fgColor)
 end
 
 local pmc_size = ffi.sizeof('PROCESS_MEMORY_COUNTERS')

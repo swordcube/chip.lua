@@ -204,7 +204,7 @@ ffi.cdef [[\
 --- A class for easily accessing native system functionality.
 ---
 local Native = {}
-Native.consoleColor = {
+Native.ConsoleColor = {
 	BLACK = 0,
 	DARK_BLUE = 1,
 	DARK_GREEN = 2,

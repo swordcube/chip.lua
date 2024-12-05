@@ -194,6 +194,65 @@ function Rect:pow(x, y, width, height)
     return self
 end
 
+function Rect:getLeft()
+    return self.x
+end
+
+function Rect:setLeft(value)
+    self.width = self.width - (value - self.x)
+    self.x = value
+end
+
+function Rect:getRight()
+    return self.x + self.width
+end
+
+function Rect:setRight(value)
+    self.width = value - self.x
+end
+
+function Rect:getTop()
+    return self.y
+end
+
+function Rect:setTop(value)
+    self.height = self.height - (value - self.y)
+    self.y = value
+end
+
+function Rect:getBottom()
+    return self.y + self.height
+end
+
+function Rect:setRight(value)
+    self.height = value - self.y
+end
+
+function Rect:isEmpty()
+    return self.width == 0 or self.height == 0
+end
+
+---
+--- @param rect     chip.math.Rect  The rectangle to check intersection against
+--- @param result?  chip.math.Rect  The resulting rectangle
+---
+--- @return chip.math.Rect
+---
+function Rect:intersection(rect, result)
+    if not result then
+        result = Rect:new()
+    end
+    local x0 = (self.x < rect.x) and rect.x or self.x
+    local x1 = (self:getRight() > rect:getRight()) and rect:getRight() or self:getRight()
+    local y0 = (self.y < rect.y) and rect.y or self.y
+    local y1 = (self:getBottom() > rect:getBottom()) and rect:getBottom() or self:getBottom()
+    
+    if x1 <= x0 or y1 <= y0 then
+        return result:set(0, 0, 0, 0)
+    end
+    return result:set(x0, y0, x1 - x0, y1 - y0)
+end
+
 ---
 --- Returns a string representation of this rectangle.
 ---
