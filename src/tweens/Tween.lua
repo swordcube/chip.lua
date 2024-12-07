@@ -105,11 +105,16 @@ function Tween:getManager()
 end
 
 ---
---- @param  manager  chip.plugins.TweenManager
+--- @param  manager  chip.plugins.TweenManager?
+--- 
 --- @return chip.tweens.Tween
 ---
 function Tween:setManager(manager)
-    self._manager = manager
+    if self._manager.list:contains(self) then
+        self._manager.list:remove(self)
+    end
+    self._manager = manager or TweenManager.global
+    self._manager.list:add(self)
     return self
 end
 
@@ -207,11 +212,11 @@ function Tween:getDuration()
         return self._cachedDuration + self._startDelay
     end
     local total = 0.0
-    for i = 1, self._tweeners._length do
+    for i = 1, self._tweeners:getLength() do
         ---
         --- @type chip.tweens.tweeners.Tweener
         ---
-        local tweener = self._tweeners._members[i]
+        local tweener = self._tweeners:getMembers()[i]
         local duration = tweener:getDuration()
         if duration > total then
             total = duration
@@ -242,7 +247,7 @@ function Tween:restart()
     self._elapsedTime = 0.0
 
     for i = 1, #self._tweeners do
-        local tweener = self._tweeners._members[i]
+        local tweener = self._tweeners:getMembers()[i]
         if tweener._elapsedTime then
             tweener._elapsedTime = 0.0
         end
@@ -260,8 +265,10 @@ function Tween:stop()
     self._cachedDuration = nil
 
     self._startDelay = 0.0
-    self._manager.list:remove(self)
 
+    if self._manager.list:contains(self) then
+        self._manager.list:remove(self)
+    end
     return self
 end
 
@@ -317,27 +324,12 @@ function Tween:update(dt)
     end
 end
 
-function Tween:cancel()
-    self:stop()
-
-    for i = 1, self._tweeners._length do
-        local obj = self._tweeners._members[i]
-        if obj then
-            if chip.config.debugMode then
-                chip.log:verbose("Disposing object " .. tostring(obj))
-            end
-            obj:free()
-            self._tweeners:remove(obj)
-        end
-    end
-end
-
 function Tween:free()
     self:stop()
-    
-    self._tweeners:free()
-    self._tweeners = nil
-    
+    if self._tweeners then
+        self._tweeners:free()
+        self._tweeners = nil
+    end
     Tween.super.free(self)
 end
 

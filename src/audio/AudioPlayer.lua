@@ -147,6 +147,13 @@ end
 --- @return chip.audio.AudioPlayer
 ---
 function AudioPlayer:load(data)
+    local sources = self._sources
+    for i = 1, #sources do
+        local source = sources[i] --- @type love.Source
+        if source then
+            source:stop()
+        end
+    end
     if self._stream then
         self._stream:unreference()
     end
@@ -416,15 +423,16 @@ end
 --- Fades this audio player from a given
 --- volume to another volume.
 ---
---- @param  from      number  The volume to fade from.
---- @param  to        number  The volume to fade to.
---- @param  duration  number  The duration of the fade. (in seconds)
+--- @param  from          number                      The volume to fade from.
+--- @param  to            number                      The volume to fade to.
+--- @param  duration      number                      The duration of the fade. (in seconds)
+--- @param  tweenManager  chip.plugins.TweenManager?  The tween manager to use. (optional)
 ---
-function AudioPlayer:fade(from, to, duration)
+function AudioPlayer:fade(from, to, duration, tweenManager)
     if self._fadeTween then
         self._fadeTween:free()
     end
-    self._fadeTween = Tween:new() --- @type chip.tweens.Tween
+    self._fadeTween = Tween:new(tweenManager) --- @type chip.tweens.Tween
     
     self:setVolume(from)
     local sources = self._sources

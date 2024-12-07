@@ -81,7 +81,7 @@ function FrameCollection:free()
 end
 
 function FrameCollection:getNumFrames()
-    return #self.frames
+    return #self._frames
 end
 
 function FrameCollection:getTexture()

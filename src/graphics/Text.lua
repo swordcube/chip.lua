@@ -23,7 +23,7 @@ local gfx = love.graphics
 ---
 local Text = Sprite:extend("Text", ...)
 
-function Text:constructor(x, y, fieldWidth, contents)
+function Text:constructor(x, y, fieldWidth, contents, size)
     Text.super.constructor(self, x, y)
 
     ---
@@ -59,11 +59,11 @@ function Text:constructor(x, y, fieldWidth, contents)
     --- @protected
     --- @type integer
     ---
-    self._size = 16
+    self._size = size or 16
 
     ---
     --- @protected
-    --- @type string
+    --- @type "left"|"center"|"right"|"justify"
     ---
     self._alignment = "left"
 
@@ -89,7 +89,7 @@ function Text:constructor(x, y, fieldWidth, contents)
     --- @protected
     --- @type chip.utils.Color
     ---
-    self._borderColor = Color:new(Color.WHITE)
+    self._borderColor = Color:new(Color.BLACK)
 
     ---
     --- @protected
@@ -135,19 +135,21 @@ end
 ---
 function Text:setFont(font)
     self._font = font
-    local fnt = Assets.getFont(self._font):getData(self._size)
-    if not fnt then
-        fnt = gfx.newFont(self._font, self._size, "light")
-        Assets.getFont(self._font):setData(self._size, fnt)
+    if self._dirty or (self._font ~= font) then
+        local fnt = Assets.getFont(self._font):getData(self._size)
+        if not fnt then
+            fnt = gfx.newFont(self._font, self._size, "light")
+            Assets.getFont(self._font):setData(self._size, fnt)
+        end
+        self._fontData = fnt
+    
+        if self._textObj then
+            self._textObj:setFont(self._fontData)
+        else
+            self._textObj = gfx.newTextBatch(self._fontData)
+        end
+        self._dirty = true
     end
-    self._fontData = fnt
-
-    if self._textObj then
-        self._textObj:setFont(self._fontData)
-    else
-        self._textObj = gfx.newTextBatch(self._fontData)
-    end
-    self._dirty = true
 end
 
 ---
@@ -161,8 +163,8 @@ end
 --- @param  contents  string
 ---
 function Text:setContents(contents)
+    self._dirty = self._dirty or (self._contents ~= contents)
     self._contents = contents
-    self._dirty = true
 end
 
 function Text:getFieldWidth()
@@ -173,8 +175,8 @@ end
 --- @param  width  number
 ---
 function Text:setFieldWidth(width)
+    self._dirty = self._dirty or (self._fieldWidth ~= width)
     self._fieldWidth = width
-    self._dirty = true
 end
 
 function Text:getSize()
@@ -186,20 +188,22 @@ end
 ---
 function Text:setSize(size)
     self._size = size
-    if self._font then
-        local fnt = Assets.getFont(self._font):getData(self._size)
-        if not fnt then
-            fnt = gfx.newFont(self._font, self._size, "light")
-            Assets.getFont(self._font):setData(self._size, fnt)
+    if self._dirty or (self._size ~= size) then
+        if self._font then
+            local fnt = Assets.getFont(self._font):getData(self._size)
+            if not fnt then
+                fnt = gfx.newFont(self._font, self._size, "light")
+                Assets.getFont(self._font):setData(self._size, fnt)
+            end
+            self._fontData = fnt
+            if self._textObj then
+                self._textObj:setFont(self._fontData)
+            else
+                self._textObj = gfx.newTextBatch(self._fontData)
+            end
         end
-        self._fontData = fnt
-        if self._textObj then
-            self._textObj:setFont(self._fontData)
-        else
-            self._textObj = gfx.newTextBatch(self._fontData)
-        end
+        self._dirty = true
     end
-    self._dirty = true
 end
 
 function Text:getAlignment()
@@ -207,11 +211,11 @@ function Text:getAlignment()
 end
 
 ---
---- @param  alignment  string
+--- @param  alignment  "left"|"center"|"right"|"justify"
 ---
 function Text:setAlignment(alignment)
+    self._dirty = self._dirty or (self._alignment ~= alignment)
     self._alignment = alignment
-    self._dirty = true
 end
 
 function Text:getBorderSize()
@@ -222,8 +226,8 @@ end
 --- @param  size  number
 ---
 function Text:setBorderSize(size)
+    self._dirty = self._dirty or (self._borderSize ~= size)
     self._borderSize = size
-    self._dirty = true
 end
 
 function Text:getBorderStyle()
@@ -234,8 +238,8 @@ end
 --- @param  style  "outline"|"shadow"
 ---
 function Text:setBorderStyle(style)
+    self._dirty = self._dirty or (self._borderStyle ~= style)
     self._borderStyle = style
-    self._dirty = true
 end
 
 function Text:getBorderColor()
@@ -246,8 +250,8 @@ end
 --- @param  color  chip.utils.Color|integer
 ---
 function Text:setBorderColor(color)
+    self._dirty = self._dirty or (self._borderColor.r ~= color.r and self._borderColor.g ~= color.g and self._borderColor.b ~= color.b and self._borderColor.a ~= color.a)
     self._borderColor = Color:new(color)
-    self._dirty = true
 end
 
 function Text:getColor()
@@ -258,8 +262,8 @@ end
 --- @param  color  chip.utils.Color|integer
 ---
 function Text:setColor(color)
+    self._dirty = self._dirty or (self._color.r ~= color.r and self._color.g ~= color.g and self._color.b ~= color.b and self._color.a ~= color.a)
     self._color = Color:new(color)
-    self._dirty = true
 end
 
 function Text:getFrames()
@@ -301,10 +305,14 @@ function Text:_regenTexture()
     end
     self._dirty = false
 
+    local alignment = self._alignment
+    if not self._contents:contains("\n") then
+        alignment = "left"
+    end
     if self._fieldWidth > 0 then
-        self._textObj:setf(self._contents, self._fieldWidth, self._alignment)
+        self._textObj:setf(self._contents, self._fieldWidth, alignment)
     else
-        self._textObj:setf(self._contents, math.huge, self._alignment)
+        self._textObj:setf(self._contents, math.huge, alignment)
     end
     if self._canvas then
         self._canvas:release()
@@ -320,7 +328,10 @@ function Text:_regenTexture()
     local tx, ty = padding * 0.5, padding * 0.5
     local pr, pg, pb, pa = gfx.getColor()
 
+    local prevBlendMode, prevAlphaMode = gfx.getBlendMode()
+
     if self._borderSize > 0 and self._borderColor.a > 0 then
+        gfx.setBlendMode("alpha", "premultiplied")
         if self._borderStyle == "outline" then
             local iterations = math.round(self._borderSize * self._borderQuality)
             if iterations < 1 then
@@ -329,7 +340,7 @@ function Text:_regenTexture()
             
             local delta = self._borderSize / iterations
             local curDelta = delta
-        
+            
             gfx.setColor(self._borderColor.r, self._borderColor.g, self._borderColor.b, self._borderColor.a)
         
             for _ = 1, iterations do
@@ -360,16 +371,20 @@ function Text:_regenTexture()
         elseif self.borderStyle == "shadow" then
             gfx.setColor(self._borderColor.r, self._borderColor.g, self._borderColor.b, self._borderColor.a)
             gfx.draw(
-                self._textObj, 
+                self._textObj,
                 tx + (self.shadowOffset.x * self.borderSize), ty + (self.shadowOffset.y * self.borderSize), 0
             )
         end
+        gfx.setBlendMode(prevBlendMode, prevAlphaMode)
+        gfx.setColor(self._color.r, self._color.g, self._color.b, self._color.a)
+    else
+        gfx.setBlendMode("alpha", "premultiplied")
+        gfx.setColor(self._color.r, self._color.g, self._color.b, self._color.a)
     end
-    
-    gfx.setColor(self._color.r, self._color.g, self._color.b, self._color.a)
     gfx.draw(self._textObj, tx, ty, 0)
-    
     gfx.setColor(pr, pg, pb, pa)
+
+    gfx.setBlendMode(prevBlendMode, prevAlphaMode)
     gfx.setCanvas(prevCanvas)
 
     ---

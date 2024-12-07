@@ -46,6 +46,12 @@ local GameSettings = {
     --- 
     --- This is used to show that the game is made in Love2D.
     ---
-    showSplashScreen = true --- @type boolean
+    showSplashScreen = true, --- @type boolean
+
+    ---
+    --- Controls whether or not the game should
+    --- be run in debug mode.
+    ---
+    debugMode = false --- @type boolean
 }
 return GameSettings

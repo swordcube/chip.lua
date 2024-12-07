@@ -60,7 +60,7 @@ function Group:update(delta)
     local members = self._members
     for i = 1, self._length do
         local actor = members[i] --- @type chip.core.Actor
-        if actor and actor:isExisting() then
+        if actor and actor:isExisting() and actor:isActive() then
             actor:update(delta)
         end
     end
@@ -94,6 +94,15 @@ function Group:draw()
     if cam then
         cam:detach()
     end
+end
+
+---
+--- Checks if this group contains the given actor.
+--- 
+--- @param  actor  chip.core.Actor  The actor to check.
+---
+function Group:contains(actor)
+    return table.contains(self._members, actor)
 end
 
 ---
@@ -225,6 +234,7 @@ function Group:free()
         actor._parent = nil
         actor:free()
     end
+    Group.super.free(self)
 end
 
 -----------------------

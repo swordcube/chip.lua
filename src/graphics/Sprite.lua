@@ -481,7 +481,7 @@ end
 function Sprite:getNumFrames()
     local frames = self:getFrames()
     if frames then
-        return frames.numFrames
+        return frames:getNumFrames()
     end
     return 0
 end

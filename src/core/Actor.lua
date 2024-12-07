@@ -32,17 +32,17 @@ function Actor:constructor()
     ---
     --- @protected
     ---
-    self._active = true --- @type boolean
-
-    ---
-    --- @protected
-    ---
     self._visible = true --- @type boolean
 
     ---
     --- @protected
     ---
     self._exists = true --- @type boolean
+
+    ---
+    --- @protected
+    ---
+    self._updateMode = "inherit" --- @type "always"|"inherit"|"disabled"
 end
 
 ---
@@ -55,17 +55,58 @@ end
 ---
 --- Returns whether or not this actor
 --- is allowed to automatically be updated.
+--- 
+--- This depends on this actor's update mode:
+--- - `always`: Always update (unless the game is unfocused with auto pause enabled)
+--- - `inherit`: Inherit whether or not the parent is allowed to update (unless the game is unfocused with auto pause enabled)
+--- - `disabled`: Never update
 ---
 function Actor:isActive()
-    return self._active
+    if self._updateMode == "always" then
+        return true
+        
+    elseif self._updateMode == "inherit" then
+        -- Return true as fallback as if this actor has
+        -- no parent, you're probably manually updating it anyways
+
+        -- Which isn't recommended, but still allowed
+        return self._parent and self._parent:isActive() or true
+    
+    end
+    return false
 end
 
 ---
 --- Controls whether or not this actor
 --- is allowed to automatically be updated.
+--- 
+--- @deprecated
+--- @param  value  boolean
 ---
 function Actor:setActive(value)
-    self._active = value
+    self._updateMode = value and "inherit" or "disabled"
+end
+
+---
+--- Returns the current update mode.
+---
+function Actor:getUpdateMode()
+    return self._updateMode
+end
+
+---
+--- Sets the current update mode to a given value.
+--- 
+--- This controls when this actor is allowed to
+--- automatically update itself:
+--- - `always`: Always update (unless the game is unfocused with auto pause enabled)
+--- - `inherit`: Inherit whether or not the parent is allowed to update (unless the game is unfocused with auto pause enabled)
+--- - `disabled`: Never update
+--- 
+--- @param  value  "always"|"inherit"|"disabled"
+---
+function Actor:setUpdateMode(value)
+    self._updateMode = value
 end
 
 ---

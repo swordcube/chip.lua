@@ -160,6 +160,11 @@ Engine.onFocusGained = Signal:new() --- @type chip.utils.Signal
 Engine.onQuit = Signal:new() --- @type chip.utils.Signal
 
 ---
+--- Whether or not debug mode is enabled.
+---
+Engine.debugMode = false --- @type boolean
+
+---
 --- Returns the amount of frames drawn
 --- to the screen in the last second.
 ---

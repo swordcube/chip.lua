@@ -193,7 +193,9 @@ local function update(dt)
     BGM.update(dt)
     plugins:update(dt)
 
-    Engine.currentScene:update(dt)
+    if Engine.currentScene and Engine.currentScene:isActive() then
+        Engine.currentScene:update(dt)
+    end
     Engine.postUpdate:emit()
 end
 local function draw()
@@ -401,6 +403,9 @@ function Chip.init(settings)
                 math.floor((screenHeight - windowHeight) * 0.5)
             )
         end
+        Engine.debugMode = settings.debugMode
+        Log.outputLineNumbers = settings.debugMode
+
         if settings.initialScene == nil then
             settings.initialScene = Scene:new()
         end
@@ -418,7 +423,7 @@ function Chip.init(settings)
         Engine.scaleMode = RatioScaleMode:new()
         Engine.scaleMode:onMeasure(settings.gameWidth, settings.gameHeight)
 
-        if settings.showSplashScreen then
+        if settings.showSplashScreen and not settings.debugMode then
             Engine.currentScene = crequire("SplashScene"):new(settings.initialScene)
         else
             Engine.currentScene = settings.initialScene

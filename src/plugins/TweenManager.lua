@@ -16,6 +16,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ]]
 
+local Engine = crequire("Engine") --- @type chip.Engine
+
 ---
 --- A class that tweens can attach to, which manages
 --- updating them.

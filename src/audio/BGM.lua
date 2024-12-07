@@ -18,6 +18,8 @@
 
 ---@diagnostic disable: invisible
 
+local TweenManager = crequire("plugins.TweenManager") --- @type chip.plugins.TweenManager
+
 ---
 --- @class chip.audio.BGM
 ---
@@ -30,6 +32,11 @@ player._isBGM = true
 --- The audio player used to play background music
 ---
 BGM.audioPlayer = player
+
+---
+--- @protected
+---
+BGM._tweenManager = TweenManager:new() --- @type chip.plugins.TweenManager
 
 ---
 --- @param  stream   chip.audio.AudioStream|string
@@ -64,6 +71,7 @@ function BGM.isPlaying()
 end
 
 function BGM.update(dt)
+    BGM._tweenManager:update(dt)
     if not player:isExisting() or not player:isActive() then
         return
     end
@@ -71,7 +79,7 @@ function BGM.update(dt)
 end
 
 function BGM.fade(from, to, duration)
-    player:fade(from, to, duration)
+    player:fade(from, to, duration, BGM._tweenManager)
 end
 
 function BGM.free()

@@ -16,6 +16,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ]]
 
+---@diagnostic disable: invisible
+
 ---
 --- @class chip.audio.AudioStream : chip.backend.RefCounted
 ---
@@ -43,6 +45,12 @@ end
 function AudioStream:free()
     self._data:release()
     self._data = nil
+
+    for key, value in pairs(Assets._audioStreamCache) do
+        if value == self then
+            Assets._audioStreamCache[key] = nil
+        end
+    end
 end
 
 return AudioStream

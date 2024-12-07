@@ -119,6 +119,7 @@ end
 --- Draws all of this canvas layer's members to the screen.
 ---
 function CanvasLayer:draw()
+    -- TODO: do this in Sprite.getRenderingInfo
     gfx.push()
 	gfx.translate(self._x, self._y)
 
@@ -148,8 +149,8 @@ function CanvasLayer:getZoom()
 end
 
 function CanvasLayer:setZoom(val)
-    self._x = -((Engine.gameWidth * 0.5) * (val - 1))
-    self._y = -((Engine.gameHeight * 0.5) * (val - 1))
+    self._x = ((Engine.gameWidth * -0.5) * (val - 1.0))
+    self._y = ((Engine.gameHeight * -0.5) * (val - 1.0))
     self.scale:set(val, val)
 end
 
