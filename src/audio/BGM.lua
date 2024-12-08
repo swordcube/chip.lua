@@ -40,16 +40,25 @@ BGM._tweenManager = TweenManager:new() --- @type chip.plugins.TweenManager
 
 ---
 --- @param  stream   chip.audio.AudioStream|string
---- @param  looping  boolean?
 ---
-function BGM.play(stream, looping)
+function BGM.load(stream)
     if not stream then
         print("WARNING: Cannot play invalid stream for BGM!")
         return
     end
-    looping = looping or true
-
     player:load(stream)
+end
+
+---
+--- @param  stream   chip.audio.AudioStream|string?
+--- @param  looping  boolean?
+---
+function BGM.play(stream, looping)
+    looping = (looping ~= nil) and looping or true
+    
+    if stream then
+        player:load(stream)
+    end
     player:setLooping(looping)
     player:play()
 end

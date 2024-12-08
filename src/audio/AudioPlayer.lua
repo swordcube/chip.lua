@@ -101,7 +101,7 @@ function AudioPlayer:constructor()
     --- @type function
     ---
     self._onFocusLost = function()
-        if self._paused then
+        if not self._playing or self._paused then
             return
         end
         local sources = self._sources
@@ -118,7 +118,7 @@ function AudioPlayer:constructor()
     --- @type function
     ---
     self._onFocusGained = function()
-        if self._paused then
+        if not self._playing or self._paused then
             return
         end
         local sources = self._sources

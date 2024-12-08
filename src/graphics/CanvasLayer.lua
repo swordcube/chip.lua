@@ -28,18 +28,18 @@ local CanvasLayer = Group:extend("CanvasLayer", ...)
 
 -- TODO: add width and height to this
 
-function CanvasLayer:constructor()
+function CanvasLayer:constructor(x, y)
     CanvasLayer.super.constructor(self)
 
     ---
     --- @protected
     ---
-    self._x = 0.0 --- @type number
+    self._x = x or 0.0 --- @type number
 
     ---
     --- @protected
     ---
-    self._y = 0.0 --- @type number
+    self._y = y or 0.0 --- @type number
 
     ---
     --- The X and Y scale of this canvas layer.
@@ -113,27 +113,6 @@ function CanvasLayer:screenCenter(axes)
     if axes:contains("y") then
         self:setY((Engine.gameHeight - self:getHeight()) * 0.5)
     end
-end
-
----
---- Draws all of this canvas layer's members to the screen.
----
-function CanvasLayer:draw()
-    -- TODO: do this in Sprite.getRenderingInfo
-    gfx.push()
-	gfx.translate(self._x, self._y)
-
-    local w2 = Engine.gameWidth * self.origin.x
-    local h2 = Engine.gameHeight * self.origin.y
-	gfx.scale(self.scale.x, self.scale.y)
-    
-    gfx.translate(w2, h2)
-	gfx.rotate(self.rotation)
-    gfx.translate(-w2, -h2)
-    
-    CanvasLayer.super.draw(self)
-
-    gfx.pop()
 end
 
 function CanvasLayer:getRotationDegrees()

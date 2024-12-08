@@ -70,29 +70,12 @@ end
 --- Draws all of this group's members to the screen.
 ---
 function Group:draw()
-    local cam = Camera.currentCamera
-    if cam then
-        cam:attach()
-    end
     local members = self._members
     for i = 1, self._length do
         local actor = members[i] --- @type chip.core.Actor
         if actor and actor:isExisting() and actor:isVisible() then
-            if actor:is(CanvasLayer) then
-                if cam then
-                    cam:detach()
-                end
-                actor:draw()
-                if cam then
-                    cam:attach()
-                end
-            else
-                actor:draw()
-            end
+            actor:draw()
         end
-    end
-    if cam then
-        cam:detach()
     end
 end
 

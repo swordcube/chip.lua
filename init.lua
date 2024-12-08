@@ -215,7 +215,7 @@ local function draw()
 
     gfx.rectangle("fill", 0, 0, Engine.gameWidth, Engine.gameHeight)
     gfx.setColor(1, 1, 1, 1)
-
+    
     Engine.preSceneDraw:emit()
 
     if not Engine.drawPluginsInFront then

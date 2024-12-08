@@ -142,50 +142,8 @@ function Camera:update(dt)
     end
 end
 
-function Camera:attach()
-    local w2 = Engine.gameWidth * 0.5
-    local h2 = Engine.gameHeight * 0.5
-    local zoom = self:getZoom()
-
-    gfx.push()
-	gfx.translate(
-        -(w2 * (zoom - 1)),
-        -(h2 * (zoom - 1))
-    )
-	gfx.scale(zoom)
-
-    gfx.translate(w2, h2)
-	gfx.rotate(self:getRotation())
-    gfx.translate(-w2, -h2)
-end
-
-function Camera:detach()
-    gfx.pop()
-end
-
 function Camera:makeCurrent()
     Camera.currentCamera = self
-end
-
----
---- @param  rect  chip.math.Rect?  The rectangle to apply the values to. If not specified, a new rectangle will be created instead.
----
---- @return chip.math.Rect
----
-function Camera:getScreenRect(rect)
-    if not rect then
-        rect = Rect:new()
-    end
-    local w = Engine.gameWidth
-    local h = Engine.gameHeight
-    
-    local zoom = self:getZoom()
-    return rect:set(
-        w * (zoom - 1),
-        h * (zoom - 1),
-        math.abs(w / zoom),
-        math.abs(h / zoom)
-    )
 end
 
 --- [ PRIVATE API ] ---

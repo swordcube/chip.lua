@@ -148,6 +148,12 @@ function Sprite:constructor(x, y)
     --- @type boolean
     ---
     self._antialiasing = Sprite.defaultAntialiasing
+
+    ---
+    --- @protected
+    --- @type love.Transform
+    ---
+    self._transform = love.math.newTransform()
 end
 
 function Sprite:isAntialiased()
@@ -290,30 +296,12 @@ function Sprite:update(delta)
 end
 
 function Sprite:isOnScreen()
-    local cam = Camera.currentCamera
-
-    local p = self._parent
-    local isOnCanvasLayer = false
-    
-    while p do
-        if p:is(CanvasLayer) and not p:is(Scene) then
-            isOnCanvasLayer = true
-            break
-        end
-        p = p._parent
-    end
-    local rx, ry, sx, sy, otx, oty, _ = self:getRenderingInfo()
-    rx = rx - (otx * math.abs(sx))
-    ry = ry - (oty * math.abs(sy))
-
-    if cam and not isOnCanvasLayer then
-        local rect = cam:getScreenRect()
-        return (
-            (rx + self:getWidth()) > rect.x and rx < (rect.x + rect.width) and
-            (ry + self:getHeight()) > rect.y and ry < (rect.y + rect.height)
-        )
-    end
-    return true
+    local rect = self._rect
+    local rx, ry, rw, rh = rect.x, rect.y, rect.width, rect.height
+    return (
+        (rx + rw) > 0 and rx < Engine.gameWidth and
+        (ry + rh) > 0 and ry < Engine.gameHeight
+    )
 end
 
 ---
@@ -329,29 +317,33 @@ function Sprite:screenCenter(axes)
 end
 
 ---
---- @return  number                            rx     The X coordinate that the sprite is rendered at on-screen. (in pixels)
---- @return  number                            ry     The Y coordinate that the sprite is rendered at on-screen. (in pixels)
---- @return  number                            sx     The X scaling that the sprite is rendered at on-screen.
---- @return  number                            sy     The Y scaling that the sprite is rendered at on-screen.
---- @return  number                            otx    The rotation origin of the sprite, *not* accounting for scale. (in pixels)
---- @return  number                            oty    The rotation origin of the sprite, *not* accounting for scale. (in pixels)
---- @return  chip.animation.frames.FrameData?  frame  The frame that is being rendered onto this sprite.
+--- @param  trans  love.Transform?  The transformation to modify, if unspecified, a new one is made.
 ---
-function Sprite:getRenderingInfo()
+--- @return love.Transform?                   trans  The modified transformation.
+--- @return number                            rx     The rendered X coordinate of the sprite.
+--- @return number                            ry     The rendered Y coordinate of the sprite.
+--- @return number                            rw     The rendered width of the sprite.
+--- @return number                            rh     The rendered height of the sprite.
+--- @return chip.animation.frames.FrameData?  frame  The frame that is being rendered onto this sprite.
+---
+function Sprite:getRenderingInfo(trans)
     local frames, frame = self._frames, self._frame
     local width, height = self:getWidth(), self:getHeight()
     local frameWidth, frameHeight = self:getFrameWidth(), self:getFrameHeight()
     
     if not frames or not frame or not frame.texture then
-        return 0, 0, 0, 0, 0, 0, nil
+        return nil, 0, 0, 0, 0, nil
     end
     local curAnim = self.animation.curAnim
     
     local ox, oy = self.origin.x * width, self.origin.y * height
     local otx, oty = self.origin.x * frameWidth, self.origin.y * frameHeight
 
+    trans = trans or love.math.newTransform()
+    trans:reset()
+
     local rx, ry = (self._x - self.offset.x) + ox, (self._y - self.offset.y) + oy
- 
+    
     local offx = ((curAnim and curAnim.offset.x or 0.0) - self.frameOffset.x) * (self.scale.x < 0 and -1 or 1)
     local offy = ((curAnim and curAnim.offset.y or 0.0) - self.frameOffset.y) * (self.scale.x < 0 and -1 or 1)
 
@@ -359,12 +351,16 @@ function Sprite:getRenderingInfo()
     offy = offy - (frame.offset.y * (self.scale.y < 0 and -1 or 1))
 
     local p = self._parent
+
+    local canvases = {} --- @type table<chip.graphics.CanvasLayer>
     local isOnCanvasLayer = false
 
     while p do
-        if p:is(CanvasLayer) and not p:is(Scene) then
-            isOnCanvasLayer = true
-            break
+        if p:is(CanvasLayer) then
+            if not p:is(Scene) then
+                isOnCanvasLayer = true
+            end
+            table.insert(canvases, p)
         end
         p = p._parent
     end
@@ -372,8 +368,8 @@ function Sprite:getRenderingInfo()
         -- TODO: maybe have some kind of ParallaxLayer instead of this
         local cam = Camera.currentCamera
         if cam then
-            offx = offx - ((cam:getX() - (Engine.gameWidth * 0.5)) * self.scrollFactor.x)
-            offy = offy - ((cam:getY() - (Engine.gameHeight * 0.5)) * self.scrollFactor.y)
+            rx = rx - ((cam:getX() - (Engine.gameWidth * 0.5)) * self.scrollFactor.x)
+            ry = ry - ((cam:getY() - (Engine.gameHeight * 0.5)) * self.scrollFactor.y)
         end
     end
     rx = rx + ((offx * math.abs(self.scale.x)) * self._cosRotation + (offy * math.abs(self.scale.y)) * -self._sinRotation)
@@ -382,19 +378,64 @@ function Sprite:getRenderingInfo()
     local sx = self.scale.x * (self.flipX and -1.0 or 1.0)
     local sy = self.scale.y * (self.flipY and -1.0 or 1.0)
 
-    return rx, ry, sx, sy, otx, oty, frame
+    if not isOnCanvasLayer then
+        local cam = Camera.currentCamera
+        if cam then
+            local w2 = Engine.gameWidth * 0.5
+            local h2 = Engine.gameHeight * 0.5
+            local zoom = cam:getZoom()
+            
+            trans:translate(
+                -(w2 * (zoom - 1)),
+                -(h2 * (zoom - 1))
+            )
+            trans:scale(zoom)
+    
+            trans:translate(w2, h2)
+            trans:rotate(self:getRotation())
+            trans:translate(-w2, -h2)
+        end
+    end
+    local canvasCount = #canvases
+    for i = 1, canvasCount do
+        local canvas = canvases[canvasCount - i + 1] --- @type chip.graphics.CanvasLayer
+        trans:translate(canvas:getX(), canvas:getY())
+
+        local w2 = Engine.gameWidth * canvas.origin.x
+        local h2 = Engine.gameHeight * canvas.origin.y
+        trans:scale(canvas.scale.x, canvas.scale.y)
+        
+        trans:translate(w2, h2)
+        trans:rotate(canvas.rotation)
+        trans:translate(-w2, -h2)
+    end
+    trans:translate(rx - ox, ry - oy)
+    trans:rotate(self._rotation)
+    trans:scale(sx, sy)
+
+    local v1, v2, _, rx, v5, v6, _, ry, v9, v10 = trans:getMatrix()
+
+    local rw = self:getFrameWidth() * math.sqrt((v1 * v1) + (v5 * v5) + (v9 * v9))
+    local rh = self:getFrameHeight() * math.sqrt((v2 * v2) + (v6 * v6) + (v10 * v10))
+    local rotation = math.atan2(v5, v1) -- this is in radians
+
+    local rect = self._rect:set(rx, ry, rw, rh) --- @type chip.math.Rect
+    rect:getRotatedBounds(rotation, nil, rect)
+
+    return trans, rect.x, rect.y, rect.width, rect.height, frame
 end
 
 ---
 --- Draws this sprite to the screen.
 ---
 function Sprite:draw()
-    if not self:isOnScreen() then
-        print("balls")
+    local trans, _, _, _, _, frame = self:getRenderingInfo(self._transform)
+    if not frame then
         return
     end
-    local rx, ry, sx, sy, otx, oty, frame = self:getRenderingInfo()
-
+    if not self:isOnScreen() then
+        return
+    end
     local pr, pg, pb, pa = love.graphics.getColor()
     gfx.setColor(self._tint.r, self._tint.g, self._tint.b, self._alpha)
 
@@ -406,10 +447,7 @@ function Sprite:draw()
     
     gfx.draw(
         frame.texture:getImage(), frame.quad, -- What's actually drawn to the screen
-        rx, ry, -- X and Y coordinates
-        self:getRotation(), -- Rotation (in radians)
-        sx, sy, -- X and Y scaling
-        otx, oty -- X and Y rotation origin
+        trans -- Transformation to apply to the sprite
     )
     img:setFilter(prevFilterMin, prevFilterMag, prevFilterAns)
     gfx.setColor(pr, pg, pb, pa)
