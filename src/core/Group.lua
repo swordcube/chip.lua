@@ -29,7 +29,7 @@ function Group:constructor()
     ---
     --- @protected
     ---
-    self._members = {} --- @type table<chip.core.Actor>
+    self._members = {} --- @type table<any>
 
     ---
     --- @protected
@@ -176,6 +176,34 @@ function Group:input(event)
         local actor = self._members[i] --- @type chip.core.Actor
         actor:input(event)
     end
+end
+
+---
+--- @param  class    chip.core.Actor
+--- @param  factory  function?
+--- @param  revive   boolean?
+---
+--- @return any
+---
+function Group:recycle(class, factory, revive)
+    revive = (revive ~= nil) and revive or true
+    for i = 1, self._length do
+        local actor = self._members[i] --- @type chip.core.Actor
+        if not actor:isExisting() and actor:is(class) then
+            if revive then
+                actor:revive()
+            end
+            return actor
+        end
+    end
+    if factory then
+        local actor = factory()
+        self:add(actor)
+        return actor
+    end
+    local actor = class:new()
+    self:add(actor)
+    return actor
 end
 
 function Group:findMinX()
