@@ -16,6 +16,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ]]
 
+local lerp = math.lerp
+
 ---
 --- @diagnostic disable: invisible
 --- @class chip.utils.SpriteUtil
@@ -60,10 +62,10 @@ function SpriteUtil.makeGradient(horizontal, fromColor, toColor, width, height)
                 local ratio = horizontal and (x / width) or (y / height)
                 result:setPixel(
                     x, y,
-                    math.lerp(fromColor.r, toColor.r, ratio),
-                    math.lerp(fromColor.g, toColor.g, ratio),
-                    math.lerp(fromColor.b, toColor.b, ratio),
-                    math.lerp(fromColor.a, toColor.a, ratio)
+                    lerp(fromColor.r, toColor.r, ratio),
+                    lerp(fromColor.g, toColor.g, ratio),
+                    lerp(fromColor.b, toColor.b, ratio),
+                    lerp(fromColor.a, toColor.a, ratio)
                 )
             end
         end

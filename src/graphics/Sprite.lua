@@ -17,7 +17,17 @@
 ]]
 
 local gfx = love.graphics
+local lmath = love.math
+
 local _linear_, _nearest_ = "linear", "nearest"
+
+local sqrt = math.sqrt
+local sin = math.sin
+local cos = math.cos
+local abs = math.abs
+local atan2 = math.atan2
+local deg = math.deg
+local rad = math.rad
 
 local SpriteUtil = crequire("utils.SpriteUtil") --- @type chip.utils.SpriteUtil
 
@@ -153,7 +163,7 @@ function Sprite:constructor(x, y)
     --- @protected
     --- @type love.Transform
     ---
-    self._transform = love.math.newTransform()
+    self._transform = lmath.newTransform()
 end
 
 function Sprite:isAntialiased()
@@ -339,7 +349,7 @@ function Sprite:getRenderingInfo(trans)
     local ox, oy = self.origin.x * width, self.origin.y * height
     local otx, oty = self.origin.x * frameWidth, self.origin.y * frameHeight
 
-    trans = trans or love.math.newTransform()
+    trans = trans or lmath.newTransform()
     trans:reset()
 
     local rx, ry = (self._x - self.offset.x) + ox, (self._y - self.offset.y) + oy
@@ -372,8 +382,8 @@ function Sprite:getRenderingInfo(trans)
             ry = ry - ((cam:getY() - (Engine.gameHeight * 0.5)) * self.scrollFactor.y)
         end
     end
-    rx = rx + ((offx * math.abs(self.scale.x)) * self._cosRotation + (offy * math.abs(self.scale.y)) * -self._sinRotation)
-    ry = ry + ((offx * math.abs(self.scale.x)) * self._sinRotation + (offy * math.abs(self.scale.y)) * self._cosRotation)
+    rx = rx + ((offx * abs(self.scale.x)) * self._cosRotation + (offy * abs(self.scale.y)) * -self._sinRotation)
+    ry = ry + ((offx * abs(self.scale.x)) * self._sinRotation + (offy * abs(self.scale.y)) * self._cosRotation)
 
     local sx = self.scale.x * (self.flipX and -1.0 or 1.0)
     local sy = self.scale.y * (self.flipY and -1.0 or 1.0)
@@ -415,9 +425,9 @@ function Sprite:getRenderingInfo(trans)
 
     local v1, v2, _, rx, v5, v6, _, ry, v9, v10 = trans:getMatrix()
 
-    local rw = self:getFrameWidth() * math.sqrt((v1 * v1) + (v5 * v5) + (v9 * v9))
-    local rh = self:getFrameHeight() * math.sqrt((v2 * v2) + (v6 * v6) + (v10 * v10))
-    local rotation = math.atan2(v5, v1) -- this is in radians
+    local rw = self:getFrameWidth() * sqrt((v1 * v1) + (v5 * v5) + (v9 * v9))
+    local rh = self:getFrameHeight() * sqrt((v2 * v2) + (v6 * v6) + (v10 * v10))
+    local rotation = atan2(v5, v1) -- this is in radians
 
     local rect = self._rect:set(rx, ry, rw, rh) --- @type chip.math.Rect
     rect:getRotatedBounds(rotation, nil, rect)
@@ -463,7 +473,7 @@ function Sprite:getFrameWidth()
 end
 
 function Sprite:getWidth()
-    return self:getFrameWidth() * math.abs(self.scale.x)
+    return self:getFrameWidth() * abs(self.scale.x)
 end
 
 function Sprite:getFrameHeight()
@@ -476,7 +486,7 @@ function Sprite:getFrameHeight()
 end
 
 function Sprite:getHeight()
-    return self:getFrameHeight() * math.abs(self.scale.y)
+    return self:getFrameHeight() * abs(self.scale.y)
 end
 
 function Sprite:getRotation()
@@ -486,18 +496,18 @@ end
 function Sprite:setRotation(val)
     self._rotation = val
 
-    self._cosRotation = math.cos(val)
-    self._sinRotation = math.sin(val)
+    self._cosRotation = cos(val)
+    self._sinRotation = sin(val)
 
     return self._rotation
 end
 
 function Sprite:getRotationDegrees()
-    return math.deg(self:getRotation())
+    return deg(self:getRotation())
 end
 
 function Sprite:setRotationDegrees(val)
-    self:setRotation(math.rad(val))
+    self:setRotation(rad(val))
 end
 
 function Sprite:getTexture()

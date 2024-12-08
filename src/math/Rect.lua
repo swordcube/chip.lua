@@ -16,6 +16,17 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ]]
 
+local round = math.round
+local floor = math.floor
+
+local deg = math.deg
+local rad = math.rad
+
+local sin = math.sin
+local cos = math.cos
+
+local abs = math.abs
+
 ---
 --- @class chip.math.Rect
 ---
@@ -34,14 +45,14 @@ end
 --- Rounds the rectangle to the nearest whole number.
 ---
 function Rect:round()
-    return Rect:new(math.round(self.x), math.round(self.y), math.round(self.width), math.round(self.height))
+    return Rect:new(round(self.x), round(self.y), round(self.width), round(self.height))
 end
 
 ---
 --- Floors the rectangle to the nearest whole number.
 ---
 function Rect:floor()
-    return Rect:new(math.floor(self.x), math.floor(self.y), math.floor(self.width), math.floor(self.height))
+    return Rect:new(floor(self.x), floor(self.y), floor(self.width), floor(self.height))
 end
 
 ---
@@ -76,17 +87,17 @@ function Rect:getRotatedBounds(radians, origin, newRect)
     if not newRect then
         newRect = Rect:new()
     end
-    local degrees = math.deg(radians) % 360
+    local degrees = deg(radians) % 360
     if degrees == 0 then
         return newRect:set(self.x, self.y, self.width, self.height)
     end
     if degrees < 0 then
         degrees = degrees + 360
     end
-    radians = math.rad(degrees)
+    radians = rad(degrees)
     
-    local cos = math.cos(radians)
-    local sin = math.sin(radians)
+    local cos = cos(radians)
+    local sin = sin(radians)
 
     local left = -origin.x
     local top = -origin.y
@@ -106,8 +117,8 @@ function Rect:getRotatedBounds(radians, origin, newRect)
         newRect.x = self.x + origin.x + cos * left - sin * top
         newRect.y = self.y + origin.y + sin * right + cos * top
     end
-    local newHeight = math.abs(cos * self.height) + math.abs(sin * self.width)
-    newRect.width = math.abs(cos * self.width) + math.abs(sin * self.height)
+    local newHeight = abs(cos * self.height) + abs(sin * self.width)
+    newRect.width = abs(cos * self.width) + abs(sin * self.height)
     newRect.height = newHeight
     return newRect
 end

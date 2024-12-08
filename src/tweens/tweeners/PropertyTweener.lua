@@ -16,6 +16,9 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ]]
 
+local min = math.min
+local lerp = math.lerp
+
 local Ease = crequire("tweens.Ease") --- @type chip.tweens.Ease
 local Tweener = crequire("tweens.tweeners.Tweener") --- @type chip.tweens.tweeners.Tweener
 
@@ -125,7 +128,7 @@ function PropertyTweener:getProgress()
     if self._elapsedTime <= self._startDelay then
         return 0.0
     end
-    return math.min((self._elapsedTime - self._startDelay) / self._duration, 1.0)
+    return min((self._elapsedTime - self._startDelay) / self._duration, 1.0)
 end
 
 function PropertyTweener:getEase()
@@ -159,7 +162,7 @@ function PropertyTweener:update(dt)
             local prop = self._object[self._property]
             for key, value in pairs(self._finalValue) do
                 if type(value) == "number" then
-                    local val = math.lerp(self._initialValue[key], value, e(progress))
+                    local val = lerp(self._initialValue[key], value, e(progress))
                     if prop["_" .. key] ~= nil then
                         prop["_" .. key] = val
                     else
@@ -168,7 +171,7 @@ function PropertyTweener:update(dt)
                 end
             end
         else
-            local val = math.lerp(self._initialValue, self._finalValue, e(progress))
+            local val = lerp(self._initialValue, self._finalValue, e(progress))
             if self._object["_" .. self._property] ~= nil then
                 self._object["_" .. self._property] = val
             else

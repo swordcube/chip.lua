@@ -18,6 +18,10 @@
 
 local gfx = love.graphics
 
+local deg = math.deg
+local rad = math.rad
+local lerp = math.lerp
+
 ---
 --- @class chip.graphics.Camera : chip.core.Actor2D
 --- 
@@ -118,11 +122,11 @@ function Camera:setRotation(val)
 end
 
 function Camera:getRotationDegrees()
-    return math.deg(self._rotation)
+    return deg(self._rotation)
 end
 
 function Camera:setRotationDegrees(val)
-    self._rotation = math.rad(val)
+    self._rotation = rad(val)
 end
 
 function Camera:getSmoothing()
@@ -137,8 +141,8 @@ function Camera:update(dt)
     Camera.super.update(self, dt)
 
     if self._smoothing > 0.0 then
-        self._smoothedX = math.lerp(self._smoothedX, self._x, dt * self._smoothing)
-        self._smoothedY = math.lerp(self._smoothedY, self._y, dt * self._smoothing)
+        self._smoothedX = lerp(self._smoothedX, self._x, dt * self._smoothing)
+        self._smoothedY = lerp(self._smoothedY, self._y, dt * self._smoothing)
     end
 end
 

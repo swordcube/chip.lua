@@ -16,6 +16,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ]]
 
+local huge = math.huge
+
 ---
 --- @class chip.core.Group : chip.core.Actor
 --- 
@@ -256,7 +258,7 @@ end
 --- @protected
 ---
 function Group:_findMinXHelper()
-    local value = math.huge
+    local value = huge
     for i = 1, self._length do
         local member = self._members[i]
         if member then
@@ -278,7 +280,7 @@ end
 --- @protected
 ---
 function Group:_findMaxXHelper()
-    local value = -math.huge
+    local value = -huge
     for i = 1, self._length do
         local member = self._members[i]
         if member then
@@ -300,7 +302,7 @@ end
 --- @protected
 ---
 function Group:_findMinYHelper()
-    local value = math.huge
+    local value = huge
     for i = 1, self._length do
         local member = self._members[i]
         if member then
@@ -322,7 +324,7 @@ end
 --- @protected
 ---
 function Group:_findMaxYHelper()
-    local value = -math.huge
+    local value = -huge
     for i = 1, self._length do
         local member = self._members[i]
         if member then

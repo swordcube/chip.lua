@@ -16,6 +16,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ]]
 
+local floor = math.floor
+
 ---
 --- Returns if a number is NaN.
 ---
@@ -32,7 +34,7 @@ end
 --- 
 function math.round(num)
     -- https://stackoverflow.com/questions/18313171/lua-rounding-numbers-and-then-truncate
-    return math.floor(num + 0.49999999999999994)
+    return floor(num + 0.49999999999999994)
 end
 
 ---

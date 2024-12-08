@@ -16,6 +16,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ]]
 
+local lerp = math.lerp
+
 local Bit = crequire("utils.Bit") --- @type chip.utils.Bit
 
 ---
@@ -66,10 +68,10 @@ end
 
 function Color:interpolate(other, ratio)
 	return Color:new({
-		r = math.lerp(self.r, other.r, ratio),
-		g = math.lerp(self.g, other.g, ratio),
-		b = math.lerp(self.b, other.b, ratio),
-		a = math.lerp(self.a, other.a, ratio)
+		r = lerp(self.r, other.r, ratio),
+		g = lerp(self.g, other.g, ratio),
+		b = lerp(self.b, other.b, ratio),
+		a = lerp(self.a, other.a, ratio)
 	})
 end
 

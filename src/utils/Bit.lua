@@ -16,6 +16,9 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ]]
 
+local fmod = math.fmod
+local floor = math.floor
+
 ---
 --- @class chip.utils.Bit
 ---
@@ -26,7 +29,7 @@ function Bit.lshift(x, by)
 end
 
 function Bit.rshift(x, by)
-    return math.floor(x / 2 ^ by)
+    return floor(x / 2 ^ by)
 end
 
 function Bit.band(x, y)
@@ -39,8 +42,8 @@ function Bit.band(x, y)
             result = result + p
         end
         p = p * 2
-        x = math.floor(x / 2)
-        y = math.floor(y / 2)
+        x = floor(x / 2)
+        y = floor(y / 2)
     end
     return result
 end
@@ -55,8 +58,8 @@ function Bit.bor(x, y)
             result = result + p
         end
         p = p * 2
-        x = math.floor(x / 2)
-        y = math.floor(y / 2)
+        x = floor(x / 2)
+        y = floor(y / 2)
     end
     return result
 end
@@ -65,9 +68,9 @@ function Bit.to_hex(num)
     local hexstr = '0123456789abcdef'
     local s = ''
     while num > 0 do
-        local mod = math.fmod(num, 16)
+        local mod = fmod(num, 16)
         s = hexstr:sub(mod+1, mod+1) .. s
-        num = math.floor(num / 16)
+        num = floor(num / 16)
     end
     if s == '' then s = '0' end
     return s

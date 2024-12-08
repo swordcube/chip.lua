@@ -18,6 +18,9 @@
 
 local gfx = love.graphics
 
+local deg = math.deg
+local rad = math.rad
+
 ---
 --- @class chip.graphics.CanvasLayer : chip.core.Group
 --- 
@@ -116,11 +119,11 @@ function CanvasLayer:screenCenter(axes)
 end
 
 function CanvasLayer:getRotationDegrees()
-    return math.deg(self.rotation)
+    return deg(self.rotation)
 end
 
 function CanvasLayer:setRotationDegrees(val)
-    self.rotation = math.rad(val)
+    self.rotation = rad(val)
 end
 
 function CanvasLayer:getZoom()
