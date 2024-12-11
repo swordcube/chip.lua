@@ -228,6 +228,8 @@ function Engine._switchScene()
     
     Engine.currentScene:init()
     Engine.postSceneSwitch:emit(Engine.currentScene)
+
+    collectgarbage("collect")
 end
 
 return Engine

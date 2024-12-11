@@ -60,7 +60,8 @@ end
 ---
 function Group:update(delta)
     local members = self._members
-    for i = 1, self._length do
+    local length = self._length
+    for i = 1, length do
         local actor = members[i] --- @type chip.core.Actor
         if actor and actor:isExisting() and actor:isActive() then
             actor:update(delta)
@@ -73,7 +74,8 @@ end
 ---
 function Group:draw()
     local members = self._members
-    for i = 1, self._length do
+    local length = self._length
+    for i = 1, length do
         local actor = members[i] --- @type chip.core.Actor
         if actor and actor:isExisting() and actor:isVisible() then
             actor:draw()
@@ -176,7 +178,9 @@ end
 function Group:input(event)
     for i = 1, self._length do
         local actor = self._members[i] --- @type chip.core.Actor
-        actor:input(event)
+        if actor then
+            actor:input(event)
+        end
     end
 end
 

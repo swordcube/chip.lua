@@ -19,6 +19,10 @@
 local gfx = love.graphics
 local lmath = love.math
 
+local gfxGetColor = gfx.getColor
+local gfxSetColor = gfx.setColor
+local gfxDraw = gfx.draw
+
 local _linear_, _nearest_ = "linear", "nearest"
 
 local sqrt = math.sqrt
@@ -339,15 +343,12 @@ end
 function Sprite:getRenderingInfo(trans)
     local frames, frame = self._frames, self._frame
     local width, height = self:getWidth(), self:getHeight()
-    local frameWidth, frameHeight = self:getFrameWidth(), self:getFrameHeight()
     
     if not frames or not frame or not frame.texture then
         return nil, 0, 0, 0, 0, nil
     end
-    local curAnim = self.animation.curAnim
-    
+    local curAnim = self.animation:getCurrentAnimation()
     local ox, oy = self.origin.x * width, self.origin.y * height
-    local otx, oty = self.origin.x * frameWidth, self.origin.y * frameHeight
 
     trans = trans or lmath.newTransform()
     trans:reset()
@@ -446,8 +447,8 @@ function Sprite:draw()
     if not self:isOnScreen() then
         return
     end
-    local pr, pg, pb, pa = love.graphics.getColor()
-    gfx.setColor(self._tint.r, self._tint.g, self._tint.b, self._alpha)
+    local pr, pg, pb, pa = gfxGetColor()
+    gfxSetColor(self._tint.r, self._tint.g, self._tint.b, self._alpha)
 
     local img = frame.texture:getImage()
     local prevFilterMin, prevFilterMag, prevFilterAns = img:getFilter()
@@ -455,12 +456,12 @@ function Sprite:draw()
     local filter = self._antialiasing and _linear_ or _nearest_
     img:setFilter(filter, filter, 4)
     
-    gfx.draw(
+    gfxDraw(
         frame.texture:getImage(), frame.quad, -- What's actually drawn to the screen
         trans -- Transformation to apply to the sprite
     )
     img:setFilter(prevFilterMin, prevFilterMag, prevFilterAns)
-    gfx.setColor(pr, pg, pb, pa)
+    gfxSetColor(pr, pg, pb, pa)
 end
 
 function Sprite:getFrameWidth()

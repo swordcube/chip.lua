@@ -306,11 +306,6 @@ local function loop()
         drawTmr = drawTmr % capDt
         love.timer.sleep(dt < 0.001 and 0.001 or 0)
     end
-    if focused then
-        collectgarbage(_gcStep_)
-    else
-        collectgarbage(_gcCollect_)
-    end
 end
 local function run()
     if love.math then
@@ -325,8 +320,8 @@ local function run()
     return loop
 end
 local function processInputEvent(event)
-    Engine.currentScene:input(event)
     Engine.onInputReceived:emit(event)
+    Engine.currentScene:input(event)
 end
 local function keypressed(key, scancode, repeating)
     local event = InputEventKey:new(key, scancode, true, repeating)
@@ -428,8 +423,8 @@ function Chip.init(settings)
         else
             Engine.currentScene = settings.initialScene
         end
-        Engine.currentScene:init()
         Input.init()
+        Engine.currentScene:init()
     end
     love.run = run
     love.resize = resize
