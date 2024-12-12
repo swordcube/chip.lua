@@ -196,6 +196,9 @@ ffi.cdef [[\
 
 	int SDL_GetDisplayForWindow(SDL_Window *window);
 	const SDL_DisplayMode *SDL_GetDesktopDisplayMode(SDL_DisplayID displayIndex);
+
+	bool SDL_ShowWindow(SDL_Window *window);
+	bool SDL_HideWindow(SDL_Window *window);
 ]]
 
 ---
@@ -250,15 +253,11 @@ function Native.getMonitorRefreshRate()
 	local dm = SDL3.SDL_GetDesktopDisplayMode(displayID)
 	return dm.refresh_rate
 end
-function Native.getScreenWidth()
-	local displayID = SDL3.SDL_GetDisplayForWindow(SDL3.SDL_GL_GetCurrentWindow())
-	local dm = SDL3.SDL_GetDesktopDisplayMode(displayID)
-	return dm.w
+function Native.showWindow()
+	SDL3.SDL_ShowWindow(SDL3.SDL_GL_GetCurrentWindow())
 end
-function Native.getScreenHeight()
-	local displayID = SDL3.SDL_GetDisplayForWindow(SDL3.SDL_GL_GetCurrentWindow())
-	local dm = SDL3.SDL_GetDesktopDisplayMode(displayID)
-	return dm.h
+function Native.hideWindow()
+	SDL3.SDL_HideWindow(SDL3.SDL_GL_GetCurrentWindow())
 end
 
 -----------------------------------------

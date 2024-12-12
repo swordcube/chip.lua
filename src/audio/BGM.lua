@@ -46,6 +46,8 @@ function BGM.load(stream)
         print("WARNING: Cannot play invalid stream for BGM!")
         return
     end
+    player:setPitch(1.0)
+    player:setVolume(1.0)
     player:load(stream)
 end
 
@@ -54,10 +56,11 @@ end
 --- @param  looping  boolean?
 ---
 function BGM.play(stream, looping)
-    looping = (looping ~= nil) and looping or true
-    
+    if looping == nil then
+        looping = true
+    end
     if stream then
-        player:load(stream)
+        BGM.load(stream)
     end
     player:setLooping(looping)
     player:play()

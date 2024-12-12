@@ -166,6 +166,7 @@ local ev = love.event
 local gfx = love.graphics
 local tmr = love.timer
 local window = love.window
+local system = love.system
 
 ---
 --- @class chip.Chip
@@ -272,7 +273,7 @@ local function loop()
 
     if tmr then
         dt = math.min(tmr.step(), math.max(capDt, 0.0416))
-        Engine.deltaTime = dt
+        Engine.deltaTime = dt * Engine.timeScale
     end
     if focused then
         update(dt)
@@ -379,10 +380,22 @@ function Chip.init(settings)
         Native.setDarkMode(true)
         Native.forceWindowRedraw()
 
-        local screenWidth = Native.getScreenWidth()
-        local screenHeight = Native.getScreenHeight()
-
-        local prevWindowWidth, prevWindowHeight, _ = love.window.getMode()
+        local supportedFeatures = gfx.getSupported()
+        if not supportedFeatures.glsl3 then
+            -- Don't know if some Linux systems will end up
+            -- displaying the error message inside the window or not
+            if system.getOS() == "Windows" then
+                Native.hideWindow()
+            end
+            window.showMessageBox(
+                "System is missing GLSL3 shader support",
+                "This system is below the minimum system requirements for the game.\nIf your graphics drivers aren't up-to-date, try updating them and running the game again.",
+                "error"
+            )
+            os.exit(1)
+        end
+        local prevWindowWidth, prevWindowHeight, flags = window.getMode()
+        local screenWidth, screenHeight = window.getDesktopDimensions(flags.display)
 
         local scaleFactor = (screenWidth > screenHeight) and ((screenHeight * 0.8) / settings.gameHeight) or ((screenWidth * 0.8) / settings.gameWidth);
         if scaleFactor < 1 then

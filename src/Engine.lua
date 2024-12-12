@@ -165,6 +165,11 @@ Engine.onQuit = Signal:new() --- @type chip.utils.Signal
 Engine.debugMode = false --- @type boolean
 
 ---
+--- Controls the general speed of the game, as a multiplier
+---
+Engine.timeScale = 1.0 --- @type number
+
+---
 --- Returns the amount of frames drawn
 --- to the screen in the last second.
 ---
