@@ -16,6 +16,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ]]
 
+local tblInsert = table.insert
+
 ---
 --- @class chip.debug.Log
 --- 
@@ -84,20 +86,20 @@ function Log.info(prefixChunk, fileName, lineNumber, ...)
     local curLine = lineNumber and lineNumber or debug.getinfo(2, "l").currentline
 
     local chunks = {}
-    table.insert(chunks, {
+    tblInsert(chunks, {
         text = "(i) ",
         fgColor = Native.ConsoleColor.BLUE,
     })
     if Log.outputLineNumbers then
-        table.insert(chunks, {
+        tblInsert(chunks, {
             text = curFile .. ":" .. curLine .. ": ",
             fgColor = Native.ConsoleColor.CYAN,
         })
     end
     if prefixChunk then
-        table.insert(chunks, prefixChunk)
+        tblInsert(chunks, prefixChunk)
     end
-    table.insert(chunks, {
+    tblInsert(chunks, {
         text = Log.stringifyVarArg(...),
         fgColor = Native.ConsoleColor.LIGHT_GRAY,
     })
@@ -112,20 +114,20 @@ function Log.warn(prefixChunk, fileName, lineNumber, ...)
     local curLine = lineNumber and lineNumber or debug.getinfo(2, "l").currentline
 
     local chunks = {}
-    table.insert(chunks, {
+    tblInsert(chunks, {
         text = "/!\\ ",
         fgColor = Native.ConsoleColor.YELLOW,
     })
     if Log.outputLineNumbers then
-        table.insert(chunks, {
+        tblInsert(chunks, {
             text = curFile .. ":" .. curLine .. ": ",
             fgColor = Native.ConsoleColor.CYAN,
         })
     end
     if prefixChunk then
-        table.insert(chunks, prefixChunk)
+        tblInsert(chunks, prefixChunk)
     end
-    table.insert(chunks, {
+    tblInsert(chunks, {
         text = Log.stringifyVarArg(...),
         fgColor = Native.ConsoleColor.LIGHT_GRAY,
     })
@@ -140,20 +142,20 @@ function Log.error(prefixChunk, fileName, lineNumber, ...)
     local curLine = lineNumber and lineNumber or debug.getinfo(2, "l").currentline
 
     local chunks = {}
-    table.insert(chunks, {
+    tblInsert(chunks, {
         text = "(X) ",
         fgColor = Native.ConsoleColor.RED,
     })
     if Log.outputLineNumbers then
-        table.insert(chunks, {
+        tblInsert(chunks, {
             text = curFile .. ":" .. curLine .. ": ",
             fgColor = Native.ConsoleColor.CYAN,
         })
     end
     if prefixChunk then
-        table.insert(chunks, prefixChunk)
+        tblInsert(chunks, prefixChunk)
     end
-    table.insert(chunks, {
+    tblInsert(chunks, {
         text = Log.stringifyVarArg(...),
         fgColor = Native.ConsoleColor.LIGHT_GRAY,
     })

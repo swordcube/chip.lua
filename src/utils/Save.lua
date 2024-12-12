@@ -20,6 +20,7 @@
 
 local nativefs = crequire("libs.nativefs") --- @type chip.libs.nativefs
 
+local tblContains = table.contains
 local fs = love.filesystem -- FREESTYLE ENGINE?!?!?!
 
 ---
@@ -66,7 +67,7 @@ function Save:bind(name, dir)
             self.data = {}
         end
     end
-    if not table.contains(Engine.onQuit._connected, self._onQuit) then
+    if not tblContains(Engine.onQuit._connected, self._onQuit) then
         Engine.onQuit:connect(self._onQuit)
     end
 end
@@ -83,7 +84,7 @@ function Save:close()
     self.name = nil
     self.dir = nil
 
-    if table.contains(Engine.onQuit._connected, self._onQuit) then
+    if tblContains(Engine.onQuit._connected, self._onQuit) then
         Engine.onQuit:connect(self._onQuit)
     end
 end

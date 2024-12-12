@@ -16,6 +16,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ]]
 
+local tblInsert = table.insert
+
 ---
 --- @class chip.input.Input
 ---
@@ -86,7 +88,7 @@ function Input.init()
     Engine.postUpdate:connect(Input._postUpdate)
 
     for _, value in pairs(KeyCode) do
-        table.insert(Input._keyCodes, value)
+        tblInsert(Input._keyCodes, value)
     end
 end
 

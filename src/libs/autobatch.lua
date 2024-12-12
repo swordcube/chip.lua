@@ -7,6 +7,9 @@
 -- under the terms of the MIT license. See LICENSE for details.
 --
 
+local tblInsert = table.insert
+local tblRemove = table.remove
+
 local autobatch = { _version = "0.1.1" }
 setmetatable(autobatch, { __index = love.graphics })
 
@@ -135,9 +138,9 @@ end
 
 function autobatch.push(stack)
   if stack == "all" then
-    table.insert(autobatch.stack, { autobatch.getColor() })
+    tblInsert(autobatch.stack, { autobatch.getColor() })
   else
-    table.insert(autobatch.stack, false)
+    tblInsert(autobatch.stack, false)
   end
   love_graphics.push(stack)
 end
@@ -146,7 +149,7 @@ end
 function autobatch.pop()
   autobatch.flush()
   love_graphics.pop()
-  local color = table.remove(autobatch.stack)
+  local color = tblRemove(autobatch.stack)
   if color ~= false then
     autobatch.setColor(color)
   end

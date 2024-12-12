@@ -16,6 +16,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ]]
 
+local tblInsert = table.insert
+
 -- Backwards compatibility
 table.pack = table.pack or function(...) return { n = select("#", ...), ... } end
 table.unpack = table.unpack or unpack
@@ -98,7 +100,7 @@ function table.filter(t, func)
     local filtered = {}
     for _, value in ipairs(t) do
         if func(value) then
-            table.insert(filtered, value)
+            tblInsert(filtered, value)
         end
     end
     return filtered

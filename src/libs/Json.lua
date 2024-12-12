@@ -22,6 +22,8 @@
 -- SOFTWARE.
 --
 
+local tblInsert = table.insert
+
 ---
 --- @class chip.libs.Json
 ---
@@ -82,7 +84,7 @@ local function encode_table(val, stack)
         end
         -- Encode
         for i, v in ipairs(val) do
-            table.insert(res, encode(v, stack))
+            tblInsert(res, encode(v, stack))
         end
         stack[val] = nil
         return "[" .. table.concat(res, ",") .. "]"
@@ -92,7 +94,7 @@ local function encode_table(val, stack)
             if type(k) ~= "string" then
                 error("invalid table: mixed or invalid key types")
             end
-            table.insert(res, encode(k, stack) .. ":" .. encode(v, stack))
+            tblInsert(res, encode(k, stack) .. ":" .. encode(v, stack))
         end
         stack[val] = nil
         return "{" .. table.concat(res, ",") .. "}"

@@ -16,6 +16,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ]]
 
+local tblInsert = table.insert
+
 local File = crequire("utils.File") --- @type chip.utils.File
 local FrameData = crequire("animation.frames.FrameData") --- @type chip.animation.frames.FrameData
 local FrameCollection = crequire("animation.frames.FrameCollection") --- @type chip.animation.frames.FrameCollection
@@ -48,7 +50,7 @@ function AtlasFrames.fromSparrow(texture, xmlFile)
 	local data = Xml.parse(xmlContent)
 	for _, node in ipairs(data.TextureAtlas.children) do
         if node.name == "SubTexture" then
-			table.insert(atlas:getFrames(), FrameData:new(
+			tblInsert(atlas:getFrames(), FrameData:new(
 				node.att.name,
 				tonumber(node.att.x), tonumber(node.att.y),
 				node.att.frameX and tonumber(node.att.frameX) or 0,

@@ -17,6 +17,9 @@
 ]]
 
 local huge = math.huge
+local tblInsert = table.insert
+local tblRemoveItem = table.removeItem
+local tblContains = table.contains
 
 ---
 --- @class chip.core.Group : chip.core.Actor
@@ -89,7 +92,7 @@ end
 --- @param  actor  chip.core.Actor  The actor to check.
 ---
 function Group:contains(actor)
-    return table.contains(self._members, actor)
+    return tblContains(self._members, actor)
 end
 
 ---
@@ -102,13 +105,13 @@ function Group:add(actor)
         print("Cannot add an invalid actor to this group!")
         return
     end
-    if table.contains(self._members, actor) then
+    if tblContains(self._members, actor) then
         print("This group already contains that actor!")
         return
     end
     actor._parent = self
     self._length = self._length + 1
-    table.insert(self._members, actor)
+    tblInsert(self._members, actor)
 end
 
 ---
@@ -122,13 +125,13 @@ function Group:insert(idx, actor)
         print("Cannot add an invalid actor to this group!")
         return
     end
-    if table.contains(self._members, actor) then
+    if tblContains(self._members, actor) then
         print("This group already contains that actor!")
         return
     end
     actor._parent = self
     self._length = self._length + 1
-    table.insert(self._members, idx, actor)
+    tblInsert(self._members, idx, actor)
 end
 
 ---
@@ -141,13 +144,13 @@ function Group:remove(actor)
         print("Cannot remove an invalid actor from this group!")
         return
     end
-    if not table.contains(self._members, actor) then
+    if not tblContains(self._members, actor) then
         print("This group does not contain that actor!")
         return
     end
     actor._parent = nil
     self._length = self._length - 1
-    table.removeItem(self._members, actor)
+    tblRemoveItem(self._members, actor)
 end
 
 ---
@@ -161,12 +164,12 @@ function Group:move(actor, idx)
         print("Cannot move an invalid actor in this group!")
         return
     end
-    if not table.contains(self._members, actor) then
+    if not tblContains(self._members, actor) then
         print("This group does not contain that actor!")
         return
     end
-    table.removeItem(self._members, actor)
-    table.insert(self._members, idx, actor)
+    tblRemoveItem(self._members, actor)
+    tblInsert(self._members, idx, actor)
 end
 
 ---

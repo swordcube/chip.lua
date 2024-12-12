@@ -16,6 +16,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ]]
 
+local tblInsert = table.insert
+
 ---
 --- Splits a `string` at each occurrence of `delimiter`.
 ---
@@ -26,7 +28,7 @@ function string.split(self, delimiter)
     local result = {}
     local regex = ("([^%s]+)"):format(delimiter)
     for each in self:gmatch(regex) do
-        table.insert(result, each)
+        tblInsert(result, each)
     end
     return result
 end

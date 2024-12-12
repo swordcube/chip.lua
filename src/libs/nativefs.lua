@@ -20,6 +20,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]--
 
+local tblInsert = table.insert
+
 local ffi, bit = require('ffi'), require('bit')
 local C = ffi.C
 
@@ -144,7 +146,7 @@ local function lines(file, autoclose)
 				end
 
 				if buffer[i] ~= 13 then -- ignore CR
-					table.insert(line, string.char(buffer[i]))
+					tblInsert(line, string.char(buffer[i]))
 				end
 			end
 
@@ -323,7 +325,7 @@ function nativefs.getDriveList()
 	local drives, bits = {}, C.GetLogicalDrives()
 	for i = 0, 25 do
 		if bit.band(bits, 2 ^ i) > 0 then
-			table.insert(drives, string.char(65 + i) .. ':/')
+			tblInsert(drives, string.char(65 + i) .. ':/')
 		end
 	end
 	return drives
@@ -372,7 +374,7 @@ local function getDirectoryItemsInfo(path, filtertype)
 		local info = love.filesystem.getInfo(filepath, filtertype)
 		if info then
 			info.name = files[i]
-			table.insert(items, info)
+			tblInsert(items, info)
 		end
 	end
 	return items

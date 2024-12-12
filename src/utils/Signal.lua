@@ -16,6 +16,10 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ]]
 
+local tblInsert = table.insert
+local tblRemoveItem = table.removeItem
+local tblContains = table.contains
+
 ---
 --- @class chip.utils.Signal 
 ---
@@ -51,16 +55,16 @@ end
 --- @param  once      boolean?  Whether or not the listener should only be called once.
 ---
 function Signal:connect(listener, priority, once)
-	if type(listener) ~= "function" or table.contains(self._connected, listener) then
+	if type(listener) ~= "function" or tblContains(self._connected, listener) then
 		return
 	end
 	if priority then
-		table.insert(self._connected, priority, listener)
+		tblInsert(self._connected, priority, listener)
 	else
-		table.insert(self._connected, listener)
+		tblInsert(self._connected, listener)
 	end
 	if once then
-		table.insert(self._connectedOnce, listener)
+		tblInsert(self._connectedOnce, listener)
 	end
 end
 
@@ -70,13 +74,13 @@ end
 --- @param  listener  function  The listener to disconnect from this signal.
 ---
 function Signal:disconnect(listener)
-	if type(listener) ~= "function" or not table.contains(self._connected, listener) then
+	if type(listener) ~= "function" or not tblContains(self._connected, listener) then
 		return
 	end
-	if table.contains(self._connectedOnce, listener) then
-		table.removeItem(self._connectedOnce, listener)
+	if tblContains(self._connectedOnce, listener) then
+		tblRemoveItem(self._connectedOnce, listener)
 	end
-	table.removeItem(self._connected, listener)
+	tblRemoveItem(self._connected, listener)
 end
 
 ---

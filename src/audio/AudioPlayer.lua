@@ -17,6 +17,7 @@
 ]]
 
 local _seconds_ = "seconds"
+local tblInsert = table.insert
 
 local Engine = crequire("Engine") --- @type chip.Engine
 local Signal = crequire("utils.Signal") --- @type chip.utils.Signal
@@ -415,7 +416,7 @@ function AudioPlayer:setMaxPolyphony(newMaxPolyphony)
         end
     end
     for _ = 1, self._maxPolyphony do
-        table.insert(sources, self._stream:getData():clone())
+        tblInsert(sources, self._stream:getData():clone())
     end
 end
 

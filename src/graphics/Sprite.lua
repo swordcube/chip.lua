@@ -23,6 +23,8 @@ local gfxGetColor = gfx.getColor
 local gfxSetColor = gfx.setColor
 local gfxDraw = gfx.draw
 
+local tblInsert = table.insert
+
 local _linear_, _nearest_ = "linear", "nearest"
 
 local sqrt = math.sqrt
@@ -371,7 +373,7 @@ function Sprite:getRenderingInfo(trans)
             if not p:is(Scene) then
                 isOnCanvasLayer = true
             end
-            table.insert(canvases, p)
+            tblInsert(canvases, p)
         end
         p = p._parent
     end

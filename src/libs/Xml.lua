@@ -3,6 +3,9 @@
 -- Originally based off https://github.com/Cluain/Lua-Simple-XML-Parser
 -- Taken from https://github.com/Stilic/FNF-LOVE/blob/main/loxel/lib/xml.lua
 
+local tblInsert = table.insert
+local tblRemove = table.remove
+
 local function trim(str) return string.match(str, "^%s*(.-)%s*$") end
 
 local function endsWith(str, ending)
@@ -42,24 +45,24 @@ local function newNode(name)
         if self[child.name] then
             if type(self[child.name].name) == "function" then
                 local tempTable = {}
-                table.insert(tempTable, self[child.name])
+                tblInsert(tempTable, self[child.name])
                 self[child.name] = tempTable
             end
-            table.insert(self[child.name], child)
+            tblInsert(self[child.name], child)
         else
             self[child.name] = child
         end
-        table.insert(self.children, child)
+        tblInsert(self.children, child)
     end
 
     function node:setAtt(name, value)
         if self.att[name] then
             if type(self.att[name]) == "string" then
                 local tempTable = {}
-                table.insert(tempTable, self.att[name])
+                tblInsert(tempTable, self.att[name])
                 self.att[name] = tempTable
             end
-            table.insert(self.att[name], value)
+            tblInsert(self.att[name], value)
         else
             self.att[name] = value
         end
@@ -76,7 +79,7 @@ local xml = {}
 function xml.parse(xmlText)
     local stack = {}
     local top = newNode()
-    table.insert(stack, top)
+    tblInsert(stack, top)
     local i = 1
     while true do
         local ni, j, c, label, xarg, empty =
@@ -106,10 +109,10 @@ function xml.parse(xmlText)
             elseif c == "" then -- start tag
                 local lNode = newNode(label)
                 parseArgs(lNode, xarg)
-                table.insert(stack, lNode)
+                tblInsert(stack, lNode)
                 top = lNode
             else                                    -- end tag
-                local toclose = table.remove(stack) -- remove top
+                local toclose = tblRemove(stack) -- remove top
 
                 top = stack[#stack]
                 if #stack < 1 then

@@ -18,6 +18,9 @@
 
 local AnimationData = crequire("animation.AnimationData") --- @type chip.animation.AnimationData
 
+local tblInsert = table.insert
+local tblRemove = table.remove
+
 ---
 --- @class chip.animation.AnimationController
 ---
@@ -206,7 +209,7 @@ function AnimationController:add(name, frames, fps, loop)
     end
     local datas = {}
     for _, num in pairs(frames) do
-        table.insert(datas, atlas:getFrames()[num])
+        tblInsert(datas, atlas:getFrames()[num])
     end
     local looping = true
     if loop ~= nil then
@@ -232,7 +235,7 @@ function AnimationController:addByPrefix(name, prefix, fps, loop)
     local __frames = {}
     for _, data in ipairs(atlas:getFrames()) do
         if string.startsWith(data.name, prefix) then
-            table.insert(__frames, data)
+            tblInsert(__frames, data)
         end
     end
     if #__frames == 0 then
@@ -264,7 +267,7 @@ function AnimationController:addByIndices(name, prefix, indices, fps, loop)
     local __frames = {}
     for _, data in ipairs(atlas:getFrames()) do
         if string.startsWith(data.name, prefix) then
-            table.insert(__frames, data)
+            tblInsert(__frames, data)
         end
     end
     if #__frames == 0 then
@@ -273,7 +276,7 @@ function AnimationController:addByIndices(name, prefix, indices, fps, loop)
     end
     local datas = {}
     for _, num in ipairs(indices) do
-        table.insert(datas, __frames[num])
+        tblInsert(datas, __frames[num])
     end
     local looping = true
     if loop ~= nil then
@@ -311,7 +314,7 @@ function AnimationController:remove(name)
     if anim == nil then
         return
     end
-    table.remove(self._animations, table.indexOf(anim))
+    tblRemove(self._animations, table.indexOf(anim))
     anim:destroy()
 end
 

@@ -16,6 +16,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ]]
 
+local tblInsert = table.insert
+
 local FrameData = crequire("animation.frames.FrameData") --- @type chip.animation.frames.FrameData
 local FrameCollection = crequire("animation.frames.FrameCollection") --- @type chip.animation.frames.FrameCollection
 
@@ -46,7 +48,7 @@ function TileFrames.fromTexture(texture, tileSize)
 
     for j = 1, numRows do
         for i = 1, numCols do
-            table.insert(atlas:getFrames(), FrameData:new(
+            tblInsert(atlas:getFrames(), FrameData:new(
                 "frame",
                 (i - 1) * tileSize.x, (j - 1) * tileSize.y,
                 0, 0, tileSize.x, tileSize.y,
