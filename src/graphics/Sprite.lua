@@ -35,6 +35,7 @@ local atan2 = math.atan2
 local deg = math.deg
 local rad = math.rad
 
+local Velocity = crequire("math.Velocity") --- @type chip.math.Velocity
 local SpriteUtil = crequire("utils.SpriteUtil") --- @type chip.utils.SpriteUtil
 
 local FrameCollection = crequire("animation.frames.FrameCollection") --- @type chip.animation.frames.FrameCollection
@@ -81,6 +82,27 @@ function Sprite:constructor(x, y)
     --- @type chip.math.Point
     ---
     self.scrollFactor = Point:new(1, 1)
+
+    ---
+    --- Controls how much velocity this sprite has.
+    ---
+    --- @type chip.math.Point
+    ---
+    self.velocity = Point:new()
+
+    ---
+    --- Controls how much acceleration this sprite has.
+    ---
+    --- @type chip.math.Point
+    ---
+    self.acceleration = Point:new()
+
+    ---
+    --- Controls the maximum velocity this sprite can have.
+    ---
+    --- @type chip.math.Point
+    ---
+    self.maxVelocity = Point:new()
 
     ---
     --- Controls whether or not this sprite is
@@ -307,8 +329,23 @@ end
 ---
 --- Updates this sprite.
 ---
-function Sprite:update(delta)
-    self.animation:update(delta)
+function Sprite:update(dt)
+    local v = self.velocity
+    if v.x ~= 0 or v.y ~= 0 then
+        local x = self._x
+        local y = self._y
+
+        local ax = self.acceleration.x
+        local ay = self.acceleration.y
+
+        local dvx, dvy = Velocity.getVelocityDelta(v.x, v.y, ax, ay, dt)
+        self._x = x + ((v.x + dvx) * dt)
+        self._y = y + ((v.y + dvy) * dt)
+
+        v.x = v.x + (dvx * 2.0)
+        v.y = v.y + (dvy * 2.0)
+    end
+    self.animation:update(dt)
 end
 
 function Sprite:isOnScreen()

@@ -59,15 +59,15 @@ end
 ---
 --- Updates all of this group's members.
 --- 
---- @param  delta  number  The time since the last frame. (in seconds)
+--- @param  dt  number  The time since the last frame. (in seconds)
 ---
-function Group:update(delta)
+function Group:update(dt)
     local members = self._members
     local length = self._length
     for i = 1, length do
         local actor = members[i] --- @type chip.core.Actor
         if actor and actor:isExisting() and actor:isActive() then
-            actor:update(delta)
+            actor:update(dt)
         end
     end
 end
@@ -82,6 +82,69 @@ function Group:draw()
         local actor = members[i] --- @type chip.core.Actor
         if actor and actor:isExisting() and actor:isVisible() then
             actor:draw()
+        end
+    end
+end
+
+---
+--- @param  func      boolean
+--- @param  recurse?  boolean
+---
+function Group:forEach(func, recurse)
+    if recurse == nil then
+        recurse = false
+    end
+    local members = self._members
+    local length = self._length
+    for i = 1, length do
+        local actor = members[i] --- @type chip.core.Actor
+        if actor then
+            func(actor)
+            if recurse and actor:is(Group) then
+                actor:forEach(func, recurse)
+            end
+        end
+    end
+end
+
+---
+--- @param  func      boolean
+--- @param  recurse?  boolean
+---
+function Group:forEachExisting(func, recurse)
+    if recurse == nil then
+        recurse = false
+    end
+    local members = self._members
+    local length = self._length
+    for i = 1, length do
+        local actor = members[i] --- @type chip.core.Actor
+        if actor and actor:isExisting() then
+            func(actor)
+            if recurse and actor:is(Group) then
+                actor:forEach(func, recurse)
+            end
+        end
+    end
+end
+
+---
+--- @param  func      boolean
+--- @param  recurse?  boolean
+---
+function Group:forEachDead(func, recurse)
+    if recurse == nil then
+        recurse = false
+    end
+    local members = self._members
+    local length = self._length
+    for i = 1, length do
+        local actor = members[i] --- @type chip.core.Actor
+        if actor and not actor:isExisting() then
+            func(actor)
+            if recurse and actor:is(Group) then
+                actor:forEach(func, recurse)
+            end
         end
     end
 end

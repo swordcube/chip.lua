@@ -43,8 +43,8 @@ function TileFrames.fromTexture(texture, tileSize)
     ---
     local atlas = TileFrames:new(tex)
 
-    local numRows = tileSize.y == 0 and 1 or math.round((texture.height) / tileSize.x)
-    local numCols = tileSize.x == 0 and 1 or math.round((texture.width) / tileSize.y)
+    local numRows = tileSize.y == 0 and 1 or math.round((texture.height) / tileSize.y)
+    local numCols = tileSize.x == 0 and 1 or math.round((texture.width) / tileSize.x)
 
     for j = 1, numRows do
         for i = 1, numCols do

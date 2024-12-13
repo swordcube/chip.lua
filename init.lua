@@ -291,7 +291,7 @@ local function loop()
     
             gfx.present()
 
-            local drawDt = os.clock() - lastDraw
+            local drawDt = love.timer.getTime() - lastDraw
             drawsPassed = drawsPassed + 1
             
             fpsTimer = fpsTimer + drawDt
@@ -302,7 +302,7 @@ local function loop()
                 drawsPassed = 0
                 fpsTimer = fpsTimer % 1.0
             end
-            lastDraw = os.clock()
+            lastDraw = love.timer.getTime()
         end
         drawTmr = drawTmr % capDt
         love.timer.sleep(dt < 0.001 and 0.001 or 0)

@@ -164,13 +164,13 @@ end
 --- This shouldn't be called explicitly as it is already
 --- called automatically by the engine.
 ---
---- @param delta number  The time between the last and current frame.
+--- @param  dt  number  The time between the last and current frame.
 ---
-function AnimationController:update(delta)
+function AnimationController:update(dt)
     if self._finished or self._curAnim == nil then
         return
     end
-    self._elapsedTime = self._elapsedTime + delta
+    self._elapsedTime = self._elapsedTime + dt
 
     if self._elapsedTime < (1 / self._curAnim.fps) then
         return

@@ -160,9 +160,9 @@ end
 ---
 --- Updates this actor.
 --- 
---- @param  delta  number  The time since the last frame. (in seconds)
+--- @param  dt  number  The time since the last frame. (in seconds)
 ---
-function Actor:update(delta)
+function Actor:update(dt)
 end
 
 ---

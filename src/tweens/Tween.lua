@@ -100,6 +100,21 @@ function Tween:constructor(manager)
     self._manager.list:add(self)
 end
 
+function Tween.cancelTweensOf(obj)
+    local members = TweenManager.global.list:getMembers()
+    for i = 1, TweenManager.global.list:getLength() do
+        local tween = members[i] --- @type chip.tweens.Tween
+        local tweenerMembers = tween._tweeners:getMembers() --- @type table<chip.tweens.tweeners.Tweener>
+
+        for j = 1, tween._tweeners:getLength() do
+            local tweener = tweenerMembers[j] --- @type chip.tweens.tweeners.Tweener
+            if tweener and tweener._object == obj then
+                tween._tweeners:remove(tweener)
+            end
+        end
+    end
+end
+
 function Tween:getManager()
     return self._manager
 end
