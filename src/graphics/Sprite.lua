@@ -381,13 +381,17 @@ end
 ---
 function Sprite:getRenderingInfo(trans)
     local frames, frame = self._frames, self._frame
+
     local width, height = self:getWidth(), self:getHeight()
+    local frameWidth, frameHeight = self:getFrameWidth(), self:getFrameHeight()
     
     if not frames or not frame or not frame.texture then
         return nil, 0, 0, 0, 0, nil
     end
     local curAnim = self.animation:getCurrentAnimation()
+
     local ox, oy = self.origin.x * width, self.origin.y * height
+    local ofx, ofy = self.origin.x * frameWidth, self.origin.y * frameHeight
 
     trans = trans or lmath.newTransform()
     trans:reset()
@@ -424,9 +428,9 @@ function Sprite:getRenderingInfo(trans)
     end
     rx = rx + ((offx * abs(self.scale.x)) * self._cosRotation + (offy * abs(self.scale.y)) * -self._sinRotation)
     ry = ry + ((offx * abs(self.scale.x)) * self._sinRotation + (offy * abs(self.scale.y)) * self._cosRotation)
-
-    local sx = self.scale.x * (self.flipX and -1.0 or 1.0)
-    local sy = self.scale.y * (self.flipY and -1.0 or 1.0)
+    
+    local sx = self.scale.x
+    local sy = self.scale.y
 
     if not isOnCanvasLayer then
         local cam = Camera.currentCamera
@@ -472,6 +476,16 @@ function Sprite:getRenderingInfo(trans)
     local rect = self._rect:set(rx, ry, rw, rh) --- @type chip.math.Rect
     rect:getRotatedBounds(rotation, nil, rect)
 
+    if self.flipX then
+        trans:translate(ofx, 0)
+        trans:scale(-1, 1)
+        trans:translate(-ofx, 0)
+    end
+    if self.flipY then
+        trans:translate(0, ofy)
+        trans:scale(1, -1)
+        trans:translate(0, -ofy)
+    end
     return trans, rect.x, rect.y, rect.width, rect.height, frame
 end
 

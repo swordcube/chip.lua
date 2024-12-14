@@ -23,4 +23,8 @@
 ---
 local InputEvent = Object:extend("InputEvent", ...)
 
+function InputEvent:isPressed()
+    return false
+end
+
 return InputEvent

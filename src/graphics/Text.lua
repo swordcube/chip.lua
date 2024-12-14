@@ -115,7 +115,7 @@ function Text:constructor(x, y, fieldWidth, contents, size)
     ---
     self._canvas = nil
 
-    tex = Texture:new()
+    local tex = Texture:new() --- @type chip.graphics.Texture
     
     local imgData = love.image.newImageData(1, 1)
     tex:setImage(gfx.newImage(imgData), imgData)
@@ -329,6 +329,11 @@ function Text:_regenTexture()
     local pr, pg, pb, pa = gfx.getColor()
 
     local prevBlendMode, prevAlphaMode = gfx.getBlendMode()
+    gfx.push()
+    gfx.origin()
+
+    local sx, sy, sw, sh = gfx.getScissor()
+    gfx.setScissor()
 
     if self._borderSize > 0 and self._borderColor.a > 0 then
         gfx.setBlendMode("alpha", "premultiplied")
@@ -385,6 +390,8 @@ function Text:_regenTexture()
     gfx.setColor(pr, pg, pb, pa)
 
     gfx.setBlendMode(prevBlendMode, prevAlphaMode)
+    gfx.pop()
+
     gfx.setCanvas(prevCanvas)
 
     ---

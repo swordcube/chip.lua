@@ -105,3 +105,61 @@ function math.wrap(value, minimum, maximum)
     end
     return minimum + (value - minimum) % range
 end
+
+---
+--- Formats a given number as a string representing money.
+---
+--- @param  amount        number     The number to format.
+--- @param  showDecimal   boolean?   Whether or not to include the decimal part of the number when formatting. (default: true)
+--- @param  englishStyle  boolean?   Whether or not to use english style formatting (i.e. use `.` for the decimal part and `,` for the thousands separator). (default: true)
+---
+--- @return string  str  The formatted string.
+---
+function math.formatMoney(amount, showDecimal, englishStyle)
+    if showDecimal == nil then
+        showDecimal = true
+    end
+    if englishStyle == nil then
+        englishStyle = true
+    end
+    local isNegative = amount < 0
+    amount = math.abs(amount)
+
+    local str = ""
+    local comma = ""
+    local whole = math.floor(amount)
+
+    while whole > 0 do
+        if #str > 0 and #comma <= 0 then
+            comma = englishStyle and "," or "."
+        end
+        local zeroes = ""
+        local helper = whole - math.floor(whole / 1000) * 1000
+        whole = math.floor(whole / 1000)
+        if whole > 0 then
+            if helper < 100 then
+                zeroes = zeroes .. "0"
+            end
+            if helper < 10 then
+                zeroes = zeroes .. "0"
+            end
+        end
+        str = zeroes .. helper .. comma .. str
+    end
+
+    if str == "" then
+        str = "0"
+    end
+    if showDecimal then
+        local decimal = math.floor(amount * 100) - math.floor(amount) * 100
+        str = str .. (englishStyle and "." or ",")
+        if decimal < 10 then
+            str = str .. "0"
+        end
+        str = str .. decimal
+    end
+    if isNegative then
+        str = "-" .. str
+    end
+    return str
+end

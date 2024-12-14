@@ -17,11 +17,11 @@
 ]]
 
 ---
---- @class chip.input.InputEventMouse : chip.backend.Object
+--- @class chip.input.InputEventMouse : chip.input.InputEvent
 --- 
 --- A class which represents a mouse input event.
 ---
-local InputEventMouse = Object:extend("InputEventMouse", ...)
+local InputEventMouse = InputEvent:extend("InputEventMouse", ...)
 
 ---
 --- @param  x  number

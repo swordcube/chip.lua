@@ -17,11 +17,11 @@
 ]]
 
 ---
---- @class chip.input.InputEventKey : chip.backend.Object
+--- @class chip.input.InputEventKey : chip.input.InputEvent
 --- 
 --- A class which represents a keyboard input event.
 ---
-local InputEventKey = Object:extend("InputEventKey", ...)
+local InputEventKey = InputEvent:extend("InputEventKey", ...)
 
 ---
 --- @param  key        string
