@@ -47,6 +47,24 @@ function FrameData:constructor(name, x, y, offsetX, offsetY, width, height, text
     self.quad = love.graphics.newQuad(self.x, self.y, self.width, self.height, self.texture.width, self.texture.height) --- @type love.Quad
 end
 
+function FrameData:getUVX()
+    return self.x / self.texture.width
+end
+
+function FrameData:getUVY()
+    return self.y / self.texture.height
+end
+
+function FrameData:getUVWidth()
+    local _, _, w, _ = self.quad:getViewport()
+    return w / self.texture.width
+end
+
+function FrameData:getUVHeight()
+    local _, _, _, h = self.quad:getViewport()
+    return h / self.texture.height
+end
+
 function FrameData:free()
     if not self.quad then
         return -- already freed

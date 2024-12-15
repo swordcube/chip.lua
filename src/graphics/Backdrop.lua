@@ -34,6 +34,11 @@ function Backdrop:constructor(x, y, repeatAmountX, repeatAmountY)
     --- @protected
     ---
     self._backdropOffset = Point:new(0, 0) --- @type chip.math.Point
+
+    ---
+    --- @protected
+    ---
+    self._moves = false
 end
 
 function Backdrop:update(dt)
@@ -48,6 +53,7 @@ function Backdrop:update(dt)
     if offset.y < -height or offset.y > height then
         offset.y = 0
     end
+    Backdrop.super.update(self, dt)
 end
 
 function Backdrop:draw()

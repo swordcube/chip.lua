@@ -84,6 +84,7 @@ Sprite = crequire("graphics.Sprite") --- @type chip.graphics.Sprite
 Text = crequire("graphics.Text") --- @type chip.graphics.Text
 
 Backdrop = crequire("graphics.Backdrop") --- @type chip.graphics.Backdrop
+TiledSprite = crequire("graphics.TiledSprite") --- @type chip.graphics.TiledSprite
 
 Camera = crequire("graphics.Camera") --- @type chip.graphics.Camera
 CanvasLayer = crequire("graphics.CanvasLayer") --- @type chip.graphics.CanvasLayer

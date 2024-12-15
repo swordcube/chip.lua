@@ -66,7 +66,6 @@ function SplashScene:init()
     self.logoBG:screenCenter("xy")
     self.logoBG:setAntialiasing(true)
     self.logoBG:setVisibility(false)
-    -- self.logoBG:setAlpha(0.45)
     self.logoBG:setRotationDegrees(45)
     self:add(self.logoBG)
 

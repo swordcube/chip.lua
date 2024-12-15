@@ -192,6 +192,12 @@ function Sprite:constructor(x, y)
     --- @type love.Transform
     ---
     self._transform = lmath.newTransform()
+
+    ---
+    --- @protected
+    --- @type boolean
+    ---
+    self._moves = true
 end
 
 function Sprite:isAntialiased()
@@ -330,20 +336,22 @@ end
 --- Updates this sprite.
 ---
 function Sprite:update(dt)
-    local v = self.velocity
-    if v.x ~= 0 or v.y ~= 0 then
-        local x = self._x
-        local y = self._y
-
-        local ax = self.acceleration.x
-        local ay = self.acceleration.y
-
-        local dvx, dvy = Velocity.getVelocityDelta(v.x, v.y, ax, ay, dt)
-        self._x = x + ((v.x + dvx) * dt)
-        self._y = y + ((v.y + dvy) * dt)
-
-        v.x = v.x + (dvx * 2.0)
-        v.y = v.y + (dvy * 2.0)
+    if self._moves then
+        local v = self.velocity
+        if v.x ~= 0 or v.y ~= 0 then
+            local x = self._x
+            local y = self._y
+    
+            local ax = self.acceleration.x
+            local ay = self.acceleration.y
+    
+            local dvx, dvy = Velocity.getVelocityDelta(v.x, v.y, ax, ay, dt)
+            self._x = x + ((v.x + dvx) * dt)
+            self._y = y + ((v.y + dvy) * dt)
+    
+            v.x = v.x + (dvx * 2.0)
+            v.y = v.y + (dvy * 2.0)
+        end
     end
     self.animation:update(dt)
 end
@@ -464,7 +472,9 @@ function Sprite:getRenderingInfo(trans)
         trans:translate(-w2, -h2)
     end
     trans:translate(rx - ox, ry - oy)
+    trans:translate(ox, oy)
     trans:rotate(self._rotation)
+    trans:translate(-ox, -oy)
     trans:scale(sx, sy)
 
     local v1, v2, _, rx, v5, v6, _, ry, v9, v10 = trans:getMatrix()
