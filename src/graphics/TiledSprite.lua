@@ -28,14 +28,12 @@ local tblInsert = table.insert
 local _linear_, _nearest_ = "linear", "nearest"
 
 local sqrt = math.sqrt
-local sin = math.sin
-local cos = math.cos
 local abs = math.abs
 local atan2 = math.atan2
-local deg = math.deg
-local rad = math.rad
 local ceil = math.ceil
 local lerp = math.lerp
+
+-- TODO: stop using deprecrated stuff, we're in love 12.0!
 
 local vertexFormat = {
     {"VertexPosition", "float", 3},
