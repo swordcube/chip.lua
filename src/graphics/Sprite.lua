@@ -23,6 +23,16 @@ local gfxGetColor = gfx.getColor
 local gfxSetColor = gfx.setColor
 local gfxDraw = gfx.draw
 
+local gfxPush = gfx.push
+local gfxPop = gfx.pop
+local gfxApplyTransform = gfx.applyTransform
+local gfxTranslate = gfx.translate
+local gfxRotate = gfx.rotate
+local gfxRectangle = gfx.rectangle
+
+local gfxStencil = gfx.stencil
+local gfxSetStencilTest = gfx.setStencilTest
+
 local tblInsert = table.insert
 
 local _linear_, _nearest_ = "linear", "nearest"
@@ -34,6 +44,25 @@ local abs = math.abs
 local atan2 = math.atan2
 local deg = math.deg
 local rad = math.rad
+
+local stencilSprite, stencilX, stencilY = nil, 0, 0
+local function stencil()
+	if stencilSprite then
+		gfxPush()
+        gfxApplyTransform(stencilSprite._transform)
+		gfxTranslate(
+            stencilX + stencilSprite._clipRect.x + stencilSprite._clipRect.width * 0.5,
+			stencilY + stencilSprite._clipRect.y + stencilSprite._clipRect.height * 0.5
+        )
+		gfxRotate(stencilSprite._rotation)
+		gfxTranslate(
+            -stencilSprite._clipRect.width * 0.5,
+			-stencilSprite._clipRect.height * 0.5
+        )
+		gfxRectangle("fill", 0, 0, stencilSprite._clipRect.width, stencilSprite._clipRect.height)
+		gfxPop()
+	end
+end
 
 local Velocity = crequire("math.Velocity") --- @type chip.math.Velocity
 local SpriteUtil = crequire("utils.SpriteUtil") --- @type chip.utils.SpriteUtil
@@ -198,6 +227,12 @@ function Sprite:constructor(x, y)
     --- @type boolean
     ---
     self._moves = true
+
+    ---
+    --- @protected
+    --- @type chip.math.Rect?
+    ---
+    self._clipRect = nil
 end
 
 function Sprite:isAntialiased()
@@ -330,6 +365,17 @@ end
 ---
 function Sprite:setAlpha(alpha)
     self._alpha = alpha
+end
+
+function Sprite:getClipRect()
+    return self._clipRect
+end
+
+---
+--- @param  rect  chip.math.Rect
+---
+function Sprite:setClipRect(rect)
+    self._clipRect = rect
 end
 
 ---
@@ -496,7 +542,7 @@ function Sprite:getRenderingInfo(trans)
         trans:scale(1, -1)
         trans:translate(0, -ofy)
     end
-    return trans, rect.x, rect.y, rect.width, rect.height, frame
+    return trans, rx, ry, rw, rh, frame
 end
 
 ---
@@ -504,10 +550,7 @@ end
 ---
 function Sprite:draw()
     local trans, _, _, _, _, frame = self:getRenderingInfo(self._transform)
-    if not frame then
-        return
-    end
-    if not self:isOnScreen() then
+    if not frame or not self:isOnScreen() then
         return
     end
     local pr, pg, pb, pa = gfxGetColor()
@@ -519,10 +562,19 @@ function Sprite:draw()
     local filter = self._antialiasing and _linear_ or _nearest_
     img:setFilter(filter, filter, 4)
     
+    if self._clipRect then
+		stencilSprite, stencilX, stencilY = self, 0, 0
+
+		gfxStencil(stencil, "replace", 1, false)
+		gfxSetStencilTest("greater", 0)
+	end
     gfxDraw(
         frame.texture:getImage(), frame.quad, -- What's actually drawn to the screen
         trans -- Transformation to apply to the sprite
     )
+    if self._clipRect then
+		gfxSetStencilTest()
+	end
     img:setFilter(prevFilterMin, prevFilterMag, prevFilterAns)
     gfxSetColor(pr, pg, pb, pa)
 end

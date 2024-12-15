@@ -55,10 +55,15 @@ local TiledSprite = Sprite:extend("TiledSprite", ...)
 function TiledSprite:constructor(x, y)
     TiledSprite.super.constructor(self, x, y)
 
+    local triangles = {}
+    for _ = 1, 10000 do
+        tblInsert(triangles, {0, 0, 0, 0, 0, 0})
+    end
+
     ---
     --- @protected
     ---
-    self._mesh = nil --- @type love.Mesh
+    self._mesh = gfx.newMesh(vertexFormat, triangles, "triangles", "stream") --- @type love.Mesh
 
     ---
     --- @protected
@@ -92,11 +97,11 @@ function TiledSprite:constructor(x, y)
 end
 
 function TiledSprite:getHorizontalLength()
-    return self._horizontalLength
+    return self._horizontalRepeat and self._horizontalLength or self:getWidth()
 end
 
 function TiledSprite:getVerticalLength()
-    return self._verticalLength
+    return self._verticalRepeat and self._verticalLength or self:getHeight()
 end
 
 function TiledSprite:getHorizontalPadding()
@@ -144,14 +149,14 @@ function TiledSprite:setVerticalPadding(value)
 end
 
 ---
---- @param  value  boolean  Whether the sprite can repeat itself horizontally.
+--- @param  value  boolean  Whether or not the sprite can repeat itself horizontally.
 ---
 function TiledSprite:setHorizontalRepeat(value)
     self._horizontalRepeat = value
 end
 
 ---
---- @param  value  boolean  Whether the sprite can repeat itself vertically.
+--- @param  value  boolean  Whether or not the sprite can repeat itself vertically.
 ---
 function TiledSprite:setVerticalRepeat(value)
     self._verticalRepeat = value
@@ -307,7 +312,7 @@ function TiledSprite:calculateVertices(frame, hTiles, vTiles)
             uvRight = lerp(uvLeft, uvRight, rightMult)
         end
         local bottomMult = 1.0
-        local uvTop, uvBottom =  frame:getUVY() + uvOffsetY, frame:getUVY() + frame:getUVHeight() - uvOffsetY
+        local uvTop, uvBottom = frame:getUVY() + uvOffsetY, frame:getUVY() + frame:getUVHeight() - uvOffsetY
         for y = 0, roundVTiles do
             if y == roundVTiles and hTiles ~= (roundVTiles + 1) then
                 bottomMult = vTiles % 1
@@ -347,10 +352,7 @@ end
 ---
 function TiledSprite:draw()
     local trans, _, _, _, _, frame = self:getRenderingInfo(self._transform)
-    if not frame then
-        return
-    end
-    if not self:isOnScreen() then
+    if not frame or self._rect.width <= 0 or self._rect.height <= 0 or not self:isOnScreen() then
         return
     end
     local pr, pg, pb, pa = gfxGetColor()
@@ -362,15 +364,11 @@ function TiledSprite:draw()
     local filter = self._antialiasing and _linear_ or _nearest_
     img:setFilter(filter, filter, 4)
     
-    local mesh = self._mesh
     local vertices = self:calculateVertices(frame, self._horizontalLength / frame.width, self._verticalLength / frame.height)
     
-    if not mesh then
-        mesh = gfx.newMesh(vertexFormat, vertices, "triangles", "stream")
-        self._mesh = mesh
-    else
-        mesh:setVertices(vertices)
-    end
+    local mesh = self._mesh
+    mesh:setDrawRange(1, #vertices)
+    mesh:setVertices(vertices)
     mesh:setTexture(img)
 
     gfxDraw(

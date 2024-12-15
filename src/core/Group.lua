@@ -314,8 +314,10 @@ end
 function Group:free()
     for i = 1, self._length do
         local actor = self._members[i] --- @type chip.core.Actor
-        actor._parent = nil
-        actor:free()
+        if actor then
+            actor._parent = nil
+            actor:free()
+        end
     end
     Group.super.free(self)
 end
