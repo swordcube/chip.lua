@@ -185,7 +185,7 @@ function TiledSprite:getRenderingInfo(trans)
     end
     local curAnim = self.animation:getCurrentAnimation()
 
-    local ox, oy = self.origin.x * (self._horizontalRepeat and self._horizontalLength or width), self.origin.y * (self._verticalRepeat and self._verticalLength or height)
+    local ox, oy = self.origin.x * (self._horizontalRepeat and self._horizontalLength * self.scale.x or width), self.origin.y * (self._verticalRepeat and self._verticalLength * self.scale.y or height)
     local ofx, ofy = self.origin.x * (self._horizontalRepeat and self._horizontalLength or frameWidth), self.origin.y * (self._verticalRepeat and self._verticalLength or frameHeight)
 
     trans = trans or lmath.newTransform()
@@ -303,7 +303,7 @@ function TiledSprite:calculateVertices(frame, hTiles, vTiles)
     local uvOffsetY = self._verticalPadding / frame.texture.height
     
     local rightMult = 1.0
-    local uvLeft, uvRight = frame:getUVX() + uvOffsetX, frame:getUVX() + frame:getUVWidth() - uvOffsetY
+    local uvLeft, uvRight = frame:getUVX() + uvOffsetX, frame:getUVX() + frame:getUVWidth() - uvOffsetX
     for x = 0, roundHTiles do
         if x == roundHTiles and hTiles ~= (roundHTiles + 1) then
             rightMult = hTiles % 1

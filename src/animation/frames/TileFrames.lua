@@ -17,6 +17,9 @@
 ]]
 
 local tblInsert = table.insert
+local function getChipImagePath(name)
+    return Chip.classPath .. "/assets/images/" .. name
+end
 
 local FrameData = crequire("animation.frames.FrameData") --- @type chip.animation.frames.FrameData
 local FrameCollection = crequire("animation.frames.FrameCollection") --- @type chip.animation.frames.FrameCollection
@@ -37,11 +40,18 @@ function TileFrames.fromTexture(texture, tileSize)
     --- @type chip.graphics.Texture?
     ---
     local tex = Assets.getTexture(texture)
-
-    ---
-    --- @type chip.animation.frames.TileFrames
-    ---
-    local atlas = TileFrames:new(tex)
+    if not tex then
+        tex = Assets.getTexture(getChipImagePath("missing.png"))
+        local atlas = TileFrames:new(tex) --- @type chip.animation.frames.TileFrames
+        tblInsert(atlas:getFrames(), FrameData:new(
+            "#_MISSING_TEXTURE_",
+            0, 0, 0, 0,
+            tex.width, tex.height,
+            atlas:getTexture()
+        ))
+        return atlas
+    end
+    local atlas = TileFrames:new(tex) --- @type chip.animation.frames.TileFrames
 
     local numRows = tileSize.y == 0 and 1 or math.round((texture.height) / tileSize.y)
     local numCols = tileSize.x == 0 and 1 or math.round((texture.width) / tileSize.x)

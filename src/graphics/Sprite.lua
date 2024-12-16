@@ -16,6 +16,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ]]
 
+---@diagnostic disable: invisible
+
 local gfx = love.graphics
 local lmath = love.math
 
@@ -62,6 +64,9 @@ local function stencil()
 		gfxRectangle("fill", 0, 0, stencilSprite._clipRect.width, stencilSprite._clipRect.height)
 		gfxPop()
 	end
+end
+local function getChipImagePath(name)
+    return Chip.classPath .. "/assets/images/" .. name
 end
 
 local Velocity = crequire("math.Velocity") --- @type chip.math.Velocity
@@ -233,6 +238,8 @@ function Sprite:constructor(x, y)
     --- @type chip.math.Rect?
     ---
     self._clipRect = nil
+
+    self:loadTexture(getChipImagePath("missing.png"))
 end
 
 function Sprite:isAntialiased()
@@ -257,9 +264,6 @@ function Sprite:loadTexture(texture, animated, frameWidth, frameHeight)
     animated = animated ~= nil and animated or false
     texture = Assets.getTexture(texture)
 
-    if not texture then
-        return self
-    end
     frameWidth = frameWidth and frameWidth or 0
     frameHeight = frameHeight and frameHeight or 0
 
@@ -559,17 +563,17 @@ function Sprite:draw()
     local img = frame.texture:getImage()
     local prevFilterMin, prevFilterMag, prevFilterAns = img:getFilter()
     
-    local filter = self._antialiasing and _linear_ or _nearest_
-    img:setFilter(filter, filter, 4)
-    
     if self._clipRect then
 		stencilSprite, stencilX, stencilY = self, 0, 0
 
 		gfxStencil(stencil, "replace", 1, false)
 		gfxSetStencilTest("greater", 0)
 	end
+    local filter = self._antialiasing and _linear_ or _nearest_
+    img:setFilter(filter, filter, 4)
+    
     gfxDraw(
-        frame.texture:getImage(), frame.quad, -- What's actually drawn to the screen
+        img, frame.quad, -- What's actually drawn to the screen
         trans -- Transformation to apply to the sprite
     )
     if self._clipRect then

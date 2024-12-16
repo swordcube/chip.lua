@@ -56,13 +56,11 @@ function FrameData:getUVY()
 end
 
 function FrameData:getUVWidth()
-    local _, _, w, _ = self.quad:getViewport()
-    return w / self.texture.width
+    return self.width / self.texture.width
 end
 
 function FrameData:getUVHeight()
-    local _, _, _, h = self.quad:getViewport()
-    return h / self.texture.height
+    return self.height / self.texture.height
 end
 
 function FrameData:free()

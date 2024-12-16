@@ -17,6 +17,9 @@
 ]]
 
 local tblInsert = table.insert
+local function getChipImagePath(name)
+    return Chip.classPath .. "/assets/images/" .. name
+end
 
 local File = crequire("utils.File") --- @type chip.utils.File
 local FrameData = crequire("animation.frames.FrameData") --- @type chip.animation.frames.FrameData
@@ -36,18 +39,22 @@ local AtlasFrames = FrameCollection:extend("AtlasFrames", ...)
 --- @return chip.animation.frames.AtlasFrames
 ---
 function AtlasFrames.fromSparrow(texture, xmlFile)
-    ---
-    --- @type chip.graphics.Texture?
-    ---
-    local tex = Assets.getTexture(texture)
-
-    ---
-    --- @type chip.animation.frames.AtlasFrames
-    ---
-	local atlas = AtlasFrames:new(tex)
+    local tex = Assets.getTexture(texture) --- @type chip.graphics.Texture?
+    if not tex then
+        tex = Assets.getTexture(getChipImagePath("missing.png"))
+        local atlas = AtlasFrames:new(tex) --- @type chip.animation.frames.AtlasFrames
+        tblInsert(atlas:getFrames(), FrameData:new(
+            "#_MISSING_TEXTURE_",
+            0, 0, 0, 0,
+            tex.width, tex.height,
+            atlas:getTexture()
+        ))
+        return atlas
+    end
 	local xmlContent = File.exists(xmlFile) and File.read(xmlFile) or xmlFile
-
 	local data = Xml.parse(xmlContent)
+    
+    local atlas = AtlasFrames:new(tex) --- @type chip.animation.frames.AtlasFrames
 	for _, node in ipairs(data.TextureAtlas.children) do
         if node.name == "SubTexture" then
 			tblInsert(atlas:getFrames(), FrameData:new(
