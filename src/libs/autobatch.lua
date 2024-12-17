@@ -23,7 +23,6 @@ autobatch.color = { 255, 255, 255, 255 }
 autobatch.image = nil
 autobatch.stack = {}
 
-
 local function switchActiveImage(img)
   -- Draw and reset old image's spritebatch if we have one; if not we reset
   -- love's color state as the spritebatch's color state will be used instead
@@ -61,13 +60,13 @@ end
 
 
 function autobatch.draw(image, ...)
+  -- Only Textures (Image or Canvas) can be batched -- if the image is
+  -- neither of these then we draw normally instead
+  if not image:typeOf("Texture") then
+    return flushAndDraw(image, ...)
+  end
   if image ~= autobatch.image then
     if not autobatch.batches[image] then
-      -- Only Textures (Image or Canvas) can be batched -- if the image is
-      -- neither of these then we draw normally instead
-      if not image:typeOf("Texture") then
-        return flushAndDraw(image, ...)
-      end
       -- Check to see if it's the pending image, and whether it's reached the
       -- draw count threshold; if so we can switch to it as the active image and
       -- create a batch for it, otherwise we just increment the count and draw

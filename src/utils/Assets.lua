@@ -64,7 +64,7 @@ function Assets.getTexture(id)
         local newTexture = Texture:new() --- @type chip.graphics.Texture
 
         local imageData = love.image.newImageData(Assets.getPath(id))
-        newTexture:setImage(love.graphics.newImage(imageData), imageData)
+        newTexture:setImage(imageData)
 
         Assets._textureCache[id] = newTexture
     end

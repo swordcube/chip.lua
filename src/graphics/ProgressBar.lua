@@ -118,13 +118,6 @@ function ProgressBar:constructor(x, y)
     --- @protected
     ---
     self._shownValue = 0.0 --- @type number
-
-    local tex = Texture:new() --- @type chip.graphics.Texture
-    
-    local imgData = love.image.newImageData(1, 1)
-    tex:setImage(gfx.newImage(imgData), imgData)
-
-    self:loadTexture(tex)
 end
 
 function ProgressBar:getFillDirection()

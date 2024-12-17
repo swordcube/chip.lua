@@ -118,7 +118,7 @@ function Text:constructor(x, y, fieldWidth, contents, size)
     local tex = Texture:new() --- @type chip.graphics.Texture
     
     local imgData = love.image.newImageData(1, 1)
-    tex:setImage(gfx.newImage(imgData), imgData)
+    tex:setImage(imgData)
 
     self:loadTexture(tex)
 end
@@ -398,10 +398,7 @@ function Text:_regenTexture()
     --- @type chip.graphics.Texture?
     ---
     local tex = self:getTexture()
-    local imgData = gfx.readbackTexture(self._canvas)
-
-    local img = gfx.newImage(imgData)
-    tex:setImage(img, imgData)
+    tex:setImage(gfx.readbackTexture(self._canvas))
 
     ---
     --- @type chip.animation.frames.FrameData

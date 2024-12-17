@@ -23,6 +23,8 @@ local lmath = love.math
 
 local gfxGetColor = gfx.getColor
 local gfxSetColor = gfx.setColor
+
+local gfxClear = gfx.clear
 local gfxDraw = gfx.draw
 
 local gfxPush = gfx.push
@@ -32,8 +34,8 @@ local gfxTranslate = gfx.translate
 local gfxRotate = gfx.rotate
 local gfxRectangle = gfx.rectangle
 
-local gfxStencil = gfx.stencil
-local gfxSetStencilTest = gfx.setStencilTest
+local gfxSetStencilState = gfx.setStencilState
+local gfxSetColorMask = gfx.setColorMask
 
 local tblInsert = table.insert
 
@@ -47,14 +49,14 @@ local atan2 = math.atan2
 local deg = math.deg
 local rad = math.rad
 
-local stencilSprite, stencilX, stencilY = nil, 0, 0
+local stencilSprite = nil
 local function stencil()
 	if stencilSprite then
 		gfxPush()
         gfxApplyTransform(stencilSprite._transform)
 		gfxTranslate(
-            stencilX + stencilSprite._clipRect.x + stencilSprite._clipRect.width * 0.5,
-			stencilY + stencilSprite._clipRect.y + stencilSprite._clipRect.height * 0.5
+            stencilSprite._clipRect.x + stencilSprite._clipRect.width * 0.5,
+			stencilSprite._clipRect.y + stencilSprite._clipRect.height * 0.5
         )
 		gfxRotate(stencilSprite._rotation)
 		gfxTranslate(
@@ -560,26 +562,29 @@ function Sprite:draw()
     local pr, pg, pb, pa = gfxGetColor()
     gfxSetColor(self._tint.r, self._tint.g, self._tint.b, self._alpha)
 
-    local img = frame.texture:getImage()
-    local prevFilterMin, prevFilterMag, prevFilterAns = img:getFilter()
+    local filter = self._antialiasing and _linear_ or _nearest_
+    local img = frame.texture:getImage(filter)
     
     if self._clipRect then
-		stencilSprite, stencilX, stencilY = self, 0, 0
+		stencilSprite = self
+        gfxClear(false, true, false)
 
-		gfxStencil(stencil, "replace", 1, false)
-		gfxSetStencilTest("greater", 0)
+        gfxSetStencilState("replace", "always", 1)
+        gfxSetColorMask(false)
+
+        stencil()
+
+        gfxSetStencilState("keep", "greater", 0)
+        gfxSetColorMask(true)
 	end
-    local filter = self._antialiasing and _linear_ or _nearest_
-    img:setFilter(filter, filter, 4)
-    
     gfxDraw(
         img, frame.quad, -- What's actually drawn to the screen
         trans -- Transformation to apply to the sprite
     )
     if self._clipRect then
-		gfxSetStencilTest()
+        gfxClear(false, true, false)
+		gfxSetStencilState()
 	end
-    img:setFilter(prevFilterMin, prevFilterMag, prevFilterAns)
     gfxSetColor(pr, pg, pb, pa)
 end
 

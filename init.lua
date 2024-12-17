@@ -279,7 +279,7 @@ local function loop()
         Engine.deltaTime = dt * Engine.timeScale
     end
     if focused then
-        update(dt)
+        update(Engine.deltaTime)
     else
         love.timer.sleep(capDt)
     end

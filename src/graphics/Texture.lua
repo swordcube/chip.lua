@@ -16,6 +16,9 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ]]
 
+local gfx = love.graphics
+local _linear_ = "linear"
+
 ---
 --- @diagnostic disable: invisible
 --- @class chip.graphics.Texture : chip.backend.RefCounted
@@ -42,9 +45,19 @@ function Texture:constructor()
 
     ---
     --- @protected
-    --- @type love.Image
+    --- 
+    --- The image drawn via Sprites when they
+    --- have antialiasing enabled on them.
     ---
-    self._image = nil
+    self._smoothImage = nil --- @type love.Image
+
+    ---
+    --- @protected
+    --- 
+    --- The image drawn via Sprites when they
+    --- have antialiasing disabled on them.
+    ---
+    self._roughImage = nil --- @type love.Image
 
     ---
     --- @protected
@@ -57,8 +70,11 @@ function Texture:free()
     self._imageData:release()
     self._imageData = nil
 
-    self._image:release()
-    self._image = nil
+    self._smoothImage:release()
+    self._smoothImage = nil
+
+    self._roughImage:release()
+    self._roughImage = nil
 
     self.width = 0
     self.height = 0
@@ -70,20 +86,36 @@ function Texture:free()
     end
 end
 
-function Texture:getImage()
-    return self._image
+---
+--- @param  filter  "linear"|"nearest"
+---
+function Texture:getImage(filter)
+    if filter == _linear_ then
+        return self._smoothImage
+    end
+    return self._roughImage
 end
 
 ---
---- @param  image      love.Image
 --- @param  imageData  love.ImageData
 ---
-function Texture:setImage(image, imageData)
-    self._image = image
+function Texture:setImage(imageData)
+    if self._smoothImage then
+        self._smoothImage:release()
+    end
+    if self._roughImage then
+        self._roughImage:release()
+    end
+    self._smoothImage = gfx.newImage(imageData)
+    self._smoothImage:setFilter("linear", "linear", 4)
+
+    self._roughImage = gfx.newImage(imageData)
+    self._roughImage:setFilter("nearest", "nearest", 4)
+
     self._imageData = imageData
 
-    self.width = self._image:getWidth()
-    self.height = self._image:getHeight()
+    self.width = self._imageData:getWidth()
+    self.height = self._imageData:getHeight()
 end
 
 --- [ PRIVATE API ] ---

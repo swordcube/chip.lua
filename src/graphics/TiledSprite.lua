@@ -33,11 +33,9 @@ local atan2 = math.atan2
 local ceil = math.ceil
 local lerp = math.lerp
 
--- TODO: stop using deprecrated stuff, we're in love 12.0!
-
 local vertexFormat = {
-    {"VertexPosition", "float", 3},
-    {"VertexTexCoord", "float", 2},
+    {format = "floatvec3", offset = 0,  arraylength = 0, location = 0},
+    {format = "floatvec2", offset = 12, arraylength = 0, location = 1}
 }
 
 ---
@@ -356,11 +354,8 @@ function TiledSprite:draw()
     local pr, pg, pb, pa = gfxGetColor()
     gfxSetColor(self._tint.r, self._tint.g, self._tint.b, self._alpha)
 
-    local img = frame.texture:getImage()
-    local prevFilterMin, prevFilterMag, prevFilterAns = img:getFilter()
-    
     local filter = self._antialiasing and _linear_ or _nearest_
-    img:setFilter(filter, filter, 4)
+    local img = frame.texture:getImage(filter)
     
     local vertices = self:calculateVertices(frame, self._horizontalLength / frame.width, self._verticalLength / frame.height)
     
@@ -373,7 +368,6 @@ function TiledSprite:draw()
         mesh, -- What's actually drawn to the screen
         trans -- Transformation to apply to the sprite
     )
-    img:setFilter(prevFilterMin, prevFilterMag, prevFilterAns)
     gfxSetColor(pr, pg, pb, pa)
 end
 

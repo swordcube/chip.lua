@@ -37,12 +37,6 @@ function AnimationController:constructor(parent)
     --- @protected
     ---
     self._animations = {}
-    
-    ---
-    --- @protected
-    --- @type string?
-    ---
-    self._name = nil
 
     --- 
     --- @protected
@@ -189,7 +183,7 @@ function AnimationController:update(dt)
     else
         self._finished = true
         if self._onComplete then
-            self._onComplete(self.name)
+            self._onComplete(self:getCurrentAnimationName())
         end
     end
 end
