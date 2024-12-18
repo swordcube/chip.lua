@@ -21,26 +21,28 @@ local gfx = love.graphics
 local gfxGetColor = gfx.getColor
 local gfxSetColor = gfx.setColor
 
+local gfxClear = gfx.clear
 local gfxPush = gfx.push
 local gfxPop = gfx.pop
+
 local gfxApplyTransform = gfx.applyTransform
 local gfxTranslate = gfx.translate
 local gfxRotate = gfx.rotate
 local gfxRectangle = gfx.rectangle
 
-local gfxStencil = gfx.stencil
-local gfxSetStencilTest = gfx.setStencilTest
+local gfxSetStencilState = gfx.setStencilState
+local gfxSetColorMask = gfx.setColorMask
 
 local clamp = math.clamp
 
-local stencilSprite, stencilX, stencilY = nil, 0, 0
+local stencilSprite = nil
 local function stencil()
 	if stencilSprite then
 		gfxPush()
         gfxApplyTransform(stencilSprite._transform)
 		gfxTranslate(
-            stencilX + stencilSprite._clipRect.x + stencilSprite._clipRect.width * 0.5,
-			stencilY + stencilSprite._clipRect.y + stencilSprite._clipRect.height * 0.5
+            stencilSprite._clipRect.x + stencilSprite._clipRect.width * 0.5,
+			stencilSprite._clipRect.y + stencilSprite._clipRect.height * 0.5
         )
 		gfxRotate(stencilSprite._rotation)
 		gfxTranslate(
@@ -254,9 +256,16 @@ function ProgressBar:draw()
     gfxSetColor(self._tint.r, self._tint.g, self._tint.b, self._alpha)
 
     if self._clipRect then
-		stencilSprite, stencilX, stencilY = self, 0, 0
-		gfxStencil(stencil, "replace", 1, false)
-		gfxSetStencilTest("greater", 0)
+		stencilSprite = self
+        gfxClear(false, true, false)
+
+        gfxSetStencilState("replace", "always", 1)
+        gfxSetColorMask(false)
+
+        stencil()
+
+        gfxSetStencilState("keep", "greater", 0)
+        gfxSetColorMask(true)
 	end
     gfxPush()
     gfxApplyTransform(trans)
@@ -285,7 +294,8 @@ function ProgressBar:draw()
         gfxRectangle("fill", 0, barHeight - fillHeight, barWidth, fillHeight)
     end
     if self._clipRect then
-		gfxSetStencilTest()
+        gfxClear(false, true, false)
+		gfxSetStencilState()
 	end
     gfxSetColor(pr, pg, pb, pa)
     gfxPop()
