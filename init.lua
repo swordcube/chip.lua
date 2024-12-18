@@ -250,6 +250,7 @@ local currentFPS = 0
 local wasFocused = true
 
 local function loop()
+    local ticks = Native.getTicksNS()
     if ev then
         ev.pump()
         for name, a, b, c, d, e, f in ev.poll() do
@@ -261,7 +262,6 @@ local function loop()
             love.handlers[name](a,b,c,d,e,f)
         end
     end
-    
     local focused = window.hasFocus()
     if wasFocused ~= focused then
         if focused then
@@ -271,14 +271,14 @@ local function loop()
         end
         wasFocused = focused
     end
-    local cap = (focused and (Engine.vsync and Native.getMonitorRefreshRate() or Engine.targetFPS) or 10)
+    local cap = ((focused or not Engine.autoPause) and (Engine.vsync and Native.getMonitorRefreshRate() or Engine.targetFPS) or 10)
     local capDt = (cap > 0) and 1 / cap or 0
 
     if tmr then
         dt = math.min(tmr.step(), math.max(capDt, 0.0416))
         Engine.deltaTime = dt * Engine.timeScale
     end
-    if focused then
+    if focused or not Engine.autoPause then
         update(Engine.deltaTime)
     else
         love.timer.sleep(capDt)
@@ -308,7 +308,10 @@ local function loop()
             lastDraw = love.timer.getTime()
         end
         drawTmr = drawTmr % capDt
-        love.timer.sleep(dt < 0.001 and 0.001 or 0)
+    end
+    local eventDt = Native.getTicksNS() - ticks
+    if Engine.lowPowerMode then
+        Native.nanoSleep(500000 - eventDt)
     end
 end
 local function run()

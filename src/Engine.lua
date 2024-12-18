@@ -165,7 +165,19 @@ Engine.onQuit = Signal:new() --- @type chip.utils.Signal
 Engine.debugMode = false --- @type boolean
 
 ---
---- Controls the general speed of the game, as a multiplier
+--- Whether or not the game will pause upon
+--- unfocusing the window.
+---
+Engine.autoPause = false --- @type boolean
+
+---
+--- Whether or not the game will run at a
+--- maximum of 1000 TPS, saving on CPU power.
+---
+Engine.lowPowerMode = true --- @type boolean
+
+---
+--- Controls the general speed of the game, as a multiplier.
 ---
 Engine.timeScale = 1.0 --- @type number
 

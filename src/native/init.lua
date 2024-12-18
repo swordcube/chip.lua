@@ -199,6 +199,9 @@ ffi.cdef [[\
 
 	bool SDL_ShowWindow(SDL_Window *window);
 	bool SDL_HideWindow(SDL_Window *window);
+
+	void SDL_DelayPrecise(uint64_t ns);
+	uint64_t SDL_GetTicksNS(void);
 ]]
 
 ---
@@ -258,6 +261,12 @@ function Native.showWindow()
 end
 function Native.hideWindow()
 	SDL3.SDL_HideWindow(SDL3.SDL_GL_GetCurrentWindow())
+end
+function Native.nanoSleep(ns)
+	SDL3.SDL_DelayPrecise(ns)
+end
+function Native.getTicksNS()
+	return SDL3.SDL_GetTicksNS()
 end
 
 -----------------------------------------
