@@ -16,7 +16,9 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ]]
 
+local tblSort = table.sort
 local tblInsert = table.insert
+
 local function getChipImagePath(name)
     return Chip.classPath .. "/assets/images/" .. name
 end
@@ -57,16 +59,24 @@ function AtlasFrames.fromSparrow(texture, xmlFile)
     local atlas = AtlasFrames:new(tex) --- @type chip.animation.frames.AtlasFrames
 	for _, node in ipairs(data.TextureAtlas.children) do
         if node.name == "SubTexture" then
+            local rotated = (node.att.rotated and node.att.rotated:lower() == "true")
+            local frameX = node.att.frameX and tonumber(node.att.frameX) or 0.0
+            local frameY = node.att.frameY and tonumber(node.att.frameY) or 0.0
+
 			tblInsert(atlas:getFrames(), FrameData:new(
 				node.att.name,
 				tonumber(node.att.x), tonumber(node.att.y),
-				node.att.frameX and tonumber(node.att.frameX) or 0,
-				node.att.frameY and tonumber(node.att.frameY) or 0,
+				frameX,
+                frameY,
 				tonumber(node.att.width), tonumber(node.att.height),
-				atlas:getTexture()
+				rotated and math.rad(-90.0) or 0.0,
+                atlas:getTexture()
 			))
         end
     end
+    tblSort(atlas:getFrames(), function(a, b)
+        return tonumber(a.name:sub(#a.name - 3)) < tonumber(b.name:sub(#b.name - 3))
+    end)
 	return atlas
 end
 

@@ -456,13 +456,7 @@ function Sprite:getRenderingInfo(trans)
     trans = trans or lmath.newTransform()
     trans:reset()
 
-    local rx, ry = (self._x - self.offset.x) + ox, (self._y - self.offset.y) + oy
-    
-    local offx = ((curAnim and curAnim.offset.x or 0.0) - self.frameOffset.x) * (self.scale.x < 0 and -1 or 1)
-    local offy = ((curAnim and curAnim.offset.y or 0.0) - self.frameOffset.y) * (self.scale.x < 0 and -1 or 1)
-
-    offx = offx - (frame.offset.x * (self.scale.x < 0 and -1 or 1))
-    offy = offy - (frame.offset.y * (self.scale.y < 0 and -1 or 1))
+    local rx, ry = (self._x - self.offset.x), (self._y - self.offset.y)
 
     local p = self._parent
 
@@ -486,9 +480,6 @@ function Sprite:getRenderingInfo(trans)
             ry = ry - ((cam:getY() - (Engine.gameHeight * 0.5)) * self.scrollFactor.y)
         end
     end
-    rx = rx + ((offx * abs(self.scale.x)) * self._cosRotation + (offy * abs(self.scale.y)) * -self._sinRotation)
-    ry = ry + ((offx * abs(self.scale.x)) * self._sinRotation + (offy * abs(self.scale.y)) * self._cosRotation)
-    
     local sx = self.scale.x
     local sy = self.scale.y
 
@@ -523,12 +514,18 @@ function Sprite:getRenderingInfo(trans)
         trans:rotate(canvas.rotation)
         trans:translate(-w2, -h2)
     end
-    trans:translate(rx - ox, ry - oy)
+
+    -- okay this behavior is consistent across origins
+    -- it's not the correct behavior but it's progress!!!
+    trans:translate(rx, ry)
+    trans:translate(-frame.offset.x, -frame.offset.y)
+    trans:rotate(frame.rotation)
     trans:translate(ox, oy)
     trans:rotate(self._rotation)
     trans:translate(-ox, -oy)
     trans:scale(sx, sy)
 
+    
     local v1, v2, _, rx, v5, v6, _, ry, v9, v10 = trans:getMatrix()
 
     local rw = self:getFrameWidth() * sqrt((v1 * v1) + (v5 * v5) + (v9 * v9))
@@ -581,6 +578,7 @@ function Sprite:draw()
         img, frame.quad, -- What's actually drawn to the screen
         trans -- Transformation to apply to the sprite
     )
+    gfxRectangle("line", self._rect.x, self._rect.y, self._rect.width, self._rect.height)
     if self._clipRect then
         gfxClear(false, true, false)
 		gfxSetStencilState()
