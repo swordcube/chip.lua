@@ -66,7 +66,7 @@ function FrameCollection.fromTexture(texture)
         tblInsert(atlas:getFrames(), FrameData:new(
             "#_MISSING_TEXTURE_",
             0, 0, 0, 0,
-            tex.width, tex.height, 0.0,
+            tex.width, tex.height,
             atlas:getTexture()
         ))
         return atlas
@@ -78,7 +78,7 @@ function FrameCollection.fromTexture(texture)
     tblInsert(atlas:getFrames(), FrameData:new(
         "#_TEXTURE_",
         0, 0, 0, 0,
-        tex.width, tex.height, 0.0,
+        tex.width, tex.height,
         tex
     ))
     return atlas

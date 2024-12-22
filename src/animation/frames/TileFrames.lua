@@ -46,7 +46,7 @@ function TileFrames.fromTexture(texture, tileSize)
         tblInsert(atlas:getFrames(), FrameData:new(
             "#_MISSING_TEXTURE_",
             0, 0, 0, 0,
-            tex.width, tex.height, 0.0,
+            tex.width, tex.height,
             atlas:getTexture()
         ))
         return atlas
@@ -61,7 +61,7 @@ function TileFrames.fromTexture(texture, tileSize)
             tblInsert(atlas:getFrames(), FrameData:new(
                 "frame",
                 (i - 1) * tileSize.x, (j - 1) * tileSize.y,
-                0, 0, tileSize.x, tileSize.y, 0.0,
+                0, 0, tileSize.x, tileSize.y,
                 atlas:getTexture()
             ))
         end

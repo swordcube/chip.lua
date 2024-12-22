@@ -22,17 +22,16 @@
 local FrameData = Class:extend("FrameData", ...)
 
 ---
---- @param  name      string                 The name of this frame.
---- @param  x         number?                The X coordinate of this frame. (in pixels)
---- @param  y         number?                The Y coordinate of this frame. (in pixels)
---- @param  offsetX   number?                The offset of this frame. (x axis, in pixels)
---- @param  offsetY   number?                The offset of this frame. (y axis, in pixels)
---- @param  width     number?                The width of this frame. (in pixels)
---- @param  height    number?                The height of this frame. (in pixels)
---- @param  rotation  number?                The rotation of this frame.
---- @param  texture   chip.graphics.Texture  The texture to use for this frame.
+--- @param  name     string                 The name of this frame.
+--- @param  x        number                 The X coordinate of this frame. (in pixels)
+--- @param  y        number                 The Y coordinate of this frame. (in pixels)
+--- @param  offsetX  number                 The offset of this frame. (x axis, in pixels)
+--- @param  offsetY  number                 The offset of this frame. (y axis, in pixels)
+--- @param  width    number                 The width of this frame. (in pixels)
+--- @param  height   number                 The height of this frame. (in pixels)
+--- @param  texture  chip.graphics.Texture  The texture to use for this frame.
 ---
-function FrameData:constructor(name, x, y, offsetX, offsetY, width, height, rotation, texture)
+function FrameData:constructor(name, x, y, offsetX, offsetY, width, height, texture)
     self.name = name --- @type string
     self.x = x or 0.0 --- @type number
     self.y = y or 0.0 --- @type number
@@ -41,8 +40,6 @@ function FrameData:constructor(name, x, y, offsetX, offsetY, width, height, rota
     
     self.width = width or 0.0 --- @type number
     self.height = height or 0.0 --- @type number
-
-    self.rotation = rotation or 0.0 --- @type number
 
     self.texture = texture --- @type chip.graphics.Texture
     self.texture:reference()
