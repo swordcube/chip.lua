@@ -16,7 +16,9 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ]]
 
+local tblSort = table.sort
 local tblInsert = table.insert
+
 local function getChipImagePath(name)
     return Chip.classPath .. "/assets/images/" .. name
 end
@@ -67,6 +69,9 @@ function AtlasFrames.fromSparrow(texture, xmlFile)
 			))
         end
     end
+    tblSort(atlas:getFrames(), function(a, b)
+        return tonumber(a.name:sub(#a.name - 3)) < tonumber(b.name:sub(#b.name - 3))
+    end)
 	return atlas
 end
 
