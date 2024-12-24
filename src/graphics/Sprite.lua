@@ -54,16 +54,7 @@ local function stencil()
 	if stencilSprite then
 		gfxPush()
         gfxApplyTransform(stencilSprite._transform)
-		gfxTranslate(
-            stencilSprite._clipRect.x + stencilSprite._clipRect.width * 0.5,
-			stencilSprite._clipRect.y + stencilSprite._clipRect.height * 0.5
-        )
-		gfxRotate(stencilSprite._rotation)
-		gfxTranslate(
-            -stencilSprite._clipRect.width * 0.5,
-			-stencilSprite._clipRect.height * 0.5
-        )
-		gfxRectangle("fill", 0, 0, stencilSprite._clipRect.width, stencilSprite._clipRect.height)
+		gfxRectangle("fill", stencilSprite._clipRect.x, stencilSprite._clipRect.y, stencilSprite._clipRect.width, stencilSprite._clipRect.height)
 		gfxPop()
 	end
 end
@@ -422,10 +413,10 @@ end
 ---
 function Sprite:screenCenter(axes)
     if axes:contains("x") then
-        self:setX((Engine.gameWidth - self:getWidth()) * 0.5)
+        self:setX((Engine.gameWidth - self:getFrameWidth()) * 0.5)
     end
     if axes:contains("y") then
-        self:setY((Engine.gameHeight - self:getHeight()) * 0.5)
+        self:setY((Engine.gameHeight - self:getFrameHeight()) * 0.5)
     end
 end
 
@@ -456,13 +447,13 @@ function Sprite:getRenderingInfo(trans)
     trans = trans or lmath.newTransform()
     trans:reset()
 
-    local rx, ry = (self._x - self.offset.x) + ox, (self._y - self.offset.y) + oy
+    local rx, ry = self._x - self.offset.x, self._y - self.offset.y
     
-    local offx = ((curAnim and curAnim.offset.x or 0.0) - self.frameOffset.x) * (self.scale.x < 0 and -1 or 1)
-    local offy = ((curAnim and curAnim.offset.y or 0.0) - self.frameOffset.y) * (self.scale.x < 0 and -1 or 1)
+    local offx = ((curAnim and curAnim.offset.x or 0.0) - self.frameOffset.x) * (self.flipX and -1 or 1)
+    local offy = ((curAnim and curAnim.offset.y or 0.0) - self.frameOffset.y) * (self.flipY and -1 or 1)
 
-    offx = offx - (frame.offset.x * (self.scale.x < 0 and -1 or 1))
-    offy = offy - (frame.offset.y * (self.scale.y < 0 and -1 or 1))
+    offx = offx - frame.offset.x
+    offy = offy - frame.offset.y
 
     local p = self._parent
 
@@ -486,9 +477,6 @@ function Sprite:getRenderingInfo(trans)
             ry = ry - ((cam:getY() - (Engine.gameHeight * 0.5)) * self.scrollFactor.y)
         end
     end
-    rx = rx + ((offx * abs(self.scale.x)) * self._cosRotation + (offy * abs(self.scale.y)) * -self._sinRotation)
-    ry = ry + ((offx * abs(self.scale.x)) * self._sinRotation + (offy * abs(self.scale.y)) * self._cosRotation)
-    
     local sx = self.scale.x
     local sy = self.scale.y
 
@@ -523,11 +511,16 @@ function Sprite:getRenderingInfo(trans)
         trans:rotate(canvas.rotation)
         trans:translate(-w2, -h2)
     end
-    trans:translate(rx - ox, ry - oy)
-    trans:translate(ox, oy)
+    trans:translate(rx, ry)
+    
+    trans:translate(ofx, ofy)
+    trans:translate(offx, offy)
+    trans:scale(abs(sx), abs(sy))
+    trans:translate(-ofx, -ofy)
+
+    trans:translate(ofx, ofy)
     trans:rotate(self._rotation)
-    trans:translate(-ox, -oy)
-    trans:scale(sx, sy)
+    trans:translate(-ofx, -ofy)
 
     local v1, v2, _, rx, v5, v6, _, ry, v9, v10 = trans:getMatrix()
 
@@ -537,6 +530,11 @@ function Sprite:getRenderingInfo(trans)
 
     local rect = self._rect:set(rx, ry, rw, rh) --- @type chip.math.Rect
     rect:getRotatedBounds(rotation, nil, rect)
+
+    trans:translate(ofx, ofy)
+    trans:scale(1 / abs(sx), 1 / abs(sy))
+    trans:scale(sx, sy)
+    trans:translate(-ofx, -ofy)
 
     if self.flipX then
         trans:translate(ofx, 0)

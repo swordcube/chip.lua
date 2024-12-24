@@ -185,17 +185,18 @@ function TiledSprite:getRenderingInfo(trans)
 
     local ox, oy = self.origin.x * (self._horizontalRepeat and self._horizontalLength * self.scale.x or width), self.origin.y * (self._verticalRepeat and self._verticalLength * self.scale.y or height)
     local ofx, ofy = self.origin.x * (self._horizontalRepeat and self._horizontalLength or frameWidth), self.origin.y * (self._verticalRepeat and self._verticalLength or frameHeight)
+    local ofx2, ofy2 = self.origin.x * frameWidth, self.origin.y * frameHeight
 
     trans = trans or lmath.newTransform()
     trans:reset()
 
-    local rx, ry = (self._x - self.offset.x) + ox, (self._y - self.offset.y) + oy
+    local rx, ry = self._x - self.offset.x, self._y - self.offset.y
     
-    local offx = ((curAnim and curAnim.offset.x or 0.0) - self.frameOffset.x) * (self.scale.x < 0 and -1 or 1)
-    local offy = ((curAnim and curAnim.offset.y or 0.0) - self.frameOffset.y) * (self.scale.x < 0 and -1 or 1)
+    local offx = ((curAnim and curAnim.offset.x or 0.0) - self.frameOffset.x) * (self.flipX and -1 or 1)
+    local offy = ((curAnim and curAnim.offset.y or 0.0) - self.frameOffset.y) * (self.flipY and -1 or 1)
 
-    offx = offx - (frame.offset.x * (self.scale.x < 0 and -1 or 1))
-    offy = offy - (frame.offset.y * (self.scale.y < 0 and -1 or 1))
+    offx = offx - frame.offset.x
+    offy = offy - frame.offset.y
 
     local p = self._parent
 
@@ -219,9 +220,6 @@ function TiledSprite:getRenderingInfo(trans)
             ry = ry - ((cam:getY() - (Engine.gameHeight * 0.5)) * self.scrollFactor.y)
         end
     end
-    rx = rx + ((offx * abs(self.scale.x)) * self._cosRotation + (offy * abs(self.scale.y)) * -self._sinRotation)
-    ry = ry + ((offx * abs(self.scale.x)) * self._sinRotation + (offy * abs(self.scale.y)) * self._cosRotation)
-    
     local sx = self.scale.x
     local sy = self.scale.y
 
@@ -256,11 +254,16 @@ function TiledSprite:getRenderingInfo(trans)
         trans:rotate(canvas.rotation)
         trans:translate(-w2, -h2)
     end
-    trans:translate(rx - ox, ry - oy)
+    trans:translate(rx, ry)
+
     trans:translate(ox, oy)
     trans:rotate(self._rotation)
     trans:translate(-ox, -oy)
-    trans:scale(sx, sy)
+    
+    trans:translate(ofx2, ofy2)
+    trans:translate(offx, offy)
+    trans:scale(abs(sx), abs(sy))
+    trans:translate(-ofx2, -ofy2)
 
     local v1, v2, _, rx, v5, v6, _, ry, v9, v10 = trans:getMatrix()
 
@@ -270,6 +273,11 @@ function TiledSprite:getRenderingInfo(trans)
 
     local rect = self._rect:set(rx, ry, rw, rh) --- @type chip.math.Rect
     rect:getRotatedBounds(rotation, nil, rect)
+
+    trans:translate(ofx2, ofy2)
+    trans:scale(1 / abs(sx), 1 / abs(sy))
+    trans:scale(sx, sy)
+    trans:translate(-ofx2, -ofy2)
 
     if self.flipX then
         trans:translate(ofx, 0)

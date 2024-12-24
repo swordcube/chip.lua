@@ -99,10 +99,8 @@ function SplashScene:init()
     local t = Timer:new() --- @type chip.utils.Timer
     t:start(0.25, function(_)
         local t2 = Tween:new() --- @type chip.tweens.Tween
-        local pt = t2:tweenProperty(self.strips.scale, "x", (Engine.gameWidth / self.strips:getFrameWidth()) * 1.25, 0.7, Ease.cubeOut)
-        pt:setUpdateCallback(function(_)
-            self.strips:screenCenter("xy")
-        end)
+        t2:tweenProperty(self.strips.scale, "x", (Engine.gameWidth / self.strips:getFrameWidth()) * 1.25, 0.7, Ease.cubeOut)
+        
         local t4 = Tween:new() --- @type chip.tweens.Tween
         t4:tweenProperty(self.strips, "rotation", math.rad(90), 0.7, Ease.cubeIn)
         t4:setCompletionCallback(function(_)
@@ -113,19 +111,13 @@ function SplashScene:init()
 
             local t5 = Tween:new() --- @type chip.tweens.Tween
             local pt = t5:tweenProperty(self.logoBG, "scale", Point:new(0.5, 0.5), 0.7, Ease.cubeIn)
-            pt:setUpdateCallback(function(_)
-                self.logoBG:screenCenter("xy")
-            end)
             pt:setCompletionCallback(function(_)
                 local t6 = Tween:new() --- @type chip.tweens.Tween
-                local pt = t6:tweenProperty(self.logoBG, "scale", Point:new(0.3, 0.3), 0.7, Ease.backOut)
-                pt:setUpdateCallback(function(_)
-                    self.logoBG:screenCenter("xy")
-                    self.heart:screenCenter("xy")
-                end)
-                self.heart:setVisibility(true)
+                t6:tweenProperty(self.logoBG, "scale", Point:new(0.3, 0.3), 0.7, Ease.backOut)
                 
+                self.heart:setVisibility(true)
                 self.heart.scale:set(0.1, 0.6)
+
                 t6:tweenProperty(self.heart, "scale", Point:new(0.3, 0.3), 0.5, Ease.backOut)
                 
                 self.heart:setAlpha(0.001)
@@ -138,23 +130,16 @@ function SplashScene:init()
 
                     self.madeWith:setAlpha(0.001)
                     t6:tweenProperty(self.madeWith, "alpha", 1, 0.15, Ease.cubeOut)
+                    t6:tweenProperty(self.madeWith, "scale", Point:new(1, 1), 0.5, Ease.backOut)
 
-                    local pt = t6:tweenProperty(self.madeWith, "scale", Point:new(1, 1), 0.5, Ease.backOut)
-                    pt:setUpdateCallback(function(_)
-                        self.madeWith.y = (self.madeWith:getHeight() - self.madeWith:getFrameHeight()) * 0.5
-                        self.madeWith:screenCenter("x")
-                    end)
                     local t = Timer:new() --- @type chip.utils.Timer
                     t:start(0.25, function(_)
                         self.logo:setVisibility(true)
                         self.logo.scale:set(0.1, 0.6)
 
                         local t7 = Tween:new() --- @type chip.tweens.Tween
-                        local pt = t7:tweenProperty(self.logo, "scale", Point:new(0.3, 0.3), 0.5, Ease.backOut)
-                        pt:setUpdateCallback(function(_)
-                            self.logo.offset.y = (self.logo:getHeight() - (self.logo:getFrameHeight() * 0.3)) * 0.5
-                            self.logo:screenCenter("x")
-                        end)
+                        t7:tweenProperty(self.logo, "scale", Point:new(0.3, 0.3), 0.5, Ease.backOut)
+                        
                         self.logo:setAlpha(0.001)
                         t7:tweenProperty(self.logo, "alpha", 1, 0.15, Ease.cubeOut)
                     end)
@@ -169,17 +154,17 @@ function SplashScene:init()
     t:start(4, function(_)
         local pinkStrip = Sprite:new() --- @type chip.graphics.Sprite
         pinkStrip:makeSolid(Engine.gameWidth, Engine.gameHeight / 2, loveStripColors[1])
-        pinkStrip:setPosition(-pinkStrip:getWidth(), 0)
+        pinkStrip:setPosition(-pinkStrip:getWidth() / 2, pinkStrip:getHeight() / 2)
         self:add(pinkStrip)
 
         local blueStrip = Sprite:new() --- @type chip.graphics.Sprite
         blueStrip:makeSolid(Engine.gameWidth, Engine.gameHeight / 2, loveStripColors[2])
-        blueStrip:setPosition(blueStrip:getWidth(), blueStrip:getHeight())
+        blueStrip:setPosition(Engine.gameWidth + (blueStrip:getWidth() / 2), pinkStrip:getY() + blueStrip:getHeight())
         self:add(blueStrip)
 
         local t2 = Tween:new() --- @type chip.tweens.Tween
-        t2:tweenProperty(pinkStrip, "x", 0, 0.35, Ease.cubeIn)
-        t2:tweenProperty(blueStrip, "x", 0, 0.35, Ease.cubeIn)
+        t2:tweenProperty(pinkStrip, "x", Engine.gameWidth / 2, 0.35, Ease.cubeIn)
+        t2:tweenProperty(blueStrip, "x", Engine.gameWidth / 2, 0.35, Ease.cubeIn)
         
         local t3 = Timer:new()
         t3:start(0.4, function(_)
@@ -194,11 +179,11 @@ function SplashScene:init()
             
             local pinkStrip = Sprite:new() --- @type chip.graphics.Sprite
             pinkStrip:makeSolid(Engine.gameWidth, Engine.gameHeight / 2, loveStripColors[1])
-            pinkStrip:setPosition(0, 0)
+            pinkStrip:setPosition(pinkStrip:getWidth() / 2, pinkStrip:getHeight() / 2)
             
             local blueStrip = Sprite:new() --- @type chip.graphics.Sprite
             blueStrip:makeSolid(Engine.gameWidth, Engine.gameHeight / 2, loveStripColors[2])
-            blueStrip:setPosition(0, blueStrip:getHeight())
+            blueStrip:setPosition(blueStrip:getWidth() / 2, pinkStrip:getY() + blueStrip:getHeight())
 
             local function update()
                 tweenManager:update(Engine.deltaTime)
@@ -212,8 +197,9 @@ function SplashScene:init()
             Engine.switchScene(self.initialScene)
 
             local t2 = Tween:new(tweenManager) --- @type chip.tweens.Tween
-            t2:tweenProperty(pinkStrip, "x", pinkStrip:getWidth(), 0.35, Ease.cubeOut)
-            t2:tweenProperty(blueStrip, "x", -blueStrip:getWidth(), 0.35, Ease.cubeOut)
+            t2:tweenProperty(pinkStrip, "x", Engine.gameWidth + (pinkStrip:getWidth() / 2), 0.35, Ease.cubeOut)
+            t2:tweenProperty(blueStrip, "x", -(blueStrip:getWidth() / 2), 0.35, Ease.cubeOut)
+            
             t2:setCompletionCallback(function(_)
                 Engine.postUpdate:disconnect(update)
                 Engine.postSceneDraw:disconnect(draw)
