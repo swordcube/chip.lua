@@ -134,6 +134,61 @@ function table.join(t, sep)
 end
 
 ---
+---dynamically set a value in a multidimensional table based off of a list   
+---author: https://stackoverflow.com/questions/67801776/writing-to-dynamic-multidimensional-table-via-path
+---
+---@param list table
+---@param keys table<string|number>
+---
+---@param value any
+---
+function table.set(list, keys, value)
+	local lastKey = nil
+
+	for _, key in ipairs(keys) do
+		key, lastKey = lastKey, key
+
+		if key == nil then goto continue end
+
+		local parentList = list
+
+		list = rawget(parentList, key)
+
+		if list == nil then
+			list = {}
+			rawset(parentList, key, list)
+		end
+
+		if type(list) ~= "table" then error("Unexpected subtable", 2) end
+
+		::continue::
+	end
+
+	rawset(list, lastKey, value)
+end
+
+---
+---dynamically get a value in a multidimensional table based off of a list   
+---author: https://stackoverflow.com/questions/67801776/writing-to-dynamic-multidimensional-table-via-path
+---
+---@param list table
+---@param keys table<string|number>
+---
+---@return any
+---
+function table.get(list, keys)
+	for index, key in ipairs(keys) do
+	   if list == nil then return nil end
+
+	   if type(list) ~= "table" then error("Unexpected subtable", 2) end
+
+	   list = rawget(list, key)
+	end
+
+	return list
+end
+
+---
 --- Removes a specific item from a table.
 ---
 --- @param t     table  The table to remove the item from.
