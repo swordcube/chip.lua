@@ -85,7 +85,7 @@ function Text:constructor(x, y, fieldWidth, contents, size)
     --- @protected
     --- @type string
     ---
-    self._contents = contents
+    self._contents = nil
     
     ---
     --- @protected
@@ -140,6 +140,8 @@ function Text:constructor(x, y, fieldWidth, contents, size)
     --- @type love.Text?
     ---
     self._textObj = nil
+
+    self:setContents(contents)
 end
 
 ---
@@ -168,6 +170,8 @@ function Text:setFont(font)
         end
         self._font = font
     end
+
+    self:setContents(self._contents)
 end
 
 ---
