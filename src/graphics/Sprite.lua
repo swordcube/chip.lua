@@ -441,8 +441,8 @@ function Sprite:getRenderingInfo(trans)
     end
     local curAnim = self.animation:getCurrentAnimation()
 
-    local ox, oy = self.origin.x * width, self.origin.y * height
-    local ofx, ofy = self.origin.x * frameWidth, self.origin.y * frameHeight
+    local ofx, ofy = abs(self.origin.x * frame.width), abs(self.origin.y * frame.height)
+    local ofx2, ofy2 = abs(self.origin.x * frameWidth), abs(self.origin.y * frameHeight)
 
     trans = trans or lmath.newTransform()
     trans:reset()
@@ -451,9 +451,6 @@ function Sprite:getRenderingInfo(trans)
     
     local offx = ((curAnim and curAnim.offset.x or 0.0) - self.frameOffset.x) * (self.flipX and -1 or 1)
     local offy = ((curAnim and curAnim.offset.y or 0.0) - self.frameOffset.y) * (self.flipY and -1 or 1)
-
-    offx = offx - frame.offset.x
-    offy = offy - frame.offset.y
 
     local p = self._parent
 
@@ -512,39 +509,47 @@ function Sprite:getRenderingInfo(trans)
         trans:translate(-w2, -h2)
     end
     trans:translate(rx, ry)
+
+    -- TODO: resulting rect is slightly off
+    -- when frame offset is more than 0 and the sprite is flipped
     
     trans:translate(ofx, ofy)
-    trans:translate(offx, offy)
+    trans:translate(offx - (frame.offset.x * (self.scale.x < 0.0 and -1 or 1) * (self.flipX and -1 or 1)), offy - (frame.offset.y * (self.scale.y < 0.0 and -1 or 1) * (self.flipY and -1 or 1)))
     trans:scale(abs(sx), abs(sy))
     trans:translate(-ofx, -ofy)
 
     trans:translate(ofx, ofy)
     trans:rotate(self._rotation)
     trans:translate(-ofx, -ofy)
-
+    
     local v1, v2, _, rx, v5, v6, _, ry, v9, v10 = trans:getMatrix()
-
-    local rw = self:getFrameWidth() * sqrt((v1 * v1) + (v5 * v5) + (v9 * v9))
-    local rh = self:getFrameHeight() * sqrt((v2 * v2) + (v6 * v6) + (v10 * v10))
+    
+    local rw = frame.width * sqrt((v1 * v1) + (v5 * v5) + (v9 * v9))
+    local rh = frame.height * sqrt((v2 * v2) + (v6 * v6) + (v10 * v10))
     local rotation = atan2(v5, v1) -- this is in radians
-
+    
     local rect = self._rect:set(rx, ry, rw, rh) --- @type chip.math.Rect
     rect:getRotatedBounds(rotation, nil, rect)
-
-    trans:translate(ofx, ofy)
-    trans:scale(1 / abs(sx), 1 / abs(sy))
-    trans:scale(sx, sy)
-    trans:translate(-ofx, -ofy)
-
-    if self.flipX then
-        trans:translate(ofx, 0)
+    
+    if self.scale.x < 0.0 then
+        trans:translate(ofx2, 0)
         trans:scale(-1, 1)
-        trans:translate(-ofx, 0)
+        trans:translate(-ofx2, 0)
+    end
+    if self.flipX then
+        trans:translate(ofx2, 0)
+        trans:scale(-1, 1)
+        trans:translate(-ofx2, 0)
+    end
+    if self.scale.y < 0.0 then
+        trans:translate(0, ofy2)
+        trans:scale(1, -1)
+        trans:translate(0, -ofy2)
     end
     if self.flipY then
-        trans:translate(0, ofy)
+        trans:translate(0, ofy2)
         trans:scale(1, -1)
-        trans:translate(0, -ofy)
+        trans:translate(0, -ofy2)
     end
     return trans, rx, ry, rw, rh, frame
 end
@@ -587,8 +592,9 @@ function Sprite:draw()
 end
 
 function Sprite:getFrameWidth()
-    if self.animation.curAnim then
-        local firstFrame = self.animation.curAnim.frames[1]
+    local curAnim = self.animation:getCurrentAnimation()
+    if curAnim then
+        local firstFrame = curAnim.frames[1]
         return firstFrame.width
     end
     local frame = self:getFrame()
