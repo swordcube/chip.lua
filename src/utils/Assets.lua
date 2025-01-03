@@ -40,70 +40,59 @@ Assets._fontCache = {}
 Assets._audioStreamCache = {}
 
 ---
---- Returns a file path from a given asset ID.
+--- Loads a texture from a given asset path.
 ---
---- @param  id  string
---- @return string
----
-function Assets.getPath(id)
-    -- TODO: the shit.
-    return id
-end
-
----
---- Loads a texture from a given asset ID.
----
---- @param  id  string
+--- @param  path  string
 --- @return chip.graphics.Texture
 ---
-function Assets.getTexture(id)
-    if type(id) ~= "string" then
-        return id
+function Assets.getTexture(path)
+    if type(path) ~= "string" then
+        return path
     end
-    if Assets._textureCache[id] == nil then
+    if Assets._textureCache[path] == nil then
         local newTexture = Texture:new() --- @type chip.graphics.Texture
 
-        local imageData = love.image.newImageData(Assets.getPath(id))
+        local imageData = love.image.newImageData(path)
         newTexture:setImage(imageData)
 
-        Assets._textureCache[id] = newTexture
+        Assets._textureCache[path] = newTexture
     end
-    return Assets._textureCache[id]
+    return Assets._textureCache[path]
 end
 
 ---
---- Loads a font from a given asset ID.
+--- Loads a font from a given asset path.
 ---
---- @param  id  string
+--- @param  path  string
 --- @return chip.graphics.Font
 ---
-function Assets.getFont(id)
-    if type(id) ~= "string" then
-        return id
+function Assets.getFont(path)
+    if type(path) ~= "string" then
+        return path
     end
-    if Assets._fontCache[id] == nil then
+    if Assets._fontCache[path] == nil then
         local newFont = Font:new() --- @type chip.graphics.Font
-        Assets._fontCache[id] = newFont
+        Assets._fontCache[path] = newFont
     end
-    return Assets._fontCache[id]
+    return Assets._fontCache[path]
 end
 
 ---
---- Loads an audio stream from a given asset ID.
+--- Loads an audio stream from a given asset path.
 ---
---- @param  id  string
+--- @param  path  string
 --- @return chip.audio.AudioStream
 ---
-function Assets.getAudioStream(id)
-    if type(id) ~= "string" then
-        return id
+function Assets.getAudioStream(path)
+    if type(path) ~= "string" then
+        return path
     end
-    if Assets._audioStreamCache[id] == nil then
+    if Assets._audioStreamCache[path] == nil then
         local newStream = AudioStream:new() --- @type chip.audio.AudioStream
-        newStream:setData(love.audio.newSource(id, "static"))
-        Assets._audioStreamCache[id] = newStream
+        newStream:setData(love.audio.newSource(path, "static"))
+        Assets._audioStreamCache[path] = newStream
     end
-    return Assets._audioStreamCache[id]
+    return Assets._audioStreamCache[path]
 end
 
 return Assets
