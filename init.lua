@@ -248,6 +248,7 @@ local drawsPassed = 0
 local currentFPS = 0
 
 local wasFocused = true
+local monitorRefreshRate = 60.0
 
 local function loop()
     local ticks = Native.getTicksNS()
@@ -271,8 +272,7 @@ local function loop()
         end
         wasFocused = focused
     end
-    local _, _, wf = window.getMode()
-    local cap = ((focused or not Engine.autoPause) and (Engine.vsync and wf.refreshrate or Engine.targetFPS) or 10)
+    local cap = ((focused or not Engine.autoPause) and (Engine.vsync and monitorRefreshRate or Engine.targetFPS) or 10)
     local capDt = (cap > 0) and 1 / cap or 0
 
     if tmr then
@@ -445,6 +445,9 @@ function Chip.init(settings)
         end
         Input.init()
         Engine.currentScene:init()
+
+        local _, _, wf = window.getMode()
+        monitorRefreshRate = wf.refreshrate
     end
     love.run = run
     love.resize = resize
