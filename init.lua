@@ -271,7 +271,8 @@ local function loop()
         end
         wasFocused = focused
     end
-    local cap = ((focused or not Engine.autoPause) and (Engine.vsync and Native.getMonitorRefreshRate() or Engine.targetFPS) or 10)
+    local _, _, wf = window.getMode()
+    local cap = ((focused or not Engine.autoPause) and (Engine.vsync and wf.refreshrate or Engine.targetFPS) or 10)
     local capDt = (cap > 0) and 1 / cap or 0
 
     if tmr then
