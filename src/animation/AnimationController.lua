@@ -315,8 +315,7 @@ end
 ---
 --- Plays any specified animation if it exists.
 ---
---- Returns a boolean of `true` on success, and `false` on failure,
---- And a string containing the error if this fails.
+--- Returns a boolean of `true` on success, and `false` on failure
 ---
 --- @param  name     string    The name of the animation to play.
 --- @param  force    boolean?  Whether or not to forcefully restart the animation.
