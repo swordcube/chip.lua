@@ -103,20 +103,20 @@ function Color:__tostring()
 	return "color (r: " .. self.r .. ", g: " .. self.g .. ", b: " .. self.b .. ", a: " .. self.a .. ")"
 end
 
-Color.TRANSPARENT = Color:new(0x00000000)
-Color.WHITE       = Color:new(0xFFFFFFFF)
-Color.GRAY        = Color:new(0xFF808080)
-Color.BLACK       = Color:new(0xFF000000)
-Color.RED         = Color:new(0xFFFF0000)
-Color.ORANGE      = Color:new(0xFFFFA500)
-Color.YELLOW      = Color:new(0xFFFFFF00)
-Color.LIME        = Color:new(0xFF00FF00)
-Color.GREEN       = Color:new(0xFF008000)
-Color.CYAN        = Color:new(0xFF00FFFF)
-Color.BLUE        = Color:new(0xFF0000FF)
-Color.PURPLE      = Color:new(0xFF800080)
-Color.MAGENTA     = Color:new(0xFFFF00FF)
-Color.PINK        = Color:new(0xFFFFC0CB)
-Color.BROWN       = Color:new(0xFF8B4513)
+Color.TRANSPARENT = Color:new(0x00000000) --- @type chip.utils.Color
+Color.WHITE       = Color:new(0xFFFFFFFF) --- @type chip.utils.Color
+Color.GRAY        = Color:new(0xFF808080) --- @type chip.utils.Color
+Color.BLACK       = Color:new(0xFF000000) --- @type chip.utils.Color
+Color.RED         = Color:new(0xFFFF0000) --- @type chip.utils.Color
+Color.ORANGE      = Color:new(0xFFFFA500) --- @type chip.utils.Color
+Color.YELLOW      = Color:new(0xFFFFFF00) --- @type chip.utils.Color
+Color.LIME        = Color:new(0xFF00FF00) --- @type chip.utils.Color
+Color.GREEN       = Color:new(0xFF008000) --- @type chip.utils.Color
+Color.CYAN        = Color:new(0xFF00FFFF) --- @type chip.utils.Color
+Color.BLUE        = Color:new(0xFF0000FF) --- @type chip.utils.Color
+Color.PURPLE      = Color:new(0xFF800080) --- @type chip.utils.Color
+Color.MAGENTA     = Color:new(0xFFFF00FF) --- @type chip.utils.Color
+Color.PINK        = Color:new(0xFFFFC0CB) --- @type chip.utils.Color
+Color.BROWN       = Color:new(0xFF8B4513) --- @type chip.utils.Color
 
 return Color

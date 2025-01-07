@@ -36,6 +36,7 @@ local gfxSetStencilState = gfx.setStencilState
 local gfxSetColorMask = gfx.setColorMask
 
 local _linear_, _nearest_ = "linear", "nearest"
+local FrameData = crequire("animation.frames.FrameData") --- @type chip.animation.frames.FrameData
 
 local stencilSprite = nil
 local function stencil()
@@ -54,6 +55,9 @@ local function stencil()
 		gfxRectangle("fill", 0, 0, stencilSprite._clipRect.width, stencilSprite._clipRect.height)
 		gfxPop()
 	end
+end
+local function getFontPath(name)
+    return Chip.classPath .. "/assets/fonts/" .. name
 end
 
 ---
@@ -141,6 +145,8 @@ function Text:constructor(x, y, fieldWidth, contents, size)
     ---
     self._textObj = nil
 
+    self:setFrame(FrameData:new("#_TEXT_", 0, 0, 0, 0, 16, 16, self:getTexture()))
+    self:setFont(getFontPath("nokiafc22.ttf"))
     self:setContents(contents or "")
 end
 
@@ -307,6 +313,15 @@ function Text:setColor(color)
     self._color = Color:new(color)
 end
 
+function Text:getFrame()
+    -- this is very dumb and hacky
+    -- do i give a shit?                    no
+    local frame = self._frame
+    frame.width = self:getFrameWidth()
+    frame.height = self:getFrameHeight()
+    return frame
+end
+
 function Text:getFrameWidth()
     local padding = math.floor(self._borderSize) + 2
     return self._textObj:getWidth() + padding + (self._borderStyle == "shadow" and self.shadowOffset.x or 0.0)
@@ -340,11 +355,11 @@ function Text:draw()
         gfxSetStencilState("keep", "greater", 0)
         gfxSetColorMask(true)
 	end
+    local tint = self._tint
     local padding = math.floor(self._borderSize) + 2
+    
     local tx, ty = padding * 0.5, padding * 0.5
-
-    gfxPush()
-    gfxApplyTransform(trans)
+    trans:translate(tx, ty)
 
     local filter = self._antialiasing and _linear_ or _nearest_
     self._fontData:setFilter(filter, filter, 4)
@@ -359,46 +374,56 @@ function Text:draw()
             local delta = self._borderSize / iterations
             local curDelta = delta
             
-            gfxSetColor(self._borderColor.r, self._borderColor.g, self._borderColor.b, self._borderColor.a)
-        
+            gfxSetColor(self._borderColor.r * tint.r, self._borderColor.g * tint.g, self._borderColor.b * tint.b, self._borderColor.a * tint.a)
+            
             for _ = 1, iterations do
                 -- upper-left
-                gfxDraw(self._textObj, tx - curDelta, ty - curDelta, 0)
+                trans:translate(-curDelta, -curDelta)
+                gfxDraw(self._textObj, trans)
                 
                 -- upper-middle
-                gfxDraw(self._textObj, tx, ty - curDelta, 0)
-        
-                -- upper-right
-                gfxDraw(self._textObj, tx + curDelta, ty - curDelta, 0)
-        
-                -- middle-right
-                gfxDraw(self._textObj, tx + curDelta, ty, 0)
-        
-                -- lower-right
-                gfxDraw(self._textObj, tx + curDelta, ty + curDelta, 0)
-        
-                -- lower-middle
-                gfxDraw(self._textObj, tx, ty + curDelta, 0)
-        
-                -- lower-left
-                gfxDraw(self._textObj, tx - curDelta, ty + curDelta, 0)
+                trans:translate(curDelta, 0)
+                gfxDraw(self._textObj, trans)
                 
+                -- upper-right
+                trans:translate(curDelta, 0)
+                gfxDraw(self._textObj, trans)
+                
+                -- middle-right
+                trans:translate(0, curDelta)
+                gfxDraw(self._textObj, trans)
+                
+                -- lower-right
+                trans:translate(0, curDelta)
+                gfxDraw(self._textObj, trans)
+                
+                -- lower-middle
+                trans:translate(-curDelta, 0)
+                gfxDraw(self._textObj, trans)
+                
+                -- lower-left
+                trans:translate(-curDelta, 0)
+                gfxDraw(self._textObj, trans)
+                
+                trans:translate(0, -curDelta)
+                gfxDraw(self._textObj, trans)
+                
+                trans:translate(curDelta, 0)
                 curDelta = curDelta + delta
             end
             
         elseif self.borderStyle == "shadow" then
-            gfxSetColor(self._borderColor.r, self._borderColor.g, self._borderColor.b, self._borderColor.a)
-            gfxDraw(
-                self._textObj,
-                tx + (self.shadowOffset.x * self.borderSize), ty + (self.shadowOffset.y * self.borderSize), 0
-            )
+            gfxSetColor(self._borderColor.r * tint.r, self._borderColor.g * tint.g, self._borderColor.b * tint.b, self._borderColor.a * tint.a)
+
+            trans:translate(self.shadowOffset.x * self.borderSize, self.shadowOffset.y * self.borderSize)
+            gfxDraw(self._textObj, trans)
+            trans:translate(-self.shadowOffset.x * self.borderSize, -self.shadowOffset.y * self.borderSize)
         end
-        gfxSetColor(self._color.r, self._color.g, self._color.b, self._color.a)
+        gfxSetColor(self._color.r * tint.r, self._color.g * tint.g, self._color.b * tint.b, self._color.a * tint.a)
     else
-        gfxSetColor(self._color.r, self._color.g, self._color.b, self._color.a)
+        gfxSetColor(self._color.r * tint.r, self._color.g * tint.g, self._color.b * tint.b, self._color.a * tint.a)
     end
-    gfxDraw(self._textObj, tx, ty)
-    gfxPop()
+    gfxDraw(self._textObj, trans)
 
     if self._clipRect then
         gfxClear(false, true, false)

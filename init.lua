@@ -163,6 +163,11 @@ function love.window.resize(width, height)
     love.window.setMode(width, height, flags)
 end
 
+--- [ SHORTCUTS TO LUA FUNCS ] ---
+
+local tblInsert = table.insert
+local tblRemove = table.remove
+
 --- [ SHORTCUTS TO LOVE2D FUNCS ] ---
 
 local ev = love.event
@@ -284,6 +289,10 @@ local function loop()
     else
         love.timer.sleep(capDt)
     end
+    local eventDt = Native.getTicksNS() - ticks
+    if Engine.lowPowerMode then
+        Native.nanoSleep(1000000 - eventDt)
+    end
     drawTmr = drawTmr + dt
     
     if cap <= 0 or drawTmr >= capDt then
@@ -308,11 +317,7 @@ local function loop()
             end
             lastDraw = love.timer.getTime()
         end
-        drawTmr = drawTmr % capDt
-    end
-    local eventDt = Native.getTicksNS() - ticks
-    if Engine.lowPowerMode then
-        Native.nanoSleep(500000 - eventDt)
+        drawTmr = 0
     end
 end
 local function run()

@@ -431,9 +431,7 @@ end
 --- @return chip.animation.frames.FrameData?  frame  The frame that is being rendered onto this sprite.
 ---
 function Sprite:getRenderingInfo(trans)
-    local frames, frame = self._frames, self._frame
-
-    local width, height = self:getWidth(), self:getHeight()
+    local frames, frame = self:getFrames(), self:getFrame()
     local frameWidth, frameHeight = self:getFrameWidth(), self:getFrameHeight()
     
     if not frames or not frame or not frame.texture then

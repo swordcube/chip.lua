@@ -173,6 +173,8 @@ Engine.autoPause = false --- @type boolean
 ---
 --- Whether or not the game will run at a
 --- maximum of 1000 TPS, saving on CPU power.
+--- 
+--- Your FPS may be slightly lower as a result aswell.
 ---
 Engine.lowPowerMode = true --- @type boolean
 
