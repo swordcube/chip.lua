@@ -217,6 +217,10 @@ function Engine.switchScene(newScene)
     Engine._requestedScene = newScene
 end
 
+function Engine.reloadScene()
+    Engine._requestedScene = require(Engine.currentScene.__path):new()
+end
+
 --- [ PRIVATE API ] ---
 
 ---
