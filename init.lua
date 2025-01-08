@@ -389,9 +389,10 @@ function Chip.init(settings)
         Log.info(nil, curFile, curLine, ...)
     end
     love.load = function()
-        Native.setDarkMode(true)
-        Native.forceWindowRedraw()
-
+        if system.getOS() == "Windows" then
+            Native.setDarkMode(true)
+            Native.forceWindowRedraw()
+        end
         local supportedFeatures = gfx.getSupported()
         if not supportedFeatures.glsl3 then
             -- Don't know if some Linux systems will end up
