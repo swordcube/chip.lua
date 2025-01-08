@@ -60,11 +60,30 @@ Native.ConsoleColor = {
 	WHITE = 15,
 	NONE = -1
 }
+Native.AnsiColorCodes = {
+    ["0"] = {fgColor = string.char(27) .. "[30m", bgColor = string.char(27) .. "[40m"},
+    ["1"] = {fgColor = string.char(27) .. "[34m", bgColor = string.char(27) .. "[44m"},
+    ["2"] = {fgColor = string.char(27) .. "[32m", bgColor = string.char(27) .. "[42m"},
+    ["3"] = {fgColor = string.char(27) .. "[36m", bgColor = string.char(27) .. "[46m"},
+    ["4"] = {fgColor = string.char(27) .. "[31m", bgColor = string.char(27) .. "[41m"},
+    ["5"] = {fgColor = string.char(27) .. "[35m", bgColor = string.char(27) .. "[45m"},
+    ["6"] = {fgColor = string.char(27) .. "[33m", bgColor = string.char(27) .. "[43m"},
+    ["7"] = {fgColor = string.char(27) .. "[37m", bgColor = string.char(27) .. "[47m"},
+    ["8"] = {fgColor = string.char(27) .. "[90m", bgColor = string.char(27) .. "[100m"},
+    ["9"] = {fgColor = string.char(27) .. "[94m", bgColor = string.char(27) .. "[104m"},
+    ["10"] = {fgColor = string.char(27) .. "[92m", bgColor = string.char(27) .. "[102m"},
+    ["11"] = {fgColor = string.char(27) .. "[96m", bgColor = string.char(27) .. "[106m"},
+    ["12"] = {fgColor = string.char(27) .. "[91m", bgColor = string.char(27) .. "[101m"},
+    ["13"] = {fgColor = string.char(27) .. "[95m", bgColor = string.char(27) .. "[105m"},
+    ["14"] = {fgColor = string.char(27) .. "[93m", bgColor = string.char(27) .. "[103m"},
+    ["15"] = {fgColor = string.char(27) .. "[97m", bgColor = string.char(27) .. "[107m"},
+    ["-1"] = {fgColor = string.char(27) .. "[0m",  bgColor = string.char(27) .. "[10m"}
+}
 
-function Native.askOpenFile(title, file_types)
+function Native.askOpenFile(title, fileTypes)
 	return ""
 end
-function Native.askSaveAsFile(title, file_types, initial_file)
+function Native.askSaveAsFile(title, fileTypes, initialFile)
 	return ""
 end
 function Native.setCursor(type) end
@@ -78,7 +97,21 @@ function Native.forceWindowRedraw()
     })
     love.window.setMode(w, h, f)
 end
-function Native.setConsoleColors(fg_color, bg_color) end
+function Native.setConsoleColors(fgColor, bgColor)
+	local fgColorStr = tostring(fgColor)
+	local bgColorStr = tostring(bgColor)
+
+	local fgColorCodes = Native.AnsiColorCodes[fgColorStr]
+	if not fgColorCodes then
+		fgColorCodes = Native.AnsiColorCodes[tostring(Native.ConsoleColor.NONE)]
+	end
+	local bgColorCodes = Native.AnsiColorCodes[bgColorStr]
+	if not bgColorCodes then
+		bgColorCodes = Native.AnsiColorCodes[tostring(Native.ConsoleColor.NONE)]
+	end
+	io.stdout:write(fgColorCodes.fgColor .. bgColorCodes.bgColor)
+	io.stdout:flush()
+end
 function Native.getProcessMemory()
 	return collectgarbage(_gcCount_) + gfx.getStats().texturememory
 end
