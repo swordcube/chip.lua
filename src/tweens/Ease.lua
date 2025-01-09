@@ -29,9 +29,9 @@ local sqrt = math.sqrt
 local pow = math.pow
 
 ---
---- A list of easing functions for tweening.
----
 --- @class chip.tweens.Ease
+---
+--- A list of easing functions for tweening.
 --- @see   flixel.tweens.FlxEase  https://github.com/HaxeFlixel/flixel/blob/master/flixel/tweens/FlxEase.hx
 ---
 local Ease = {}
