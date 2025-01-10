@@ -150,6 +150,11 @@ function PropertyTweener:setStartDelay(secs)
 end
 
 function PropertyTweener:update(dt)
+    if self._parent._freed then
+        self:free()
+        self._parent._tweeners:remove(self)
+        return
+    end
     if self._duration <= 0.0 then
         return
     end
@@ -157,7 +162,7 @@ function PropertyTweener:update(dt)
     local progress = self:getProgress()
 
     if self._elapsedTime >= self._startDelay then
-        local e = self._ease and self._ease or (self.parent.ease and self.parent.ease or Ease.linear)
+        local e = self._ease and self._ease or (self._parent.ease and self._parent.ease or Ease.linear)
         if type(self._finalValue) == "table" then
             local prop = self._object[self._property]
             for key, value in pairs(self._finalValue) do

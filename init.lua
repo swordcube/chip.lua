@@ -196,20 +196,25 @@ Chip.classPath = classPath
 local plugins = Engine.plugins
 local function update(dt)
     Engine.preUpdate:emit()
-    if Engine._requestedScene then
+    if Engine.preUpdate._cancelled then
+        return
+    end
+    if Engine._requestedScene and Engine._canSwitchScene then
         Engine._switchScene()
     end
     BGM.update(dt)
-    plugins:update(dt)
+    plugins:_update(dt)
 
-    if Engine.currentScene and Engine.currentScene:isActive() then
-        Engine.currentScene:update(dt)
+    if Engine.currentScene then
+        Engine.currentScene:_update(dt)
     end
     Engine.postUpdate:emit()
 end
 local function draw()
     Engine.preDraw:emit()
-
+    if Engine.preDraw._cancelled then
+        return
+    end
     -- Draw current scene to the game area
     gfx.push()
     gfx.setScissor(
@@ -228,15 +233,18 @@ local function draw()
     Engine.preSceneDraw:emit()
 
     if not Engine.drawPluginsInFront then
-        plugins:draw()
+        plugins:_draw()
     end
-    Engine.currentScene:draw()
-    
+    if not Engine.preSceneDraw._cancelled then
+        Engine.currentScene:_draw()
+    end
     if Engine.drawPluginsInFront then
-        plugins:draw()
+        plugins:_draw()
     end
-    Engine.postSceneDraw:emit()
-    
+    if not Engine.preSceneDraw._cancelled then
+        Engine.postSceneDraw:emit()
+    end
+
     gfx.setScissor()
     gfx.pop()
 
@@ -334,7 +342,7 @@ local function run()
 end
 local function processInputEvent(event)
     Engine.onInputReceived:emit(event)
-    Engine.currentScene:input(event)
+    Engine.currentScene:_input(event)
 end
 local function keypressed(key, scancode, repeating)
     local event = InputEventKey:new(key, scancode, true, repeating)

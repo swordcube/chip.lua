@@ -328,7 +328,7 @@ function Tween:update(dt)
     end
     self._elapsedTime = self._elapsedTime + dt
     if self._elapsedTime >= self._startDelay then
-        self._tweeners:update(dt)
+        self._tweeners:_update(dt)
 
         if self:getProgress() >= 1.0 then
             if self._onComplete then

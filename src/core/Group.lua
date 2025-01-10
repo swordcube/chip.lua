@@ -57,36 +57,6 @@ function Group:getLength()
 end
 
 ---
---- Updates all of this group's members.
---- 
---- @param  dt  number  The time since the last frame. (in seconds)
----
-function Group:update(dt)
-    local members = self._members
-    local length = self._length
-    for i = 1, length do
-        local actor = members[i] --- @type chip.core.Actor
-        if actor and actor:isExisting() and actor:isActive() then
-            actor:update(dt)
-        end
-    end
-end
-
----
---- Draws all of this group's members to the screen.
----
-function Group:draw()
-    local members = self._members
-    local length = self._length
-    for i = 1, length do
-        local actor = members[i] --- @type chip.core.Actor
-        if actor and actor:isExisting() and actor:isVisible() then
-            actor:draw()
-        end
-    end
-end
-
----
 --- @param  func      boolean
 --- @param  recurse?  boolean
 ---
@@ -236,21 +206,6 @@ function Group:move(actor, idx)
 end
 
 ---
---- The function that gets called when
---- this group receives an input event.
---- 
---- @param  event  chip.input.InputEvent
----
-function Group:input(event)
-    for i = 1, self._length do
-        local actor = self._members[i] --- @type chip.core.Actor
-        if actor then
-            actor:input(event)
-        end
-    end
-end
-
----
 --- @param  class    chip.core.Actor
 --- @param  factory  function?
 --- @param  revive   boolean?
@@ -325,6 +280,78 @@ end
 -----------------------
 --- [ Private API ] ---
 -----------------------
+
+---
+--- @protected
+---
+--- Updates all of this group's members.
+--- 
+--- @param  dt  number  The time since the last frame. (in seconds)
+---
+function Group:_update(dt)
+    if self:isActive() then
+        self:update(dt)
+    end
+    local members = self._members
+    local length = self._length
+    for i = 1, length do
+        local actor = members[i] --- @type chip.core.Actor
+        if actor and actor:isExisting() and actor:isActive() then
+            if actor:is(Group) then
+                actor:_update(dt)
+            else
+                actor:update(dt)
+            end
+        end
+    end
+end
+
+---
+--- @protected
+---
+--- Draws all of this group's members to the screen.
+---
+function Group:_draw()
+    if self:isVisible() then
+        self:draw()
+    end
+    local members = self._members
+    local length = self._length
+    for i = 1, length do
+        local actor = members[i] --- @type chip.core.Actor
+        if actor and actor:isExisting() and actor:isVisible() then
+            if actor:is(Group) then
+                actor:_draw()
+            else
+                actor:draw()
+            end
+        end
+    end
+end
+
+---
+--- @protected
+---
+--- The function that gets called when
+--- this group receives an input event.
+--- 
+--- @param  event  chip.input.InputEvent
+---
+function Group:_input(event)
+    if self:isActive() then
+        self:input(event)
+    end
+    for i = 1, self._length do
+        local actor = self._members[i] --- @type chip.core.Actor
+        if actor and actor:isExisting() and actor:isActive() then
+            if actor:is(Group) then
+                actor:_input(event)
+            else
+                actor:input(event)
+            end
+        end
+    end
+end
 
 ---
 --- @protected

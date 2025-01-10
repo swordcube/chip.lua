@@ -374,7 +374,7 @@ function Text:draw()
             local delta = self._borderSize / iterations
             local curDelta = delta
             
-            gfxSetColor(self._borderColor.r * tint.r, self._borderColor.g * tint.g, self._borderColor.b * tint.b, self._borderColor.a * tint.a)
+            gfxSetColor(self._borderColor.r * tint.r, self._borderColor.g * tint.g, self._borderColor.b * tint.b, self._borderColor.a * self._alpha)
             
             for _ = 1, iterations do
                 -- upper-left
@@ -413,15 +413,15 @@ function Text:draw()
             end
             
         elseif self.borderStyle == "shadow" then
-            gfxSetColor(self._borderColor.r * tint.r, self._borderColor.g * tint.g, self._borderColor.b * tint.b, self._borderColor.a * tint.a)
+            gfxSetColor(self._borderColor.r * tint.r, self._borderColor.g * tint.g, self._borderColor.b * tint.b, self._borderColor.a * self._alpha)
 
             trans:translate(self.shadowOffset.x * self.borderSize, self.shadowOffset.y * self.borderSize)
             gfxDraw(self._textObj, trans)
             trans:translate(-self.shadowOffset.x * self.borderSize, -self.shadowOffset.y * self.borderSize)
         end
-        gfxSetColor(self._color.r * tint.r, self._color.g * tint.g, self._color.b * tint.b, self._color.a * tint.a)
+        gfxSetColor(self._color.r * tint.r, self._color.g * tint.g, self._color.b * tint.b, self._color.a * self._alpha)
     else
-        gfxSetColor(self._color.r * tint.r, self._color.g * tint.g, self._color.b * tint.b, self._color.a * tint.a)
+        gfxSetColor(self._color.r * tint.r, self._color.g * tint.g, self._color.b * tint.b, self._color.a * self._alpha)
     end
     gfxDraw(self._textObj, trans)
 

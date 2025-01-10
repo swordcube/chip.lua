@@ -16,6 +16,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ]]
 
+---@diagnostic disable: invisible
+
 local tmr = love.timer
 
 local Color = crequire("utils.Color") --- @type chip.utils.Color
@@ -214,10 +216,12 @@ end
 --- @param  newScene  chip.core.Scene
 ---
 function Engine.switchScene(newScene)
+    Engine._canSwitchScene = true
     Engine._requestedScene = newScene
 end
 
 function Engine.reloadScene()
+    Engine._canSwitchScene = true
     Engine._requestedScene = require(Engine.currentScene.__path):new()
 end
 
@@ -231,6 +235,12 @@ Engine._requestedScene = nil
 
 ---
 --- @protected
+--- @type boolean
+---
+Engine._canSwitchScene = true
+
+---
+--- @protected
 --- @type integer
 ---
 Engine._currentFPS = 0
@@ -240,7 +250,10 @@ Engine._currentFPS = 0
 ---
 function Engine._switchScene()
     Engine.preSceneSwitch:emit()
-
+    if Engine.preSceneSwitch._cancelled then
+        Engine._canSwitchScene = false
+        return
+    end
     if Engine.currentScene then
         Engine.currentScene:free()
     end

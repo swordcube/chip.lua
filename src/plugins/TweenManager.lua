@@ -61,8 +61,31 @@ function TweenManager:reset()
     end
 end
 
+---
+--- Pauses all current tweens in this tween manager.
+--- Any new tweens given to this tween manager will still be ran.
+---
+function TweenManager:pause()
+    local members = self.list:getMembers()
+    for i = 1, self.list:getLength() do
+        local tween = members[i] --- @type chip.tweens.Tween
+        tween:setUpdateMode("disabled")
+    end
+end
+
+---
+--- Resumes all current tweens in this tween manager.
+---
+function TweenManager:resume()
+    local members = self.list:getMembers()
+    for i = 1, self.list:getLength() do
+        local tween = members[i] --- @type chip.tweens.Tween
+        tween:setUpdateMode("inherit")
+    end
+end
+
 function TweenManager:update(dt)
-    self.list:update(dt)
+    self.list:_update(dt)
 end
 
 return TweenManager

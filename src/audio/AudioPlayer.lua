@@ -31,6 +31,7 @@ function AudioPlayer:constructor()
     AudioPlayer.super.constructor(self)
 
     self:setVisibility(false)
+    self:setUpdateMode("always")
 
     ---
     --- The signal that is fired when the audio has finished playing.
@@ -269,6 +270,25 @@ function AudioPlayer:stop()
         end
     end
     self:kill()
+end
+
+---
+--- Sets the current update mode to a given value.
+--- 
+--- This controls when this actor is allowed to
+--- automatically update itself:
+--- - `always`: Always update (unless the game is unfocused with auto pause enabled)
+--- - `inherit`: Inherit whether or not the parent is allowed to update (unless the game is unfocused with auto pause enabled)
+--- - `disabled`: Never update
+--- 
+--- @param  value  "always"|"inherit"|"disabled"
+---
+function AudioPlayer:setUpdateMode(value)
+    if value ~= "always" then
+        Log.warn(nil, nil, nil, "AudioPlayers must always be able to update!")
+        value = "always"
+    end
+    self._updateMode = value
 end
 
 function AudioPlayer:isPlaying()

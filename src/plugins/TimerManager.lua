@@ -54,8 +54,31 @@ function TimerManager:reset()
     end
 end
 
+---
+--- Pauses all current tweens in this timer manager.
+--- Any new tweens given to this timer manager will still be ran.
+---
+function TimerManager:pause()
+    local members = self.list:getMembers()
+    for i = 1, self.list:getLength() do
+        local timer = members[i] --- @type chip.utils.Timer
+        timer:setUpdateMode("disabled")
+    end
+end
+
+---
+--- Resumes all current tweens in this timer manager.
+---
+function TimerManager:resume()
+    local members = self.list:getMembers()
+    for i = 1, self.list:getLength() do
+        local timer = members[i] --- @type chip.utils.Timer
+        timer:setUpdateMode("inherit")
+    end
+end
+
 function TimerManager:update(dt)
-    self.list:update(dt)
+    self.list:_update(dt)
 end
 
 return TimerManager

@@ -70,8 +70,19 @@ function Actor:isActive()
         -- no parent, you're probably manually updating it anyways
 
         -- Which isn't recommended, but still allowed
-        return self._parent and self._parent:isActive() or true
-    
+        local p = self._parent
+        if not p then
+            return true
+        end
+        local active = false
+        while p do
+            if p:isActive() then
+                active = true
+                break
+            end
+            p = p._parent
+        end
+        return active
     end
     return false
 end
