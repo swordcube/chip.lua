@@ -297,7 +297,7 @@ function Group:_update(dt)
     for i = 1, length do
         local actor = members[i] --- @type chip.core.Actor
         if actor and actor:isExisting() and actor:isActive() then
-            if actor:is(Group) then
+            if actor._update then
                 actor:_update(dt)
             else
                 actor:update(dt)
@@ -320,7 +320,7 @@ function Group:_draw()
     for i = 1, length do
         local actor = members[i] --- @type chip.core.Actor
         if actor and actor:isExisting() and actor:isVisible() then
-            if actor:is(Group) then
+            if actor._draw then
                 actor:_draw()
             else
                 actor:draw()
@@ -344,7 +344,7 @@ function Group:_input(event)
     for i = 1, self._length do
         local actor = self._members[i] --- @type chip.core.Actor
         if actor and actor:isExisting() and actor:isActive() then
-            if actor:is(Group) then
+            if actor._input then
                 actor:_input(event)
             else
                 actor:input(event)
@@ -358,13 +358,14 @@ end
 ---
 function Group:_findMinXHelper()
     local value = huge
+    local members = self._members
     for i = 1, self._length do
-        local member = self._members[i]
+        local member = members[i]
         if member then
             local minX = 0.0
-            if member:is(Group) then
+            if member.findMinX then
                 minX = member:findMinX()
-            else
+            elseif member.getX then
                 minX = member:getX()
             end
             if minX < value then
@@ -380,13 +381,14 @@ end
 ---
 function Group:_findMaxXHelper()
     local value = -huge
+    local members = self._members
     for i = 1, self._length do
-        local member = self._members[i]
+        local member = members[i]
         if member then
             local maxX = 0.0
-            if member:is(Group) then
+            if member.findMaxX then
                 maxX = member:findMaxX()
-            else
+            elseif member.getX and member.getWidth then
                 maxX = member:getX() + member:getWidth()
             end
             if maxX > value then
@@ -402,13 +404,14 @@ end
 ---
 function Group:_findMinYHelper()
     local value = huge
+    local members = self._members
     for i = 1, self._length do
-        local member = self._members[i]
+        local member = members[i]
         if member then
             local minY = 0.0
-            if member:is(Group) then
+            if member.findMinY then
                 minY = member:findMinY()
-            elseif member:is(Actor2D) then
+            elseif member.getY then
                 minY = member:getY()
             end
             if minY < value then
@@ -424,13 +427,14 @@ end
 ---
 function Group:_findMaxYHelper()
     local value = -huge
+    local members = self._members
     for i = 1, self._length do
-        local member = self._members[i]
+        local member = members[i]
         if member then
             local maxY = 0.0
-            if member:is(Group) then
+            if member.findMaxY then
                 maxY = member:findMaxY()
-            elseif member:is(Actor2D) then
+            elseif member.getY and member.getHeight then
                 maxY = member:getY() + member:getHeight()
             end
             if maxY > value then

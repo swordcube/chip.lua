@@ -201,6 +201,8 @@ function TiledSprite:getRenderingInfo(trans)
     local p = self._parent
 
     local canvases = {} --- @type table<chip.graphics.CanvasLayer>
+
+    local canvasCount = 0
     local isOnCanvasLayer = false
 
     while p do
@@ -209,6 +211,7 @@ function TiledSprite:getRenderingInfo(trans)
                 isOnCanvasLayer = true
             end
             tblInsert(canvases, p)
+            canvasCount = canvasCount + 1
         end
         p = p._parent
     end
@@ -241,7 +244,6 @@ function TiledSprite:getRenderingInfo(trans)
             trans:translate(-w2, -h2)
         end
     end
-    local canvasCount = #canvases
     for i = 1, canvasCount do
         local canvas = canvases[canvasCount - i + 1] --- @type chip.graphics.CanvasLayer
         trans:translate(canvas:getX(), canvas:getY())

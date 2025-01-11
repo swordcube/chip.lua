@@ -364,6 +364,17 @@ function Text:draw()
     local filter = self._antialiasing and _linear_ or _nearest_
     self._fontData:setFilter(filter, filter, 4)
 
+    local alignment = self._alignment
+    if not self._contents:contains("\n") then
+        alignment = "left"
+    end
+    if self._textObj then
+        if self._fieldWidth > 0 then
+            self._textObj:setf(self._contents, self._fieldWidth, alignment)
+        else
+            self._textObj:setf(self._contents, self._fontData:getWidth(self._contents), alignment)
+        end
+    end
     if self._borderSize > 0 and self._borderColor.a > 0 then
         if self._borderStyle == "outline" then
             local iterations = math.round(self._borderSize * self._borderQuality)

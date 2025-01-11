@@ -453,6 +453,8 @@ function Sprite:getRenderingInfo(trans)
     local p = self._parent
 
     local canvases = {} --- @type table<chip.graphics.CanvasLayer>
+
+    local canvasCount = 0
     local isOnCanvasLayer = false
 
     while p do
@@ -461,6 +463,7 @@ function Sprite:getRenderingInfo(trans)
                 isOnCanvasLayer = true
             end
             tblInsert(canvases, p)
+            canvasCount = canvasCount + 1
         end
         p = p._parent
     end
@@ -493,16 +496,15 @@ function Sprite:getRenderingInfo(trans)
             trans:translate(-w2, -h2)
         end
     end
-    local canvasCount = #canvases
     for i = 1, canvasCount do
         local canvas = canvases[canvasCount - i + 1] --- @type chip.graphics.CanvasLayer
         trans:translate(canvas:getX(), canvas:getY())
 
-        local w2 = Engine.gameWidth * canvas.origin.x
-        local h2 = Engine.gameHeight * canvas.origin.y
+        local w2 = canvas:getWidth() * canvas.origin.x
+        local h2 = canvas:getHeight() * canvas.origin.y
+        trans:translate(w2, h2)
         trans:scale(canvas.scale.x, canvas.scale.y)
         
-        trans:translate(w2, h2)
         trans:rotate(canvas.rotation)
         trans:translate(-w2, -h2)
     end
