@@ -77,6 +77,12 @@ function PropertyTweener:constructor(parent, object, property, initialValue, fin
     --- @type number
     ---
     self._duration = duration
+
+    ---
+    --- @protected
+    --- @type boolean
+    ---
+    self._started = false
 end
 
 function PropertyTweener:getObject()
@@ -162,7 +168,28 @@ function PropertyTweener:update(dt)
     local progress = self:getProgress()
 
     if self._elapsedTime >= self._startDelay then
-        local e = self._ease and self._ease or (self._parent.ease and self._parent.ease or Ease.linear)
+        if not self._started then
+            local obj = self._object
+            local property = self._property
+
+            local initialValue = obj["_" .. property]
+            local finalValue = self._finalValue
+
+            if initialValue == nil then
+                initialValue = obj[property]
+            end
+            if type(finalValue) == "table" then
+                initialValue = {}
+                
+                local prop = obj[property]
+                for key, _ in pairs(finalValue) do
+                    initialValue[key] = prop[key]
+                end
+            end
+            self._initialValue = initialValue
+            self._started = true
+        end
+        local e = self._ease or (self._parent:getEase() and self._parent.ease or Ease.linear)
         if type(self._finalValue) == "table" then
             local prop = self._object[self._property]
             for key, value in pairs(self._finalValue) do
@@ -194,6 +221,8 @@ function PropertyTweener:update(dt)
                 self._onComplete(self)
             end
         end
+    else
+        self._started = false
     end
 end
 

@@ -171,14 +171,25 @@ function AnimationController:update(dt)
     end
     self._elapsedTime = 0
 
-    if self._curAnim.curFrame < self._curAnim.frameCount then
-        self._curAnim.curFrame = self._curAnim.curFrame + 1
-        self._parent:setFrame(self._curAnim.frames[self._curAnim.curFrame])
-        return
+    if self._reversed then
+        if self._curAnim.curFrame > 1 then
+            self._curAnim.curFrame = self._curAnim.curFrame - 1
+            self._parent:setFrame(self._curAnim.frames[self._curAnim.curFrame])
+            return
+        end
+    else
+        if self._curAnim.curFrame < self._curAnim.frameCount then
+            self._curAnim.curFrame = self._curAnim.curFrame + 1
+            self._parent:setFrame(self._curAnim.frames[self._curAnim.curFrame])
+            return
+        end
     end
-
     if self._curAnim.loop then
-        self._curAnim.curFrame = 1
+        if self._reversed then
+            self._curAnim.curFrame = self._curAnim.frameCount
+        else
+            self._curAnim.curFrame = 1
+        end
         self._parent:setFrame(self._curAnim.frames[self._curAnim.curFrame])
     else
         self._finished = true
@@ -375,6 +386,18 @@ function AnimationController:getNumFrames()
         return self._parent:getNumFrames()
     end
     return 0.0
+end
+
+---
+--- Finishes the current animation immediately.
+---
+function AnimationController:finish()
+    if self._reversed then
+        self._curAnim.curFrame = 1
+    else
+        self._curAnim.curFrame = self._curAnim.frameCount
+    end
+    self._parent:setFrame(self._curAnim.frames[self._curAnim.curFrame])
 end
 
 -----------------------

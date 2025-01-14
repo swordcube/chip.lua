@@ -247,14 +247,8 @@ function TiledSprite:getRenderingInfo(trans)
     for i = 1, canvasCount do
         local canvas = canvases[canvasCount - i + 1] --- @type chip.graphics.CanvasLayer
         trans:translate(canvas:getX(), canvas:getY())
-
-        local w2 = Engine.gameWidth * canvas.origin.x
-        local h2 = Engine.gameHeight * canvas.origin.y
         trans:scale(canvas.scale.x, canvas.scale.y)
-        
-        trans:translate(w2, h2)
         trans:rotate(canvas.rotation)
-        trans:translate(-w2, -h2)
     end
     trans:translate(rx, ry)
 
@@ -263,8 +257,8 @@ function TiledSprite:getRenderingInfo(trans)
     trans:translate(-ox, -oy)
     
     trans:translate(ofx2, ofy2)
-    trans:translate(offx, offy)
     trans:scale(abs(sx), abs(sy))
+    trans:translate(offx, offy)
     trans:translate(-ofx2, -ofy2)
 
     local v1, v2, _, rx, v5, v6, _, ry, v9, v10 = trans:getMatrix()
@@ -276,15 +270,20 @@ function TiledSprite:getRenderingInfo(trans)
     local rect = self._rect:set(rx, ry, rw, rh) --- @type chip.math.Rect
     rect:getRotatedBounds(rotation, nil, rect)
 
-    trans:translate(ofx2, ofy2)
-    trans:scale(1 / abs(sx), 1 / abs(sy))
-    trans:scale(sx, sy)
-    trans:translate(-ofx2, -ofy2)
-
+    if self.scale.x < 0.0 then
+        trans:translate(ofx2, 0)
+        trans:scale(-1, 1)
+        trans:translate(-ofx2, 0)
+    end
     if self.flipX then
         trans:translate(ofx, 0)
         trans:scale(-1, 1)
         trans:translate(-ofx, 0)
+    end
+    if self.scale.y < 0.0 then
+        trans:translate(0, ofy2)
+        trans:scale(1, -1)
+        trans:translate(0, -ofy2)
     end
     if self.flipY then
         trans:translate(0, ofy)

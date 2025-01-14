@@ -29,16 +29,19 @@ function Tweener:constructor(parent)
     self:setVisibility(false)
 
     ---
+    --- @protected
     --- @type chip.tweens.Tween
     ---
     self._parent = parent
 
     ---
+    --- @protected
     --- @type function?
     ---
     self._onUpdate = nil
 
     ---
+    --- @protected
     --- @type function?
     ---
     self._onComplete = nil

@@ -40,6 +40,7 @@ function TweenManager:constructor(resetOnSceneSwitch)
     --- @type chip.core.Group
     ---
     self.list = Group:new()
+    self.list:setUpdateMode("always")
 
     if resetOnSceneSwitch == nil then
         resetOnSceneSwitch = true
@@ -49,6 +50,7 @@ function TweenManager:constructor(resetOnSceneSwitch)
             self:reset()
         end)
     end
+    self:setUpdateMode("always")
 end
 
 function TweenManager:reset()

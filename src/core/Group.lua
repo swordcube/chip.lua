@@ -21,6 +21,8 @@ local tblInsert = table.insert
 local tblRemoveItem = table.removeItem
 local tblContains = table.contains
 
+local Signal = crequire("utils.Signal") --- @type chip.utils.Signal
+
 ---
 --- @class chip.core.Group : chip.core.Actor
 --- 
@@ -40,6 +42,24 @@ function Group:constructor()
     --- @protected
     ---
     self._length = 0 --- @type integer
+    
+    ---
+    --- A signal that gets emitted whenever a
+    --- member is added to this group.
+    ---
+    self.memberAdded = Signal:new():type("chip.core.Actor") --- @type chip.utils.Signal
+
+    ---
+    --- A signal that gets emitted whenever a
+    --- member is removed from this group.
+    ---
+    self.memberRemoved = Signal:new():type("chip.core.Actor") --- @type chip.utils.Signal
+
+    ---
+    --- A signal that gets emitted whenever a
+    --- member is moved inside this group.
+    ---
+    self.memberMoved = Signal:new():type("chip.core.Actor") --- @type chip.utils.Signal
 end
 
 ---
@@ -145,6 +165,7 @@ function Group:add(actor)
     actor._parent = self
     self._length = self._length + 1
     tblInsert(self._members, actor)
+    self.memberAdded:emit(actor)
 end
 
 ---
@@ -165,6 +186,7 @@ function Group:insert(idx, actor)
     actor._parent = self
     self._length = self._length + 1
     tblInsert(self._members, idx, actor)
+    self.memberAdded:emit(actor)
 end
 
 ---
@@ -184,6 +206,7 @@ function Group:remove(actor)
     actor._parent = nil
     self._length = self._length - 1
     tblRemoveItem(self._members, actor)
+    self.memberRemoved:emit(actor)
 end
 
 ---
@@ -203,6 +226,7 @@ function Group:move(actor, idx)
     end
     tblRemoveItem(self._members, actor)
     tblInsert(self._members, idx, actor)
+    self.memberMoved:emit(actor)
 end
 
 ---

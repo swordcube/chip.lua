@@ -29,8 +29,6 @@ local rad = math.rad
 ---
 local CanvasLayer = Group:extend("CanvasLayer", ...)
 
--- TODO: add width and height to this
-
 function CanvasLayer:constructor(x, y)
     CanvasLayer.super.constructor(self)
 
@@ -48,11 +46,6 @@ function CanvasLayer:constructor(x, y)
     --- The X and Y scale of this canvas layer.
     ---
     self.scale = Point:new(1, 1) --- @type chip.math.Point
-
-    ---
-    --- The X and Y rotation origin of this canvas layer.
-    ---
-    self.origin = Point:new(0.5, 0.5) --- @type chip.math.Point
 
     ---
     --- The zoom factor of this canvas layer.

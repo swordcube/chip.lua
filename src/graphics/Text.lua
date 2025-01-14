@@ -117,9 +117,9 @@ function Text:constructor(x, y, fieldWidth, contents, size)
 
     ---
     --- @protected
-    --- @type number
+    --- @type integer
     ---
-    self._borderQuality = 1
+    self._borderPrecision = 8
 
     ---
     --- @protected
@@ -280,6 +280,17 @@ function Text:setBorderSize(size)
     self._borderSize = size
 end
 
+function Text:getBorderPrecision()
+    return self._borderPrecision
+end
+
+---
+--- @param  precision  number
+---
+function Text:setBorderPrecision(precision)
+    self._borderPrecision = precision
+end
+
 function Text:getBorderStyle()
     return self._borderStyle
 end
@@ -341,8 +352,6 @@ function Text:draw()
         return
     end
     local pr, pg, pb, pa = gfxGetColor()
-    gfxSetColor(self._tint.r, self._tint.g, self._tint.b, self._alpha)
-    
     if self._clipRect then
 		stencilSprite = self
         gfxClear(false, true, false)
@@ -377,52 +386,19 @@ function Text:draw()
     end
     if self._borderSize > 0 and self._borderColor.a > 0 then
         if self._borderStyle == "outline" then
-            local iterations = math.round(self._borderSize * self._borderQuality)
-            if iterations < 1 then
-                iterations = 1
-            end
-            
-            local delta = self._borderSize / iterations
-            local curDelta = delta
-            
             gfxSetColor(self._borderColor.r * tint.r, self._borderColor.g * tint.g, self._borderColor.b * tint.b, self._borderColor.a * self._alpha)
             
-            for _ = 1, iterations do
-                -- upper-left
-                trans:translate(-curDelta, -curDelta)
+            local step = (2 * math.pi) / self._borderPrecision
+			for i = 1, self._borderPrecision do
+				local dx = math.cos(i * step) * self._borderSize
+				local dy = math.sin(i * step) * self._borderSize
+
+				local fdx, fdy = math.round(dx), math.round(dy)
+                trans:translate(fdx, fdy)
                 gfxDraw(self._textObj, trans)
-                
-                -- upper-middle
-                trans:translate(curDelta, 0)
-                gfxDraw(self._textObj, trans)
-                
-                -- upper-right
-                trans:translate(curDelta, 0)
-                gfxDraw(self._textObj, trans)
-                
-                -- middle-right
-                trans:translate(0, curDelta)
-                gfxDraw(self._textObj, trans)
-                
-                -- lower-right
-                trans:translate(0, curDelta)
-                gfxDraw(self._textObj, trans)
-                
-                -- lower-middle
-                trans:translate(-curDelta, 0)
-                gfxDraw(self._textObj, trans)
-                
-                -- lower-left
-                trans:translate(-curDelta, 0)
-                gfxDraw(self._textObj, trans)
-                
-                trans:translate(0, -curDelta)
-                gfxDraw(self._textObj, trans)
-                
-                trans:translate(curDelta, 0)
-                curDelta = curDelta + delta
-            end
-            
+                trans:translate(-fdx, -fdy)
+			end
+
         elseif self.borderStyle == "shadow" then
             gfxSetColor(self._borderColor.r * tint.r, self._borderColor.g * tint.g, self._borderColor.b * tint.b, self._borderColor.a * self._alpha)
 

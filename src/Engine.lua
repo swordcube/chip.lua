@@ -186,6 +186,14 @@ Engine.lowPowerMode = true --- @type boolean
 Engine.timeScale = 1.0 --- @type number
 
 ---
+--- Controls whether or not the game is paused.
+--- 
+--- This does not affect actors whose update mode is
+--- set to `always`.
+---
+Engine.paused = false --- @type boolean
+
+---
 --- Returns the amount of frames drawn
 --- to the screen in the last second.
 ---

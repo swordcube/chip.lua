@@ -431,6 +431,7 @@ end
 --- @return chip.animation.frames.FrameData?  frame  The frame that is being rendered onto this sprite.
 ---
 function Sprite:getRenderingInfo(trans)
+    -- TODO: separate the transform updating into it's own function
     local frames, frame = self:getFrames(), self:getFrame()
     local frameWidth, frameHeight = self:getFrameWidth(), self:getFrameHeight()
     
@@ -441,87 +442,87 @@ function Sprite:getRenderingInfo(trans)
 
     local ofx, ofy = abs(self.origin.x * frame.width), abs(self.origin.y * frame.height)
     local ofx2, ofy2 = abs(self.origin.x * frameWidth), abs(self.origin.y * frameHeight)
-
-    trans = trans or lmath.newTransform()
-    trans:reset()
-
-    local rx, ry = self._x - self.offset.x, self._y - self.offset.y
     
-    local offx = ((curAnim and curAnim.offset.x or 0.0) - self.frameOffset.x) * (self.flipX and -1 or 1)
-    local offy = ((curAnim and curAnim.offset.y or 0.0) - self.frameOffset.y) * (self.flipY and -1 or 1)
-
-    local p = self._parent
-
-    local canvases = {} --- @type table<chip.graphics.CanvasLayer>
-
-    local canvasCount = 0
-    local isOnCanvasLayer = false
-
-    while p do
-        if p:is(CanvasLayer) then
-            if not p:is(Scene) then
-                isOnCanvasLayer = true
-            end
-            tblInsert(canvases, p)
-            canvasCount = canvasCount + 1
-        end
-        p = p._parent
-    end
-    if not isOnCanvasLayer then
-        -- TODO: maybe have some kind of ParallaxLayer instead of this
-        local cam = Camera.currentCamera
-        if cam then
-            rx = rx - ((cam:getX() - (Engine.gameWidth * 0.5)) * self.scrollFactor.x)
-            ry = ry - ((cam:getY() - (Engine.gameHeight * 0.5)) * self.scrollFactor.y)
-        end
-    end
-    local sx = self.scale.x
-    local sy = self.scale.y
-
-    if not isOnCanvasLayer then
-        local cam = Camera.currentCamera
-        if cam then
-            local w2 = Engine.gameWidth * 0.5
-            local h2 = Engine.gameHeight * 0.5
-            local zoom = cam:getZoom()
-            
-            trans:translate(
-                -(w2 * (zoom - 1)),
-                -(h2 * (zoom - 1))
-            )
-            trans:scale(zoom)
+    if trans then
+        trans:reset()
     
-            trans:translate(w2, h2)
-            trans:rotate(self:getRotation())
-            trans:translate(-w2, -h2)
-        end
-    end
-    for i = 1, canvasCount do
-        local canvas = canvases[canvasCount - i + 1] --- @type chip.graphics.CanvasLayer
-        trans:translate(canvas:getX(), canvas:getY())
-
-        local w2 = canvas:getWidth() * canvas.origin.x
-        local h2 = canvas:getHeight() * canvas.origin.y
-        trans:translate(w2, h2)
-        trans:scale(canvas.scale.x, canvas.scale.y)
+        local rx, ry = self._x - self.offset.x, self._y - self.offset.y
         
-        trans:rotate(canvas.rotation)
-        trans:translate(-w2, -h2)
+        local offx = ((curAnim and curAnim.offset.x or 0.0) - self.frameOffset.x) * (self.flipX and -1 or 1)
+        local offy = ((curAnim and curAnim.offset.y or 0.0) - self.frameOffset.y) * (self.flipY and -1 or 1)
+    
+        local p = self._parent
+    
+        local canvases = {} --- @type table<chip.graphics.CanvasLayer>
+    
+        local canvasCount = 0
+        local isOnCanvasLayer = false
+    
+        while p do
+            if p:is(CanvasLayer) then
+                if not p:is(Scene) then
+                    isOnCanvasLayer = true
+                end
+                tblInsert(canvases, p)
+                canvasCount = canvasCount + 1
+            end
+            p = p._parent
+        end
+        if not isOnCanvasLayer then
+            -- TODO: maybe have some kind of ParallaxLayer instead of this
+            local cam = Camera.currentCamera
+            if cam then
+                rx = rx - ((cam:getX() - (Engine.gameWidth * 0.5)) * self.scrollFactor.x)
+                ry = ry - ((cam:getY() - (Engine.gameHeight * 0.5)) * self.scrollFactor.y)
+            end
+        end
+        local sx = self.scale.x
+        local sy = self.scale.y
+    
+        if not isOnCanvasLayer then
+            local cam = Camera.currentCamera
+            if cam then
+                local w2 = Engine.gameWidth * 0.5
+                local h2 = Engine.gameHeight * 0.5
+                local zoom = cam:getZoom()
+                
+                trans:translate(
+                    -(w2 * (zoom - 1)),
+                    -(h2 * (zoom - 1))
+                )
+                trans:scale(zoom)
+        
+                trans:translate(w2, h2)
+                trans:rotate(self:getRotation())
+                trans:translate(-w2, -h2)
+            end
+        end
+        for i = 1, canvasCount do
+            local canvas = canvases[canvasCount - i + 1] --- @type chip.graphics.CanvasLayer
+            trans:translate(canvas:getX(), canvas:getY())
+            trans:scale(canvas.scale.x, canvas.scale.y)
+            trans:rotate(canvas.rotation)
+        end
+        -- TODO: resulting rect is slightly off
+        -- when frame offset is more than 0 and the sprite is flipped
+
+        trans:translate(rx, ry)
+
+        trans:translate(ofx2, ofy2)
+        trans:scale(abs(sx), abs(sy))
+        
+        trans:rotate(self._rotation)
+        trans:translate(
+            -(frame.offset.x * (sx < 0.0 and -1 or 1) * (self.flipX and -1 or 1)),
+            -(frame.offset.y * (sy < 0.0 and -1 or 1) * (self.flipY and -1 or 1))
+        )
+        trans:translate(offx, offy)
+        trans:translate(-ofx2, -ofy2)
     end
-    trans:translate(rx, ry)
-
-    -- TODO: resulting rect is slightly off
-    -- when frame offset is more than 0 and the sprite is flipped
-    
-    trans:translate(ofx, ofy)
-    trans:translate(offx - (frame.offset.x * (self.scale.x < 0.0 and -1 or 1) * (self.flipX and -1 or 1)), offy - (frame.offset.y * (self.scale.y < 0.0 and -1 or 1) * (self.flipY and -1 or 1)))
-    trans:scale(abs(sx), abs(sy))
-    trans:translate(-ofx, -ofy)
-
-    trans:translate(ofx, ofy)
-    trans:rotate(self._rotation)
-    trans:translate(-ofx, -ofy)
-    
+    local ot = trans
+    if not trans then
+        trans = self._transform
+    end
     local v1, v2, _, rx, v5, v6, _, ry, v9, v10 = trans:getMatrix()
     
     local rw = frame.width * sqrt((v1 * v1) + (v5 * v5) + (v9 * v9))
@@ -530,26 +531,29 @@ function Sprite:getRenderingInfo(trans)
     
     local rect = self._rect:set(rx, ry, rw, rh) --- @type chip.math.Rect
     rect:getRotatedBounds(rotation, nil, rect)
-    
-    if self.scale.x < 0.0 then
-        trans:translate(ofx2, 0)
-        trans:scale(-1, 1)
-        trans:translate(-ofx2, 0)
-    end
-    if self.flipX then
-        trans:translate(ofx2, 0)
-        trans:scale(-1, 1)
-        trans:translate(-ofx2, 0)
-    end
-    if self.scale.y < 0.0 then
-        trans:translate(0, ofy2)
-        trans:scale(1, -1)
-        trans:translate(0, -ofy2)
-    end
-    if self.flipY then
-        trans:translate(0, ofy2)
-        trans:scale(1, -1)
-        trans:translate(0, -ofy2)
+   
+    trans = ot
+    if trans then
+        if self.scale.x < 0.0 then
+            trans:translate(ofx2, 0)
+            trans:scale(-1, 1)
+            trans:translate(-ofx2, 0)
+        end
+        if self.flipX then
+            trans:translate(ofx2, 0)
+            trans:scale(-1, 1)
+            trans:translate(-ofx2, 0)
+        end
+        if self.scale.y < 0.0 then
+            trans:translate(0, ofy2)
+            trans:scale(1, -1)
+            trans:translate(0, -ofy2)
+        end
+        if self.flipY then
+            trans:translate(0, ofy2)
+            trans:scale(1, -1)
+            trans:translate(0, -ofy2)
+        end
     end
     return trans, rx, ry, rw, rh, frame
 end
@@ -606,8 +610,9 @@ function Sprite:getWidth()
 end
 
 function Sprite:getFrameHeight()
-    if self.animation.curAnim then
-        local firstFrame = self.animation.curAnim.frames[1]
+    local curAnim = self.animation:getCurrentAnimation()
+    if curAnim then
+        local firstFrame = curAnim.frames[1]
         return firstFrame.height
     end
     local frame = self:getFrame()

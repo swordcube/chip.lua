@@ -198,6 +198,7 @@ function Timer:start(duration, onComplete, loops)
     self._loops = loops and loops or 1
     self._loopsLeft = self._loops
 
+    self:setUpdateMode("always")
     self._manager.list:add(self)
     return self
 end

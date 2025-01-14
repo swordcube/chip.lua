@@ -38,10 +38,12 @@ function TimerManager:constructor()
     --- @type chip.core.Group
     ---
     self.list = Group:new()
+    self.list:setUpdateMode("always")
 
     Engine.preSceneSwitch:connect(function()
         self:reset()
     end)
+    self:setUpdateMode("always")
 end
 
 function TimerManager:reset()
@@ -73,7 +75,7 @@ function TimerManager:resume()
     local members = self.list:getMembers()
     for i = 1, self.list:getLength() do
         local timer = members[i] --- @type chip.utils.Timer
-        timer:setUpdateMode("inherit")
+        timer:setUpdateMode("always")
     end
 end
 

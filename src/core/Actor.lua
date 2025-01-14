@@ -72,7 +72,7 @@ function Actor:isActive()
         -- Which isn't recommended, but still allowed
         local p = self._parent
         if not p then
-            return true
+            return not Engine.paused
         end
         local active = false
         while p do

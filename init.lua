@@ -89,6 +89,7 @@ TiledSprite = crequire("graphics.TiledSprite") --- @type chip.graphics.TiledSpri
 Camera = crequire("graphics.Camera") --- @type chip.graphics.Camera
 CanvasLayer = crequire("graphics.CanvasLayer") --- @type chip.graphics.CanvasLayer
 
+Viewport = crequire("graphics.Viewport") --- @type chip.graphics.Viewport
 ProgressBar = crequire("graphics.ProgressBar") --- @type chip.graphics.ProgressBar
 
 BaseScaleMode = crequire("graphics.scalemodes.BaseScaleMode") --- @type chip.graphics.scalemodes.BaseScaleMode

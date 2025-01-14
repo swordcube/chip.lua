@@ -66,6 +66,12 @@ function Tween:constructor(manager)
     --- @protected
     --- @type function?
     ---
+    self._onUpdate = nil
+    
+    ---
+    --- @protected
+    --- @type function?
+    ---
     self._onComplete = nil
 
     ---
@@ -79,6 +85,7 @@ function Tween:constructor(manager)
     --- @type chip.core.Group
     ---
     self._tweeners = Group:new()
+    self._tweeners:setUpdateMode("always")
 
     ---
     --- @protected
@@ -97,6 +104,7 @@ function Tween:constructor(manager)
     ---
     self._started = false
 
+    self:setUpdateMode("always")
     self._manager.list:add(self)
 end
 
@@ -160,6 +168,19 @@ end
 ---
 function Tween:setEase(ease)
     self._ease = ease
+    return self
+end
+
+function Tween:getUpdateCallback()
+    return self._onUpdate
+end
+
+---
+--- @param  func  function
+--- @return chip.tweens.Tween
+---
+function Tween:setUpdateCallback(func)
+    self._onUpdate = func
     return self
 end
 
@@ -330,6 +351,9 @@ function Tween:update(dt)
     if self._elapsedTime >= self._startDelay then
         self._tweeners:_update(dt)
 
+        if self._onUpdate then
+            self._onUpdate(self)
+        end
         if self:getProgress() >= 1.0 then
             if self._onComplete then
                 self._onComplete(self)
