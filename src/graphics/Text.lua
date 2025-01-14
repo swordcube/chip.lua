@@ -145,6 +145,24 @@ function Text:constructor(x, y, fieldWidth, contents, size)
     ---
     self._textObj = nil
 
+    ---
+    --- @protected
+    --- @type boolean
+    ---
+    self._fastRendering = true
+
+    ---
+    --- @protected
+    --- @type boolean
+    ---
+    self._dirty = false -- this only matters for slow rendering
+
+    ---
+    --- @protected
+    --- @type love.Canvas?
+    ---
+    self._canvas = nil -- this only matters for slow rendering
+
     self:setFrame(FrameData:new("#_TEXT_", 0, 0, 0, 0, 16, 16, self:getTexture()))
     self:setFont(getFontPath("nokiafc22.ttf"))
     self:setContents(contents or "")
@@ -154,6 +172,9 @@ end
 --- @return string
 ---
 function Text:getFont()
+    if not self:isFastRendering() and self._dirty then
+        self:_regenTexture()
+    end
     return self._font
 end
 
@@ -175,8 +196,10 @@ function Text:setFont(font)
             self._textObj = gfx.newTextBatch(self._fontData)
         end
         self._font = font
+        if not self:isFastRendering() then
+            self._dirty = true
+        end
     end
-
     self:setContents(self._contents or "")
 end
 
@@ -184,6 +207,9 @@ end
 --- @return string
 ---
 function Text:getContents()
+    if not self:isFastRendering() and self._dirty then
+        self:_regenTexture()
+    end
     return self._contents
 end
 
@@ -206,9 +232,15 @@ function Text:setContents(contents)
             self._textObj:setf(self._contents, math.huge, alignment)
         end
     end
+    if not self:isFastRendering() then
+        self._dirty = true
+    end
 end
 
 function Text:getFieldWidth()
+    if not self:isFastRendering() and self._dirty then
+        self:_regenTexture()
+    end
     return self._fieldWidth
 end
 
@@ -217,9 +249,15 @@ end
 ---
 function Text:setFieldWidth(width)
     self._fieldWidth = width
+    if not self:isFastRendering() then
+        self._dirty = true
+    end
 end
 
 function Text:getSize()
+    if not self:isFastRendering() and self._dirty then
+        self:_regenTexture()
+    end
     return self._size
 end
 
@@ -243,9 +281,15 @@ function Text:setSize(size)
         end
         self._size = size
     end
+    if not self:isFastRendering() then
+        self._dirty = true
+    end
 end
 
 function Text:getAlignment()
+    if not self:isFastRendering() and self._dirty then
+        self:_regenTexture()
+    end
     return self._alignment
 end
 
@@ -267,9 +311,15 @@ function Text:setAlignment(alignment)
             self._textObj:setf(self._contents, math.huge, alignment)
         end
     end
+    if not self:isFastRendering() then
+        self._dirty = true
+    end
 end
 
 function Text:getBorderSize()
+    if not self:isFastRendering() and self._dirty then
+        self:_regenTexture()
+    end
     return self._borderSize
 end
 
@@ -278,9 +328,15 @@ end
 ---
 function Text:setBorderSize(size)
     self._borderSize = size
+    if not self:isFastRendering() then
+        self._dirty = true
+    end
 end
 
 function Text:getBorderPrecision()
+    if not self:isFastRendering() and self._dirty then
+        self:_regenTexture()
+    end
     return self._borderPrecision
 end
 
@@ -289,9 +345,15 @@ end
 ---
 function Text:setBorderPrecision(precision)
     self._borderPrecision = precision
+    if not self:isFastRendering() then
+        self._dirty = true
+    end
 end
 
 function Text:getBorderStyle()
+    if not self:isFastRendering() and self._dirty then
+        self:_regenTexture()
+    end
     return self._borderStyle
 end
 
@@ -300,9 +362,15 @@ end
 ---
 function Text:setBorderStyle(style)
     self._borderStyle = style
+    if not self:isFastRendering() then
+        self._dirty = true
+    end
 end
 
 function Text:getBorderColor()
+    if not self:isFastRendering() and self._dirty then
+        self:_regenTexture()
+    end
     return self._borderColor
 end
 
@@ -311,9 +379,15 @@ end
 ---
 function Text:setBorderColor(color)
     self._borderColor = Color:new(color)
+    if not self:isFastRendering() then
+        self._dirty = true
+    end
 end
 
 function Text:getColor()
+    if not self:isFastRendering() and self._dirty then
+        self:_regenTexture()
+    end
     return self._color
 end
 
@@ -322,6 +396,35 @@ end
 ---
 function Text:setColor(color)
     self._color = Color:new(color)
+    if not self:isFastRendering() then
+        self._dirty = true
+    end
+end
+
+---
+--- Returns whether or not fast rendering is enabled.
+--- 
+--- If your text *doesn't* change very often, then you
+--- can disable this without much performance cost.
+--- 
+--- If fast rendering is left enabled, setting the alpha
+--- value of the text may not affect the border correctly.
+---
+function Text:isFastRendering()
+    return self._fastRendering
+end
+
+---
+--- @param  fastRendering  boolean
+---
+function Text:setFastRendering(fastRendering)
+    self._fastRendering = fastRendering
+    self._dirty = not fastRendering
+
+    if fastRendering and self._canvas then
+        self._canvas:release()
+        self._canvas = nil
+    end
 end
 
 function Text:getFrame()
@@ -330,15 +433,25 @@ function Text:getFrame()
     local frame = self._frame
     frame.width = self:getFrameWidth()
     frame.height = self:getFrameHeight()
+
+    if not self:isFastRendering() and self._dirty then
+        self:_regenTexture()
+    end
     return frame
 end
 
 function Text:getFrameWidth()
+    if not self:isFastRendering() and self._dirty then
+        self:_regenTexture()
+    end
     local padding = math.floor(self._borderSize) + 2
     return self._textObj:getWidth() + padding + (self._borderStyle == "shadow" and self.shadowOffset.x or 0.0)
 end
 
 function Text:getFrameHeight()
+    if not self:isFastRendering() and self._dirty then
+        self:_regenTexture()
+    end
     local padding = math.floor(self._borderSize) + 2
     return self._textObj:getHeight() + padding + (self._borderStyle == "shadow" and self.shadowOffset.y or 0.0)
 end
@@ -347,13 +460,42 @@ end
 --- Draws this sprite to the screen.
 ---
 function Text:draw()
+    if not self:isFastRendering() and self._dirty then
+        self:_regenTexture()
+    end
     local trans, _, _, _, _, frame = self:getRenderingInfo(self._transform)
     if not frame or not self:isOnScreen() then
         return
     end
+    if self:isFastRendering() then
+        self:_fastRender(trans)
+    else
+        self:_slowRender(trans)
+    end
+end
+
+function Text:free()
+    if self._textObj then
+        self._textObj:release()
+        self._textObj = nil
+    end
+    if self._canvas then
+        self._canvas:release()
+        self._canvas = nil
+    end
+    Text.super.free(self)
+end
+
+--- [ PRIVATE API ] ---
+
+---
+--- @protected
+--- @param  trans  love.Transform
+---
+function Text:_fastRender(trans)
     local pr, pg, pb, pa = gfxGetColor()
     if self._clipRect then
-		stencilSprite = self
+        stencilSprite = self
         gfxClear(false, true, false)
 
         gfxSetStencilState("replace", "always", 1)
@@ -363,7 +505,7 @@ function Text:draw()
 
         gfxSetStencilState("keep", "greater", 0)
         gfxSetColorMask(true)
-	end
+    end
     local tint = self._tint
     local padding = math.floor(self._borderSize) + 2
     
@@ -389,15 +531,15 @@ function Text:draw()
             gfxSetColor(self._borderColor.r * tint.r, self._borderColor.g * tint.g, self._borderColor.b * tint.b, self._borderColor.a * self._alpha)
             
             local step = (2 * math.pi) / self._borderPrecision
-			for i = 1, self._borderPrecision do
-				local dx = math.cos(i * step) * self._borderSize
-				local dy = math.sin(i * step) * self._borderSize
+            for i = 1, self._borderPrecision do
+                local dx = math.cos(i * step) * self._borderSize
+                local dy = math.sin(i * step) * self._borderSize
 
-				local fdx, fdy = math.round(dx), math.round(dy)
+                local fdx, fdy = math.round(dx), math.round(dy)
                 trans:translate(fdx, fdy)
                 gfxDraw(self._textObj, trans)
                 trans:translate(-fdx, -fdy)
-			end
+            end
 
         elseif self.borderStyle == "shadow" then
             gfxSetColor(self._borderColor.r * tint.r, self._borderColor.g * tint.g, self._borderColor.b * tint.b, self._borderColor.a * self._alpha)
@@ -406,25 +548,75 @@ function Text:draw()
             gfxDraw(self._textObj, trans)
             trans:translate(-self.shadowOffset.x * self.borderSize, -self.shadowOffset.y * self.borderSize)
         end
-        gfxSetColor(self._color.r * tint.r, self._color.g * tint.g, self._color.b * tint.b, self._color.a * self._alpha)
-    else
-        gfxSetColor(self._color.r * tint.r, self._color.g * tint.g, self._color.b * tint.b, self._color.a * self._alpha)
     end
+    gfxSetColor(self._color.r * tint.r, self._color.g * tint.g, self._color.b * tint.b, self._color.a * self._alpha)
     gfxDraw(self._textObj, trans)
 
     if self._clipRect then
         gfxClear(false, true, false)
-		gfxSetStencilState()
-	end
+        gfxSetStencilState()
+    end
     gfxSetColor(pr, pg, pb, pa)
 end
 
-function Text:free()
-    if self._textObj then
-        self._textObj:release()
-        self._textObj = nil
+---
+--- @protected
+--- @param  trans  love.Transform
+---
+function Text:_slowRender(trans)
+    local pr, pg, pb, pa = gfxGetColor()
+    gfxSetColor(self._tint.r, self._tint.g, self._tint.b, self._alpha)
+
+    if self._clipRect then
+        stencilSprite = self
+        gfxClear(false, true, false)
+
+        gfxSetStencilState("replace", "always", 1)
+        gfxSetColorMask(false)
+
+        stencil()
+
+        gfxSetStencilState("keep", "greater", 0)
+        gfxSetColorMask(true)
     end
-    Text.super.free(self)
+    gfxDraw(self._canvas, trans)
+
+    if self._clipRect then
+        gfxClear(false, true, false)
+        gfxSetStencilState()
+    end
+    gfxSetColor(pr, pg, pb, pa)
+end
+
+---
+--- @protected
+---
+function Text:_regenTexture()
+    if not self._dirty then
+        return
+    end
+    self._dirty = false
+
+    if self._canvas then
+        self._canvas:release()
+        self._canvas = nil
+    end
+    local trans = self._transform
+    local oldTrans = self._transform:clone()
+    
+    local tr, tg, tb, a, cr = self._tint.r, self._tint.g, self._tint.b, self._alpha, self._clipRect
+    self._tint.r, self._tint.g, self._tint.b, self._alpha, self._clipRect = 1, 1, 1, 1, nil
+
+    local prevCanvas = gfx.getCanvas()
+    self._canvas = gfx.newCanvas(self:getFrameWidth(), self:getFrameHeight())
+    gfx.setCanvas(self._canvas)
+
+    trans:reset()
+    self:_fastRender(trans) -- what if i     cheat
+    self._tint.r, self._tint.g, self._tint.b, self._alpha, self._clipRect = tr, tg, tb, a, cr
+
+    trans:setMatrix(oldTrans:getMatrix())
+    gfx.setCanvas(prevCanvas)
 end
 
 return Text
