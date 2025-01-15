@@ -17,31 +17,29 @@
 ]]
 
 ---
---- @class chip.input.InputEventMouseMotion : chip.input.InputEventMouse
+--- @class chip.input.mouse.InputEventMouse : chip.input.InputEvent
 --- 
---- A class which represents a mouse button input event.
+--- A class which represents a mouse input event.
 ---
-local InputEventMouseMotion = InputEventMouse:extend("InputEventMouseMotion", ...)
+local InputEventMouse = InputEvent:extend("InputEventMouse", ...)
 
 ---
---- @param  x   number
---- @param  y   number
---- @param  dx  number
---- @param  dy  number
+--- @param  x  number
+--- @param  y  number
 ---
-function InputEventMouseMotion:constructor(x, y, dx, dy)
-    InputEventMouseMotion.super.constructor(self, x, y)
+function InputEventMouse:constructor(x, y)
+    InputEventMouse.super.constructor(self)
 
-    self._dx = dx
-    self._dy = dy
+    self._x = x
+    self._y = y
 end
 
-function InputEventMouseMotion:getDeltaX()
-    return self._dx
+function InputEventMouse:getX()
+    return self._x
 end
 
-function InputEventMouseMotion:getDeltaY()
-    return self._dy
+function InputEventMouse:getY()
+    return self._y
 end
 
-return InputEventMouseMotion
+return InputEventMouse

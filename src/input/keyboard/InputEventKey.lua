@@ -17,7 +17,7 @@
 ]]
 
 ---
---- @class chip.input.InputEventKey : chip.input.InputEvent
+--- @class chip.input.keyboard.InputEventKey : chip.input.InputEvent
 --- 
 --- A class which represents a keyboard input event.
 ---

@@ -157,7 +157,7 @@ end
 ---
 function Input._processEvent(event)
     if event:is(InputEventKey) then
-        local event = event --- @type chip.input.InputEventKey
+        local event = event --- @type chip.input.keyboard.InputEventKey
 
         local key = event:getKey() --- @type string
         local pressed = event:isPressed() --- @type boolean
@@ -173,13 +173,13 @@ function Input._processEvent(event)
         Input._mouseJustMoved = true
     end
     if event:is(InputEventMouseScroll) then
-        local event = event --- @type chip.input.InputEventMouseScroll
+        local event = event --- @type chip.input.mouse.InputEventMouseScroll
 
         Input._horizontalMouseWheel = event:getX()
         Input._verticalMouseWheel = event:getY()
     end
     if event:is(InputEventMouseButton) then
-        local event = event --- @type chip.input.InputEventMouseButton
+        local event = event --- @type chip.input.mouse.InputEventMouseButton
 
         local button = event:getButton() --- @type "left"|"right"|"middle"|"unknown"
         local pressed = event:isPressed() --- @type boolean

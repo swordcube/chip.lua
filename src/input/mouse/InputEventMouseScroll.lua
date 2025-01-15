@@ -17,29 +17,10 @@
 ]]
 
 ---
---- @class chip.input.InputEventMouse : chip.input.InputEvent
+--- @class chip.input.mouse.InputEventMouseScroll : chip.input.mouse.InputEventMouse
 --- 
---- A class which represents a mouse input event.
+--- A class which represents a mouse button input event.
 ---
-local InputEventMouse = InputEvent:extend("InputEventMouse", ...)
+local InputEventMouseScroll = InputEventMouse:extend("InputEventMouseScroll", ...)
 
----
---- @param  x  number
---- @param  y  number
----
-function InputEventMouse:constructor(x, y)
-    InputEventMouse.super.constructor(self)
-
-    self._x = x
-    self._y = y
-end
-
-function InputEventMouse:getX()
-    return self._x
-end
-
-function InputEventMouse:getY()
-    return self._y
-end
-
-return InputEventMouse
+return InputEventMouseScroll

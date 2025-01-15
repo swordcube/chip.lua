@@ -52,8 +52,9 @@ function TiledSprite:constructor(x, y)
     TiledSprite.super.constructor(self, x, y)
 
     local triangles = {}
-    for _ = 1, 10000 do
-        tblInsert(triangles, {0, 0, 0, 0, 0, 0})
+    local tri = {0, 0, 0, 0, 0, 0}
+    for _ = 1, 100000 do
+        tblInsert(triangles, tri)
     end
 
     ---

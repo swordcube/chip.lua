@@ -516,7 +516,7 @@ function Sprite:getRenderingInfo(trans)
             -(frame.offset.x * (sx < 0.0 and -1 or 1) * (self.flipX and -1 or 1)),
             -(frame.offset.y * (sy < 0.0 and -1 or 1) * (self.flipY and -1 or 1))
         )
-        trans:translate(offx, offy)
+        trans:translate(-offx, -offy)
         trans:translate(-ofx2, -ofy2)
     end
     local ot = trans

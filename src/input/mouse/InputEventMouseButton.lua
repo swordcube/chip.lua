@@ -17,7 +17,7 @@
 ]]
 
 ---
---- @class chip.input.InputEventMouseButton : chip.input.InputEventMouse
+--- @class chip.input.mouse.InputEventMouseButton : chip.input.mouse.InputEventMouse
 --- 
 --- A class which represents a mouse button input event.
 ---

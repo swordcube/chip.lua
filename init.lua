@@ -91,6 +91,7 @@ CanvasLayer = crequire("graphics.CanvasLayer") --- @type chip.graphics.CanvasLay
 
 Viewport = crequire("graphics.Viewport") --- @type chip.graphics.Viewport
 ProgressBar = crequire("graphics.ProgressBar") --- @type chip.graphics.ProgressBar
+MouseCursor = crequire("graphics.MouseCursor") --- @type chip.graphics.MouseCursor
 
 BaseScaleMode = crequire("graphics.scalemodes.BaseScaleMode") --- @type chip.graphics.scalemodes.BaseScaleMode
 RatioScaleMode = crequire("graphics.scalemodes.RatioScaleMode") --- @type chip.graphics.scalemodes.RatioScaleMode
@@ -142,12 +143,12 @@ Input = crequire("input.Input") --- @type chip.input.Input
 InputState = crequire("input.InputState") --- @type chip.input.InputState
 
 InputEvent = crequire("input.InputEvent") --- @type chip.input.InputEvent
-InputEventKey = crequire("input.InputEventKey") --- @type chip.input.InputEventKey
+InputEventKey = crequire("input.keyboard.InputEventKey") --- @type chip.input.keyboard.InputEventKey
 
-InputEventMouse = crequire("input.InputEventMouse") --- @type chip.input.InputEventMouse
-InputEventMouseButton = crequire("input.InputEventMouseButton") --- @type chip.input.InputEventMouseButton
-InputEventMouseMotion = crequire("input.InputEventMouseMotion") --- @type chip.input.InputEventMouseMotion
-InputEventMouseScroll = crequire("input.InputEventMouseScroll") --- @type chip.input.InputEventMouseScroll
+InputEventMouse = crequire("input.mouse.InputEventMouse") --- @type chip.input.mouse.InputEventMouse
+InputEventMouseButton = crequire("input.mouse.InputEventMouseButton") --- @type chip.input.mouse.InputEventMouseButton
+InputEventMouseMotion = crequire("input.mouse.InputEventMouseMotion") --- @type chip.input.mouse.InputEventMouseMotion
+InputEventMouseScroll = crequire("input.mouse.InputEventMouseScroll") --- @type chip.input.mouse.InputEventMouseScroll
 
 --- [ GAME IMPORTS ] ---
 
@@ -200,6 +201,7 @@ local function update(dt)
     if Engine.preUpdate._cancelled then
         return
     end
+    MouseCursor._update()
     if Engine._requestedScene and Engine._canSwitchScene then
         Engine._switchScene()
     end
@@ -249,6 +251,7 @@ local function draw()
     gfx.setScissor()
     gfx.pop()
 
+    MouseCursor._draw()
     Engine.postDraw:emit()
 end
 
@@ -452,6 +455,8 @@ function Chip.init(settings)
 
         Engine.scaleMode = RatioScaleMode:new()
         Engine.scaleMode:onMeasure(settings.gameWidth, settings.gameHeight)
+
+        MouseCursor.init()
 
         if settings.showSplashScreen and not settings.debugMode then
             Engine.currentScene = crequire("SplashScene"):new(settings.initialScene)
