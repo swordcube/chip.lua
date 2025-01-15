@@ -26,6 +26,7 @@ local gfxClear = gfx.clear
 local gfxDraw = gfx.draw
 
 local gfxPush = gfx.push
+local gfxOrigin = gfx.origin
 local gfxPop = gfx.pop
 local gfxApplyTransform = gfx.applyTransform
 local gfxTranslate = gfx.translate
@@ -163,7 +164,12 @@ function Text:constructor(x, y, fieldWidth, contents, size)
     ---
     self._canvas = nil -- this only matters for slow rendering
 
-    self:setFrame(FrameData:new("#_TEXT_", 0, 0, 0, 0, 16, 16, self:getTexture()))
+    local tex = Texture:new() --- @type chip.graphics.Texture
+    tex:setImage(love.image.newImageData(1, 1))
+
+    self:loadTexture(tex)
+    self:setFrame(FrameData:new("#_TEXT_", 0, 0, 0, 0, 16, 16, tex))
+
     self:setFont(getFontPath("nokiafc22.ttf"))
     self:setContents(contents or "")
 end
@@ -172,9 +178,6 @@ end
 --- @return string
 ---
 function Text:getFont()
-    if not self:isFastRendering() and self._dirty then
-        self:_regenTexture()
-    end
     return self._font
 end
 
@@ -207,9 +210,6 @@ end
 --- @return string
 ---
 function Text:getContents()
-    if not self:isFastRendering() and self._dirty then
-        self:_regenTexture()
-    end
     return self._contents
 end
 
@@ -229,7 +229,7 @@ function Text:setContents(contents)
         if self._fieldWidth > 0 then
             self._textObj:setf(self._contents, self._fieldWidth, alignment)
         else
-            self._textObj:setf(self._contents, math.huge, alignment)
+            self._textObj:setf(self._contents, self._fontData:getWidth(self._contents), alignment)
         end
     end
     if not self:isFastRendering() then
@@ -238,9 +238,6 @@ function Text:setContents(contents)
 end
 
 function Text:getFieldWidth()
-    if not self:isFastRendering() and self._dirty then
-        self:_regenTexture()
-    end
     return self._fieldWidth
 end
 
@@ -255,9 +252,6 @@ function Text:setFieldWidth(width)
 end
 
 function Text:getSize()
-    if not self:isFastRendering() and self._dirty then
-        self:_regenTexture()
-    end
     return self._size
 end
 
@@ -287,9 +281,6 @@ function Text:setSize(size)
 end
 
 function Text:getAlignment()
-    if not self:isFastRendering() and self._dirty then
-        self:_regenTexture()
-    end
     return self._alignment
 end
 
@@ -317,9 +308,6 @@ function Text:setAlignment(alignment)
 end
 
 function Text:getBorderSize()
-    if not self:isFastRendering() and self._dirty then
-        self:_regenTexture()
-    end
     return self._borderSize
 end
 
@@ -334,9 +322,6 @@ function Text:setBorderSize(size)
 end
 
 function Text:getBorderPrecision()
-    if not self:isFastRendering() and self._dirty then
-        self:_regenTexture()
-    end
     return self._borderPrecision
 end
 
@@ -351,9 +336,6 @@ function Text:setBorderPrecision(precision)
 end
 
 function Text:getBorderStyle()
-    if not self:isFastRendering() and self._dirty then
-        self:_regenTexture()
-    end
     return self._borderStyle
 end
 
@@ -368,9 +350,6 @@ function Text:setBorderStyle(style)
 end
 
 function Text:getBorderColor()
-    if not self:isFastRendering() and self._dirty then
-        self:_regenTexture()
-    end
     return self._borderColor
 end
 
@@ -385,9 +364,6 @@ function Text:setBorderColor(color)
 end
 
 function Text:getColor()
-    if not self:isFastRendering() and self._dirty then
-        self:_regenTexture()
-    end
     return self._color
 end
 
@@ -433,25 +409,15 @@ function Text:getFrame()
     local frame = self._frame
     frame.width = self:getFrameWidth()
     frame.height = self:getFrameHeight()
-
-    if not self:isFastRendering() and self._dirty then
-        self:_regenTexture()
-    end
     return frame
 end
 
 function Text:getFrameWidth()
-    if not self:isFastRendering() and self._dirty then
-        self:_regenTexture()
-    end
     local padding = math.floor(self._borderSize) + 2
     return self._textObj:getWidth() + padding + (self._borderStyle == "shadow" and self.shadowOffset.x or 0.0)
 end
 
 function Text:getFrameHeight()
-    if not self:isFastRendering() and self._dirty then
-        self:_regenTexture()
-    end
     local padding = math.floor(self._borderSize) + 2
     return self._textObj:getHeight() + padding + (self._borderStyle == "shadow" and self.shadowOffset.y or 0.0)
 end
@@ -460,9 +426,6 @@ end
 --- Draws this sprite to the screen.
 ---
 function Text:draw()
-    if not self:isFastRendering() and self._dirty then
-        self:_regenTexture()
-    end
     local trans, _, _, _, _, frame = self:getRenderingInfo(self._transform)
     if not frame or not self:isOnScreen() then
         return
@@ -470,7 +433,10 @@ function Text:draw()
     if self:isFastRendering() then
         self:_fastRender(trans)
     else
-        self:_slowRender(trans)
+        if self._dirty then
+            self:_regenTexture()
+        end
+        self:_slowRender()
     end
 end
 
@@ -563,29 +529,8 @@ end
 --- @protected
 --- @param  trans  love.Transform
 ---
-function Text:_slowRender(trans)
-    local pr, pg, pb, pa = gfxGetColor()
-    gfxSetColor(self._tint.r, self._tint.g, self._tint.b, self._alpha)
-
-    if self._clipRect then
-        stencilSprite = self
-        gfxClear(false, true, false)
-
-        gfxSetStencilState("replace", "always", 1)
-        gfxSetColorMask(false)
-
-        stencil()
-
-        gfxSetStencilState("keep", "greater", 0)
-        gfxSetColorMask(true)
-    end
-    gfxDraw(self._canvas, trans)
-
-    if self._clipRect then
-        gfxClear(false, true, false)
-        gfxSetStencilState()
-    end
-    gfxSetColor(pr, pg, pb, pa)
+function Text:_slowRender()
+    Text.super.draw(self)
 end
 
 ---
@@ -611,12 +556,29 @@ function Text:_regenTexture()
     self._canvas = gfx.newCanvas(self:getFrameWidth(), self:getFrameHeight())
     gfx.setCanvas(self._canvas)
 
+    gfxPush()
+    gfxOrigin()
+
+    local sx, sy, sw, sh = gfx.getScissor()
+    gfx.setScissor()
+
     trans:reset()
     self:_fastRender(trans) -- what if i     cheat
     self._tint.r, self._tint.g, self._tint.b, self._alpha, self._clipRect = tr, tg, tb, a, cr
 
     trans:setMatrix(oldTrans:getMatrix())
     gfx.setCanvas(prevCanvas)
+
+    gfx.setScissor(sx, sy, sw, sh)
+    gfxPop()
+
+    local texture = self:getTexture()
+    texture:setImage(gfx.readbackTexture(self._canvas))
+
+    local frame = self:getFrame()
+    frame.width = texture.width
+    frame.height = texture.height
+    frame.quad:setViewport(0, 0, texture.width, texture.height, texture.width, texture.height)
 end
 
 return Text

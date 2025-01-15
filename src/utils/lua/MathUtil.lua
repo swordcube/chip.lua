@@ -163,3 +163,13 @@ function math.formatMoney(amount, showDecimal, englishStyle)
     end
     return str
 end
+
+---
+--- Returns the sign of a given number.
+--- 
+--- @param  value  number  The number to get the sign of.
+--- @return number
+---
+function math.sign(value)
+    return value < 0 and -1.0 or 1.0
+end

@@ -100,7 +100,7 @@ function string.lastIndexOf(self, sub)
     local subStringLength = #sub
     local lastIndex = -1
 
-    for i = 1, #str - subStringLength + 1 do
+    for i = 1, #self - subStringLength + 1 do
         local currentSubstring = self:sub(i, i + subStringLength - 1)
         if currentSubstring == sub then
             lastIndex = i
@@ -118,21 +118,8 @@ end
 --- @param to     string  The content to replace `from` with.
 ---
 function string.replace(self, from, to)
-    local searchStartIdx = 1
-
-    while true do
-        local startIdx, endIdx = self:find(from, searchStartIdx, true)
-        if (not startIdx) then
-            break
-        end
-
-        local postfix = self:sub(endIdx + 1)
-        str = self:sub(1, (startIdx - 1)) .. to .. postfix
-
-        searchStartIdx = -1 * postfix:len()
-    end
-
-    return str
+    local s, _ = self:gsub(from, to)
+    return s
 end
 
 ---
@@ -159,6 +146,7 @@ function string.charAt(self, pos)
 end
 
 ---
+---
 --- Similar to `string.charAt()` but it returns the raw character
 --- code of the returned character.
 ---
@@ -173,7 +161,7 @@ end
 --- (default: whitespace) up to a certain length
 --- on the left side of the string.
 ---
---- @param  str     string   The string to pad.
+--- @param  self    string   The string to pad.
 --- @param  length  integer  The length to pad the string to.
 --- @param  char    string   The character to pad the string with. (default: whitespace)
 ---
@@ -185,10 +173,29 @@ end
 --- (default: whitespace) up to a certain length
 --- on the right side of the string.
 ---
---- @param  str     string   The string to pad.
+--- @param  self    string   The string to pad.
 --- @param  length  integer  The length to pad the string to.
 --- @param  char    string   The character to pad the string with. (default: whitespace)
 ---
 function string.rpad(self, length, char)
     return self .. string.rep(char or ' ', length - #self)
+end
+
+---
+--- Converts a given string to title case.
+--- 
+--- @param  self  string  The string to convert to title case.
+---
+function string.title(self)
+    local split = string.split(self, " ")
+    if not split then
+        split = {self}
+    end
+    for i = 1, #split do
+        local str = split[i] --- @type string
+        if #str > 0 then
+            split[i] = str:charAt(1):upper() .. str:sub(2)
+        end
+    end
+    return table.concat(split, " ")
 end
