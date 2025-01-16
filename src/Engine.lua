@@ -127,7 +127,13 @@ Engine.preSceneSwitch = Signal:new() --- @type chip.utils.Signal
 
 ---
 --- A signal that is fired after the game
---- switches scenes.
+--- switches to a new scene but before initializing it.
+---
+Engine.preSceneInit = Signal:new():type(Scene) --- @type chip.utils.Signal
+
+---
+--- A signal that is fired after the game
+--- switches to a new scene and initializes it.
 ---
 Engine.postSceneSwitch = Signal:new():type(Scene) --- @type chip.utils.Signal
 
@@ -270,9 +276,10 @@ function Engine._switchScene()
     Engine.currentScene = Engine._requestedScene
     Engine._requestedScene = nil
     
+    Engine.preSceneInit:emit(Engine.currentScene)
     Engine.currentScene:init()
-    Engine.postSceneSwitch:emit(Engine.currentScene)
 
+    Engine.postSceneSwitch:emit(Engine.currentScene)
     collectgarbage("collect")
 end
 

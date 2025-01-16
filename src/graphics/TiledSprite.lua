@@ -241,7 +241,7 @@ function TiledSprite:getRenderingInfo(trans)
             trans:scale(zoom)
     
             trans:translate(w2, h2)
-            trans:rotate(self:getRotation())
+            trans:rotate(cam:getRotation())
             trans:translate(-w2, -h2)
         end
     end

@@ -17,6 +17,8 @@
 ]]
 
 local _seconds_ = "seconds"
+
+local max = math.max
 local tblInsert = table.insert
 
 local Engine = crequire("Engine") --- @type chip.Engine
@@ -181,7 +183,7 @@ function AudioPlayer:load(data)
 
         source = self._stream:getData():clone()
         source:setVolume(self._volume * mult)
-        source:setPitch(self._pitch)
+        source:setPitch(max(self._pitch, 0.01))
         source:setLooping(self._looping)
     
         if self._filter then
@@ -365,7 +367,7 @@ function AudioPlayer:setPitch(newPitch)
     for i = 1, #sources do
         local source = sources[i] --- @type love.Source
         if source then
-            source:setPitch(self._pitch)
+            source:setPitch(max(self._pitch, 0.01))
         end
     end
 end

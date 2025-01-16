@@ -40,6 +40,8 @@ function SplashScene:constructor(initialScene)
 end
 
 function SplashScene:init()
+    MouseCursor.setVisibility(false)
+
     self.bg = Sprite:new() --- @type chip.graphics.Sprite
     self.bg:makeSolid(Engine.gameWidth, Engine.gameHeight, 0xFF17171a)
     self.bg:screenCenter("xy")
@@ -192,6 +194,7 @@ function SplashScene:init()
                 pinkStrip:draw()
                 blueStrip:draw()
             end
+            MouseCursor.setVisibility(true)
             Engine.postUpdate:connect(update)
             Engine.postSceneDraw:connect(draw)
             Engine.switchScene(self.initialScene)

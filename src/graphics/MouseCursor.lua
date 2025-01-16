@@ -163,12 +163,17 @@ function MouseCursor.loadDefaultTexture()
     MouseCursor._sprite.origin:set()
 end
 
-function MouseCursor:isVisible()
+function MouseCursor.isVisible()
     return MouseCursor._visible
 end
 
-function MouseCursor:setVisibility(visibility)
+function MouseCursor.setVisibility(visibility)
     MouseCursor._visible = visibility
+    if MouseCursor.isSoftwareCursor() then
+        MouseCursor._sprite:setVisibility(MouseCursor._visible)
+    else
+        mouse.setVisible(MouseCursor._visible)
+    end
 end
 
 function MouseCursor.getScreenDeltaX()

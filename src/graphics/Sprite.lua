@@ -493,7 +493,7 @@ function Sprite:getRenderingInfo(trans)
                 trans:scale(zoom)
         
                 trans:translate(w2, h2)
-                trans:rotate(self:getRotation())
+                trans:rotate(cam:getRotation())
                 trans:translate(-w2, -h2)
             end
         end
@@ -505,12 +505,12 @@ function Sprite:getRenderingInfo(trans)
         end
         -- TODO: resulting rect is slightly off
         -- when frame offset is more than 0 and the sprite is flipped
-
+        
         trans:translate(rx, ry)
-
+        
         trans:translate(ofx2, ofy2)
         trans:scale(abs(sx), abs(sy))
-        
+
         trans:rotate(self._rotation)
         trans:translate(
             -(frame.offset.x * (sx < 0.0 and -1 or 1) * (self.flipX and -1 or 1)),
