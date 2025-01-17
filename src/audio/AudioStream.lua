@@ -18,6 +18,8 @@
 
 ---@diagnostic disable: invisible
 
+local _seconds_ = "seconds"
+
 ---
 --- @class chip.audio.AudioStream : chip.backend.RefCounted
 ---
@@ -40,6 +42,10 @@ end
 ---
 function AudioStream:setData(data)
     self._data = data
+end
+
+function AudioStream:getDuration()
+    return self._data:getDuration(_seconds_)
 end
 
 function AudioStream:free()

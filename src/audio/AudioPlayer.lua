@@ -309,6 +309,10 @@ function AudioPlayer:seek(newTime)
     source:seek(newTime, _seconds_)
 end
 
+function AudioPlayer:getStream()
+    return self._stream
+end
+
 function AudioPlayer:getBus()
     return self._bus
 end
