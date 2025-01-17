@@ -65,7 +65,7 @@ Engine.deltaTime = 0.0 --- @type number
 Engine.targetFPS = 60 --- @type integer
 
 ---
---- Whether or not the framerate of the game
+--- Controls whether or not the framerate of the game
 --- should match the monitor that the window
 --- is currently within.
 ---
@@ -168,18 +168,24 @@ Engine.onFocusGained = Signal:new() --- @type chip.utils.Signal
 Engine.onQuit = Signal:new() --- @type chip.utils.Signal
 
 ---
---- Whether or not debug mode is enabled.
+--- Controls whether or not debug mode is enabled.
 ---
 Engine.debugMode = false --- @type boolean
 
 ---
---- Whether or not the game will pause upon
+--- Controls whether or not the game will pause upon
 --- unfocusing the window.
 ---
 Engine.autoPause = false --- @type boolean
 
 ---
---- Whether or not the game will run at a
+--- Controls whether or not the game will update separately
+--- from the rendering, causing it to update more and render smoother.
+---
+Engine.parallelUpdating = true --- @type boolean
+
+---
+--- Controls whether or not the game will run at a
 --- maximum of 1000 TPS, saving on CPU power.
 --- 
 --- Your FPS may be slightly lower as a result aswell.

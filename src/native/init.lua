@@ -125,7 +125,7 @@ function Native.nanoSleep(ns)
 	SDL3.SDL_DelayPrecise(ns)
 end
 function Native.getTicksNS()
-	return SDL3.SDL_GetTicksNS()
+	return tonumber(SDL3.SDL_GetTicksNS())
 end
 
 -----------------------------------------

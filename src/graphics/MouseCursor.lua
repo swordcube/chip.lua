@@ -83,6 +83,8 @@ function MouseCursor.init()
     MouseCursor._sprite.isOnScreen = function(_)
         return true
     end
+    MouseCursor._sprite:setPosition(mouse.getPosition())
+    
     MouseCursor.loadDefaultTexture()
     MouseCursor.useSoftwareCursor()
 

@@ -167,6 +167,7 @@ end
 
 --- [ SHORTCUTS TO LUA FUNCS ] ---
 
+local max = math.max
 local tblInsert = table.insert
 local tblRemove = table.remove
 
@@ -296,14 +297,12 @@ local function loop()
         dt = math.min(tmr.step(), math.max(capDt, 0.0416))
         Engine.deltaTime = dt * Engine.timeScale
     end
-    if focused or not Engine.autoPause then
-        update(Engine.deltaTime)
-    else
-        love.timer.sleep(capDt)
-    end
-    local eventDt = Native.getTicksNS() - ticks
-    if Engine.lowPowerMode then
-        Native.nanoSleep(1000000 - eventDt)
+    if Engine.parallelUpdating then
+        if focused or not Engine.autoPause then
+            update(Engine.deltaTime)
+        else
+            love.timer.sleep(capDt)
+        end
     end
     drawTmr = drawTmr + dt
     
@@ -312,6 +311,9 @@ local function loop()
             gfx.origin()
             gfx.clear(gfx.getBackgroundColor())
             
+            if not Engine.parallelUpdating then
+                update(Engine.deltaTime)
+            end
             draw()
     
             gfx.present()
@@ -330,6 +332,15 @@ local function loop()
             lastDraw = love.timer.getTime()
         end
         drawTmr = 0
+    end
+    if Engine.parallelUpdating then
+        if Engine.lowPowerMode then
+            local eventDt = max(Native.getTicksNS() - ticks, 0.0)
+            Native.nanoSleep(max((1000000000 - eventDt) / 1000, 0.0))
+        end
+    else
+        local eventDt = max(Native.getTicksNS() - ticks, 0.0)
+        Native.nanoSleep(max((1000000000 - eventDt) / cap, 0.0))
     end
 end
 local function run()
