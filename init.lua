@@ -136,6 +136,7 @@ KeyCode = crequire("utils.KeyCode") --- @type chip.utils.KeyCode
 --- [ DEBUG IMPORTS ] ---
 
 Log = crequire("debug.Log") --- @type chip.debug.Log
+Debugger = crequire("debug.Debugger") --- @type chip.debug.Debugger
 
 --- [ INPUT IMPORTS ] ---
 
@@ -144,6 +145,7 @@ InputState = crequire("input.InputState") --- @type chip.input.InputState
 
 InputEvent = crequire("input.InputEvent") --- @type chip.input.InputEvent
 InputEventKey = crequire("input.keyboard.InputEventKey") --- @type chip.input.keyboard.InputEventKey
+InputEventTypeKey = crequire("input.keyboard.InputEventTypeKey") --- @type chip.input.keyboard.InputEventTypeKey
 
 InputEventMouse = crequire("input.mouse.InputEventMouse") --- @type chip.input.mouse.InputEventMouse
 InputEventMouseButton = crequire("input.mouse.InputEventMouseButton") --- @type chip.input.mouse.InputEventMouseButton
@@ -203,14 +205,19 @@ local function update(dt)
         return
     end
     MouseCursor._update()
-    if Engine._requestedScene and Engine._canSwitchScene then
-        Engine._switchScene()
+    if not (Debugger.isVisible() and Debugger.isTyping()) then
+        if Engine._requestedScene and Engine._canSwitchScene then
+            Engine._switchScene()
+        end
+        BGM.update(dt)
+        plugins:_update(dt)
+    
+        if Engine.currentScene then
+            Engine.currentScene:_update(dt)
+        end
     end
-    BGM.update(dt)
-    plugins:_update(dt)
-
-    if Engine.currentScene then
-        Engine.currentScene:_update(dt)
+    if Engine.debugMode then
+        Debugger.update(dt)
     end
     Engine.postUpdate:emit()
 end
@@ -219,6 +226,10 @@ local function draw()
     if Engine.preDraw._cancelled then
         return
     end
+    if Engine.debugMode then
+        Debugger.preDraw()
+    end
+
     -- Draw current scene to the game area
     gfx.push()
     gfx.setScissor(
@@ -251,7 +262,10 @@ local function draw()
 
     gfx.setScissor()
     gfx.pop()
-
+    
+    if Engine.debugMode then
+        Debugger.draw()
+    end
     MouseCursor._draw()
     Engine.postDraw:emit()
 end
@@ -300,8 +314,10 @@ local function loop()
     if Engine.parallelUpdating then
         if focused or not Engine.autoPause then
             update(Engine.deltaTime)
+            collectgarbage(_gcStep_)
         else
             love.timer.sleep(capDt)
+            collectgarbage(_gcCollect_)
         end
     end
     drawTmr = drawTmr + dt
@@ -356,8 +372,17 @@ local function run()
     return loop
 end
 local function processInputEvent(event)
+    Debugger.input(event)
+    if Debugger.isTyping() then
+        return
+    end
     Engine.onInputReceived:emit(event)
     Engine.currentScene:_input(event)
+end
+local function textinput(char)
+    local event = InputEventTypeKey:new(char)
+    processInputEvent(event)
+    event:free()
 end
 local function keypressed(key, scancode, repeating)
     local event = InputEventKey:new(key, scancode, true, repeating)
@@ -468,6 +493,7 @@ function Chip.init(settings)
         Engine.scaleMode:onMeasure(settings.gameWidth, settings.gameHeight)
 
         MouseCursor.init()
+        Debugger.init()
 
         if settings.showSplashScreen and not settings.debugMode then
             Engine.currentScene = crequire("SplashScene"):new(settings.initialScene)
@@ -479,9 +505,13 @@ function Chip.init(settings)
 
         local _, _, wf = window.getMode()
         monitorRefreshRate = wf.refreshrate
+        
+        love.keyboard.setKeyRepeat(true)
     end
     love.run = run
     love.resize = resize
+
+    love.textinput = textinput
     
     love.keypressed = keypressed
     love.keyreleased = keyreleased

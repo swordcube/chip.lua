@@ -26,9 +26,15 @@ local tblInsert = table.insert
 ---
 function string.split(self, delimiter)
     local result = {}
-    local regex = ("([^%s]+)"):format(delimiter)
-    for each in self:gmatch(regex) do
-        tblInsert(result, each)
+    if #delimiter == 0 then
+        for i = 1, #self do
+            tblInsert(result, self:sub(i, i))
+        end
+    else
+        local regex = ("([^%s]+)"):format(delimiter)
+        for each in self:gmatch(regex) do
+            tblInsert(result, each)
+        end
     end
     return result
 end

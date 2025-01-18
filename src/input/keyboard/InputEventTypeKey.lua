@@ -17,18 +17,27 @@
 ]]
 
 ---
---- @class chip.input.InputEvent : chip.backend.Object
+--- @class chip.input.keyboard.InputEventTypeKey : chip.input.InputEvent
 --- 
---- A class which represents an input event.
+--- A class which represents a keyboard input event, but only
+--- emitted when a key valid for typing into a text field is pressed.
 ---
-local InputEvent = Object:extend("InputEvent", ...)
+local InputEventTypeKey = InputEvent:extend("InputEventTypeKey", ...)
 
-function InputEvent:isPressed()
-    return false
+---
+--- @param  char  string
+---
+function InputEventTypeKey:constructor(char)
+    InputEventTypeKey.super.constructor(self)
+
+    ---
+    --- @protected
+    ---
+    self._char = char --- @type string
 end
 
-function InputEvent:isRepeating()
-    return false
+function InputEventTypeKey:getCharacter()
+    return self._char
 end
 
-return InputEvent
+return InputEventTypeKey
