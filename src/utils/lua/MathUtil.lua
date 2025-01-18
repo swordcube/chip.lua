@@ -38,6 +38,19 @@ function math.round(num)
 end
 
 ---
+--- Returns a random number within a range, similarly
+--- to `math.random()`, but with more precision (more decimal numbers).
+---
+--- @param  low  number  The lower bound of the range.
+--- @param  high number  The upper bound of the range.
+--- 
+--- @return number
+---
+function math.preciseRandom(low, high)
+    return low + math.random()  * (high - low);
+end
+
+---
 --- Round a decimal number to have reduced precision (less decimal numbers).
 ---
 --- @param  num       number   The number to round.

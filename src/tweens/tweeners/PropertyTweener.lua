@@ -137,6 +137,13 @@ function PropertyTweener:getProgress()
     return min((self._elapsedTime - self._startDelay) / self._duration, 1.0)
 end
 
+function PropertyTweener:getValue()
+    if self._object["_" .. self._property] ~= nil then
+        return self._object["_" .. self._property]
+    end
+    return self._object[self._property]
+end
+
 function PropertyTweener:getEase()
     return self._ease
 end

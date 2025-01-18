@@ -47,6 +47,10 @@ function Tweener:constructor(parent)
     self._onComplete = nil
 end
 
+function Tweener:getValue()
+    return nil
+end
+
 function Tweener:getParent()
     return self._parent
 end
