@@ -82,7 +82,11 @@ end
 ---@param  ...  unknown  The info to output to the log, this can be multiple things, like so: `Log.info("info1", 2)`
 ---
 function Log.info(prefixChunk, fileName, lineNumber, ...)
-    local curFile = fileName and fileName or debug.getinfo(2, "S").source:sub(2)
+    local source = debug.getinfo(2, "S").source
+    if File.fileExists(source:sub(2)) then
+        source = source:sub(2)
+    end
+    local curFile = fileName and fileName or source
     local curLine = lineNumber and lineNumber or debug.getinfo(2, "l").currentline
 
     local chunks = {}
@@ -104,13 +108,28 @@ function Log.info(prefixChunk, fileName, lineNumber, ...)
         fgColor = Native.ConsoleColor.LIGHT_GRAY,
     })
     Log.output(chunks)
+
+    if Engine.debugMode then
+        local debuggerLogText = ""
+        for i = 1, #chunks do
+            debuggerLogText = debuggerLogText .. chunks[i].text
+        end
+        Debugger.addLog({
+            text = debuggerLogText,
+            type = "info"
+        })
+    end
 end
 
 ---
 ---@param  ...  unknown  The info to output to the log, this can be multiple things, like so: `Log.info("info1", 2)`
 ---
 function Log.warn(prefixChunk, fileName, lineNumber, ...)
-    local curFile = fileName and fileName or debug.getinfo(2, "S").source:sub(2)
+    local source = debug.getinfo(2, "S").source
+    if File.fileExists(source:sub(2)) then
+        source = source:sub(2)
+    end
+    local curFile = fileName and fileName or source
     local curLine = lineNumber and lineNumber or debug.getinfo(2, "l").currentline
 
     local chunks = {}
@@ -132,13 +151,28 @@ function Log.warn(prefixChunk, fileName, lineNumber, ...)
         fgColor = Native.ConsoleColor.LIGHT_GRAY,
     })
     Log.output(chunks)
+
+    if Engine.debugMode then
+        local debuggerLogText = ""
+        for i = 1, #chunks do
+            debuggerLogText = debuggerLogText .. chunks[i].text
+        end
+        Debugger.addLog({
+            text = debuggerLogText,
+            type = "warning"
+        })
+    end
 end
 
 ---
 ---@param  ...  unknown  The info to output to the log, this can be multiple things, like so: `Log.info("info1", 2)`
 ---
 function Log.error(prefixChunk, fileName, lineNumber, ...)
-    local curFile = fileName and fileName or debug.getinfo(2, "S").source:sub(2)
+    local source = debug.getinfo(2, "S").source
+    if File.fileExists(source:sub(2)) then
+        source = source:sub(2)
+    end
+    local curFile = fileName and fileName or source
     local curLine = lineNumber and lineNumber or debug.getinfo(2, "l").currentline
 
     local chunks = {}
@@ -160,6 +194,17 @@ function Log.error(prefixChunk, fileName, lineNumber, ...)
         fgColor = Native.ConsoleColor.LIGHT_GRAY,
     })
     Log.output(chunks)
+
+    if Engine.debugMode then
+        local debuggerLogText = ""
+        for i = 1, #chunks do
+            debuggerLogText = debuggerLogText .. chunks[i].text
+        end
+        Debugger.addLog({
+            text = debuggerLogText,
+            type = "error"
+        })
+    end
 end
 
 return Log

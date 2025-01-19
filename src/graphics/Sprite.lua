@@ -37,6 +37,9 @@ local gfxRectangle = gfx.rectangle
 local gfxSetStencilState = gfx.setStencilState
 local gfxSetColorMask = gfx.setColorMask
 
+local gfxGetShader = gfx.getShader
+local gfxSetShader = gfx.setShader
+
 local tblInsert = table.insert
 
 local _linear_, _nearest_ = "linear", "nearest"
@@ -232,6 +235,12 @@ function Sprite:constructor(x, y)
     ---
     self._clipRect = nil
 
+    ---
+    --- @protected
+    --- @type chip.graphics.Shader
+    ---
+    self._shader = nil
+
     self:loadTexture(getChipImagePath("missing.png"))
 end
 
@@ -373,6 +382,18 @@ end
 ---
 function Sprite:setClipRect(rect)
     self._clipRect = rect
+end
+
+function Sprite:getShader()
+    return self._shader
+end
+
+function Sprite:setShader(shader)
+    if self._shader then
+        self._shader:unreference()
+    end
+    self._shader = shader
+    self._shader:reference()
 end
 
 ---
@@ -584,10 +605,17 @@ function Sprite:draw()
         gfxSetStencilState("keep", "greater", 0)
         gfxSetColorMask(true)
 	end
+    local prevShader = gfxGetShader()
+    if self._shader then
+        gfxSetShader(self._shader:getData())
+    end
     gfxDraw(
         img, frame.quad, -- What's actually drawn to the screen
         trans -- Transformation to apply to the sprite
     )
+    if self._shader then
+        gfxSetShader(prevShader)
+    end
     if self._clipRect then
         gfxClear(false, true, false)
 		gfxSetStencilState()

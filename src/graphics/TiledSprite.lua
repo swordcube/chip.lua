@@ -23,6 +23,9 @@ local gfxGetColor = gfx.getColor
 local gfxSetColor = gfx.setColor
 local gfxDraw = gfx.draw
 
+local gfxGetShader = gfx.getShader
+local gfxSetShader = gfx.setShader
+
 local tblInsert = table.insert
 
 local _linear_, _nearest_ = "linear", "nearest"
@@ -374,10 +377,15 @@ function TiledSprite:draw()
     mesh:setVertices(vertices)
     mesh:setTexture(img)
 
+    local prevShader = gfxGetShader()
+    if self._shader then
+        gfxSetShader(self._shader:getData())
+    end
     gfxDraw(
         mesh, -- What's actually drawn to the screen
         trans -- Transformation to apply to the sprite
     )
+    gfxSetShader(prevShader)
     gfxSetColor(pr, pg, pb, pa)
 end
 

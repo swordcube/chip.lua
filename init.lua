@@ -78,6 +78,7 @@ Scene = crequire("core.Scene") --- @type chip.core.Scene
 --- [ GRAPHICS IMPORTS ] ---
 
 Texture = crequire("graphics.Texture") --- @type chip.graphics.Texture
+Shader = crequire("graphics.Shader") --- @type chip.graphics.Shader
 Font = crequire("graphics.Font") --- @type chip.graphics.Font
 
 Sprite = crequire("graphics.Sprite") --- @type chip.graphics.Sprite
@@ -145,7 +146,7 @@ InputState = crequire("input.InputState") --- @type chip.input.InputState
 
 InputEvent = crequire("input.InputEvent") --- @type chip.input.InputEvent
 InputEventKey = crequire("input.keyboard.InputEventKey") --- @type chip.input.keyboard.InputEventKey
-InputEventTypeKey = crequire("input.keyboard.InputEventTypeKey") --- @type chip.input.keyboard.InputEventTypeKey
+InputEventTextInput = crequire("input.keyboard.InputEventTextInput") --- @type chip.input.keyboard.InputEventTextInput
 
 InputEventMouse = crequire("input.mouse.InputEventMouse") --- @type chip.input.mouse.InputEventMouse
 InputEventMouseButton = crequire("input.mouse.InputEventMouseButton") --- @type chip.input.mouse.InputEventMouseButton
@@ -157,10 +158,6 @@ InputEventMouseScroll = crequire("input.mouse.InputEventMouseScroll") --- @type 
 Engine = crequire("Engine") --- @type chip.Engine
 
 --- [ CORE ] ---
-
-if (love.filesystem.isFused() or not love.filesystem.getInfo("assets")) and love.filesystem.mountFullPath then
-    love.filesystem.mountFullPath(love.filesystem.getSourceBaseDirectory(), "")
-end
 
 function love.window.resize(width, height)
     local _, _, flags = love.window.getMode()
@@ -205,16 +202,14 @@ local function update(dt)
         return
     end
     MouseCursor._update()
-    if not (Debugger.isVisible() and Debugger.isTyping()) then
-        if Engine._requestedScene and Engine._canSwitchScene then
-            Engine._switchScene()
-        end
-        BGM.update(dt)
-        plugins:_update(dt)
-    
-        if Engine.currentScene then
-            Engine.currentScene:_update(dt)
-        end
+    if Engine._requestedScene and Engine._canSwitchScene then
+        Engine._switchScene()
+    end
+    BGM.update(dt)
+    plugins:_update(dt)
+
+    if Engine.currentScene then
+        Engine.currentScene:_update(dt)
     end
     if Engine.debugMode then
         Debugger.update(dt)
@@ -263,11 +258,12 @@ local function draw()
     gfx.setScissor()
     gfx.pop()
     
+    Engine.postDraw:emit()
+
     if Engine.debugMode then
         Debugger.draw()
     end
     MouseCursor._draw()
-    Engine.postDraw:emit()
 end
 
 local dt = 0
@@ -373,14 +369,14 @@ local function run()
 end
 local function processInputEvent(event)
     Debugger.input(event)
-    if Debugger.isTyping() then
+    if Debugger.isVisible() then
         return
     end
     Engine.onInputReceived:emit(event)
     Engine.currentScene:_input(event)
 end
 local function textinput(char)
-    local event = InputEventTypeKey:new(char)
+    local event = InputEventTextInput:new(char)
     processInputEvent(event)
     event:free()
 end
@@ -432,11 +428,14 @@ end
 function Chip.init(settings)
     Log.luaPrint = print
     print = function(...)
-        local curFile = debug.getinfo(2, "S").source:sub(2)
+        local source = debug.getinfo(2, "S").source
+        if File.fileExists(source:sub(2)) then
+            source = source:sub(2)
+        end
         local curLine = debug.getinfo(2, "l").currentline
-        Log.info(nil, curFile, curLine, ...)
+        Log.info(nil, source, curLine, ...)
     end
-    love.load = function()
+    love.load = function(args)
         if system.getOS() == "Windows" then
             Native.setDarkMode(true)
             Native.forceWindowRedraw()
@@ -448,6 +447,7 @@ function Chip.init(settings)
             if system.getOS() == "Windows" then
                 Native.hideWindow()
             end
+            Log.error(nil, nil, nil, "System is missing GLSL3 shader support")
             window.showMessageBox(
                 "System is missing GLSL3 shader support",
                 "This system is below the minimum system requirements for the game.\nIf your graphics drivers aren't up-to-date, try updating them and running the game again.",
@@ -473,7 +473,21 @@ function Chip.init(settings)
             )
         end
         Engine.debugMode = settings.debugMode
-        Log.outputLineNumbers = settings.debugMode
+        if table.contains(args, "-debug") or table.contains(args, "--debug") then
+            Engine.debugMode = true
+        end
+        Log.outputLineNumbers = Engine.debugMode
+
+        if (love.filesystem.isFused() or not love.filesystem.getInfo("icon.png", "file")) and love.filesystem.mountFullPath then
+            local sourceBaseDir = os.getenv("OWD") -- use OWD for linux app image support
+            if not sourceBaseDir then
+                sourceBaseDir = love.filesystem.getSourceBaseDirectory()
+            end
+            love.filesystem.mountFullPath(sourceBaseDir, "")
+        end
+        if love.filesystem.getInfo("icon.png", "file") then
+            window.setIcon(love.image.newImageData("icon.png"))
+        end
 
         if settings.initialScene == nil then
             settings.initialScene = Scene:new()
@@ -495,7 +509,7 @@ function Chip.init(settings)
         MouseCursor.init()
         Debugger.init()
 
-        if settings.showSplashScreen and not settings.debugMode then
+        if settings.showSplashScreen and not Engine.debugMode then
             Engine.currentScene = crequire("SplashScene"):new(settings.initialScene)
         else
             Engine.currentScene = settings.initialScene

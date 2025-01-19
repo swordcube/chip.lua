@@ -100,11 +100,17 @@ end
 --- @param  imageData  love.ImageData
 ---
 function Texture:setImage(imageData)
+    if self._imageData then
+        self._imageData:release()
+        self._imageData = nil
+    end
     if self._smoothImage then
         self._smoothImage:release()
+        self._smoothImage = nil
     end
     if self._roughImage then
         self._roughImage:release()
+        self._roughImage = nil
     end
     self._smoothImage = gfx.newImage(imageData)
     self._smoothImage:setFilter("linear", "linear", 4)

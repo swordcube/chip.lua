@@ -174,7 +174,7 @@ function AudioPlayer:load(data)
     end
     local sources = self._sources
     for i = 1, #sources do
-        local source = sources[i]
+        local source = sources[i] --- @type love.Source
         if source then
             source:release()
         end
@@ -488,22 +488,35 @@ function AudioPlayer:update(_)
     local sources = self._sources
     local isAnySourcePlaying = false
 
-    for i = 1, #sources do
-        local source = sources[i]
-        if source then
-            local masterBus = AudioBus.master
-            local mult = masterBus:getVolume()
-            if self._bus then
-                mult = mult * self._bus:getVolume()
-            end
-            if masterBus:isMuted() then
-                mult = 0
-            end
-            source:setVolume(self._volume * mult)
-            if source:isPlaying() then
-                isAnySourcePlaying = true
+    if self._stream and self._stream:getData() == nil then
+        for i = 1, #sources do
+            local source = sources[i] --- @type love.Source
+            if source then
+                source:stop()
+                source:release()
             end
         end
+        self._sources = {}
+        return
+    end
+    for i = 1, #sources do
+        local source = sources[i]
+        if not source then
+            goto continue
+        end
+        local masterBus = AudioBus.master
+        local mult = masterBus:getVolume()
+        if self._bus then
+            mult = mult * self._bus:getVolume()
+        end
+        if masterBus:isMuted() then
+            mult = 0
+        end
+        source:setVolume(self._volume * mult)
+        if source:isPlaying() then
+            isAnySourcePlaying = true
+        end
+        ::continue::
     end
     if not self._looping and self._playing and not isAnySourcePlaying then
         self._playing = false
@@ -512,6 +525,9 @@ function AudioPlayer:update(_)
 end
 
 function AudioPlayer:free()
+    if self._stream then
+        self._stream:unreference()
+    end
     local sources = self._sources
     for i = 1, #sources do
         local source = sources[i] --- @type love.Source

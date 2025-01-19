@@ -24,9 +24,25 @@ local unpack = table.unpack
 local Script = Class:extend("Script", ...)
 
 function Script:constructor(code)
-    self._code = code
-    self._variables = {}
-    self._closed = false
+    ---
+    --- @protected
+    ---
+    self._code = code --- @type string
+
+    ---
+    --- @protected
+    ---
+    self._variables = {} --- @type table<string, any>
+
+    ---
+    --- @protected
+    ---
+    self._closed = false --- @type boolean
+
+    ---
+    --- @protected
+    ---
+    self._chunk = nil --- @type function
     
     local vars = self._variables
     vars.close = function()
@@ -34,25 +50,39 @@ function Script:constructor(code)
     end
     local success, err = pcall(function()
         local chunk = loadstring(code)
-        if chunk then
-            local env = {Script = Script}
-            for k, f in pairs(_G) do
-                env[k] = f
-            end
-            env._G = _G
-            vars.__getCurrentFile = function()
-                return debug.getinfo(2, "S").source:sub(2)
-            end
-            vars.__getCurrentLine = function()
-                return debug.getinfo(2, "l").currentline
-            end
-            setfenv(chunk, setmetatable(vars, {__index = env}))
-            chunk()
-        end
+        self._chunk = chunk
     end)
     if not success then
         self:close()
         Log.error(nil, nil, nil, "Failed to load script: " .. code .. ": " .. err)
+    end
+end
+
+function Script:getChunk()
+    return self._chunk
+end
+
+function Script:run()
+    local chunk = self._chunk
+    local vars = self._variables
+    if chunk then
+        local env = {Script = Script}
+        for k, f in pairs(_G) do
+            env[k] = f
+        end
+        env._G = _G
+        vars.__getCurrentFile = function()
+            local source = debug.getinfo(2, "S").source
+            if File.fileExists(source:sub(2)) then
+                return source:sub(2)
+            end
+            return source
+        end
+        vars.__getCurrentLine = function()
+            return debug.getinfo(2, "l").currentline
+        end
+        setfenv(chunk, setmetatable(vars, {__index = env}))
+        chunk()
     end
 end
 

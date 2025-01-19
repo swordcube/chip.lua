@@ -49,6 +49,7 @@ function AudioStream:getDuration()
 end
 
 function AudioStream:free()
+    self._data:stop()
     self._data:release()
     self._data = nil
 

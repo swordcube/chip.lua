@@ -88,9 +88,15 @@ end
 
 function Graph:average()
     local a = 0.0
-    local len = #self.data
-    for i = 1, len do
-        a = a + self.data[i]
+    local len = 0
+    for i = 1, #self.data do
+        if self.data[i] > 0 then
+            a = a + self.data[i]
+            len = len + 1
+        end
+    end
+    if len == 0 then
+        return 0
     end
     return a / len
 end
