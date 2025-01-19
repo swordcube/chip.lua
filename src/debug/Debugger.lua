@@ -280,7 +280,7 @@ function Debugger.preDraw()
 end
 
 function Debugger.drawLogs()
-    gfx.setScissor(10, 10, gfx.getWidth() - 280, gfx.getHeight() - 50)
+    gfx.setScissor(10, 10, math.max(gfx.getWidth() - 280, 0.0), math.max(gfx.getHeight() - 50, 0.0))
 
     local logs = Debugger._logs
     for i = 1, #logs do
