@@ -43,7 +43,7 @@ local vertexFormat = {
 
 local triangles = {}
 local tri = {0, 0, 0, 0, 0, 0}
-for _ = 1, 100000   0 do
+for _ = 1, 1000000 do
     tblInsert(triangles, tri)
 end
 
