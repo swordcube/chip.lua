@@ -41,10 +41,10 @@ local vertexFormat = {
     {format = "floatvec2", offset = 12, arraylength = 0, location = 1}
 }
 
-local triangles = {}
-local tri = {0, 0, 0, 0, 0, 0}
-for _ = 1, 1000000 do
-    tblInsert(triangles, tri)
+local defaultTriangles = {}
+local defaultTri = {0, 0, 0, 0, 0, 0}
+for _ = 1, 1000 do
+    tblInsert(defaultTriangles, defaultTri)
 end
 
 ---
@@ -63,7 +63,7 @@ function TiledSprite:constructor(x, y)
     ---
     --- @protected
     ---
-    self._mesh = gfx.newMesh(vertexFormat, triangles, "triangles", "stream") --- @type love.Mesh
+    self._mesh = gfx.newMesh(vertexFormat, defaultTriangles, "triangles", "stream") --- @type love.Mesh
 
     ---
     --- @protected
@@ -371,10 +371,24 @@ function TiledSprite:draw()
     local img = frame.texture:getImage(filter)
     
     local vertices = self:calculateVertices(frame, self._horizontalLength / frame.width, self._verticalLength / frame.height)
-    
+    local vertexCount = #vertices
+
     local mesh = self._mesh
-    mesh:setDrawRange(1, #vertices)
-    mesh:setVertices(vertices)
+    if vertexCount > mesh:getVertexCount() then
+        -- if you reach higher vertex count than the mesh
+        -- can currently handle, make a new mesh
+
+        -- seems to be the best solution other than
+        -- giving the mesh a shit ton of triangles immediately
+
+        mesh:release()
+        mesh = gfx.newMesh(vertexFormat, vertices, "triangles", "stream")
+
+        self._mesh = mesh
+    else
+        mesh:setDrawRange(1, vertexCount)
+        mesh:setVertices(vertices)
+    end
     mesh:setTexture(img)
 
     local prevShader = gfxGetShader()

@@ -242,6 +242,7 @@ function Sprite:constructor(x, y)
     self._shader = nil
 
     self:loadTexture(getChipImagePath("missing.png"))
+    self:getTexture():reference()
 end
 
 function Sprite:isAntialiased()
