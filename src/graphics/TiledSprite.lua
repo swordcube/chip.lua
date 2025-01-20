@@ -41,6 +41,12 @@ local vertexFormat = {
     {format = "floatvec2", offset = 12, arraylength = 0, location = 1}
 }
 
+local triangles = {}
+local tri = {0, 0, 0, 0, 0, 0}
+for _ = 1, 100000   0 do
+    tblInsert(triangles, tri)
+end
+
 ---
 --- @class chip.graphics.TiledSprite : chip.graphics.Sprite
 --- 
@@ -53,12 +59,6 @@ local TiledSprite = Sprite:extend("TiledSprite", ...)
 
 function TiledSprite:constructor(x, y)
     TiledSprite.super.constructor(self, x, y)
-
-    local triangles = {}
-    local tri = {0, 0, 0, 0, 0, 0}
-    for _ = 1, 100000 do
-        tblInsert(triangles, tri)
-    end
 
     ---
     --- @protected
